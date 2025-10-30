@@ -1,21 +1,28 @@
+#child class from Fish
+
 import pygame
 from fish import Fish
 from screamer import Scream
 import numpy as np
 
-class SwimFish:
-    def __init__(self):
+class SwimFish(Fish):
+
+    def __init__(self, x, y, size, image, screen_w, screen_h):
+
         pygame.init()
-        self.h = 720
-        self.w = 720
-        self.screen = pygame.display.set_mode((self.w, self.h))
+
         self.clock = pygame.time.Clock()
         self.running = True
 
-        self.fish = Fish(x = self.w//2, y = self.h // 2 - 75 , size = (100, 100), image =  '../data/img/img_1.png')
+        # self.dt = self.clock.tick(60) / 1000.0
+
+        super().__init__(x, y, size, image, screen_w, screen_h)
+
+        self.fish = Fish(x, y, size, image, screen_w, screen_h)
 
     def swim(self):
         while self.running:
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -26,7 +33,8 @@ class SwimFish:
                         self.fish.right()
                     elif event.key == pygame.K_LEFT:
                         self.fish.left()
-                
+                    # elif event.key == pygame.K_UP:
+                    #     self.fish.scream()
                 
             self.fish.update()
 

@@ -1,8 +1,7 @@
 import pygame
 from fish import Fish
-from move_fish import SwimFish
+from swim_fish import SwimFish
 
-#
 # pygame.init()
 # h = 720
 # w = 1280
@@ -44,5 +43,6 @@ from move_fish import SwimFish
 # pygame.quit()
 
 if __name__ == "__main__":
-    game = SwimFish()
-    game.swim()
+    if __name__ == "__main__":
+        game = SwimFish(x=100, y=200, size=(100, 100), image="../data/img/img_1.png", screen_w=1000, screen_h=600)
+        game.swim()
