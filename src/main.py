@@ -44,5 +44,5 @@ from swim_fish import SwimFish
 
 if __name__ == "__main__":
     if __name__ == "__main__":
-        game = SwimFish(x=100, y=200, size=(100, 100), image="../data/img/img_1.png", screen_w=1000, screen_h=600)
+        game = SwimFish(x=150, y=200, size=(150, 150), image="../data/img/img_2.png")
         game.swim()

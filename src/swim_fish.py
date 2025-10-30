@@ -7,7 +7,7 @@ import numpy as np
 
 class SwimFish(Fish):
 
-    def __init__(self, x, y, size, image, screen_w, screen_h):
+    def __init__(self, x, y, size, image):
 
         pygame.init()
 
@@ -16,9 +16,9 @@ class SwimFish(Fish):
 
         # self.dt = self.clock.tick(60) / 1000.0
 
-        super().__init__(x, y, size, image, screen_w, screen_h)
+        super().__init__(x, y, size, image)
 
-        self.fish = Fish(x, y, size, image, screen_w, screen_h)
+        self.fish = Fish(x, y, size, image)
 
     def swim(self):
         while self.running:
@@ -41,6 +41,6 @@ class SwimFish(Fish):
             self.screen.fill("skyblue3")
             self.fish.draw(self.screen)
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(self.FPS)
 
         pygame.quit()

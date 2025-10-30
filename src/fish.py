@@ -7,9 +7,9 @@ from pexpect.screen import screen
 from game import Game
 
 class Fish(Game):
-    def __init__(self, x, y, size, image, screen_w, screen_h):
+    def __init__(self, x, y, size, image):
 
-        super().__init__(screen_w, screen_h)
+        super().__init__()
 
         self.size = size
         self.image = pygame.image.load(image).convert_alpha()
@@ -17,7 +17,7 @@ class Fish(Game):
         self.rect = self.image.get_rect(center=(x, y))
 
         self.velocity = 0
-        self.gravity = 0.5
+        self.gravity = 0.4
         # self.acceleration = 1.5
         self.jump_strength = -10
         self.max_fall_speed = 100
@@ -49,7 +49,7 @@ class Fish(Game):
 
         if self.rect.bottom > self.screen_h:
             self.rect.bottom = self.screen_h
-            self.velocity_y = 0
+            self.velocity = 0
         #
         # if self.rect.left < 0:
         #     self.rect.left = self.screen_w
