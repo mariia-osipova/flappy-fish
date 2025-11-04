@@ -2,7 +2,6 @@
 
 import pygame
 import numpy as np
-from pexpect.screen import screen
 
 from game import Game
 
