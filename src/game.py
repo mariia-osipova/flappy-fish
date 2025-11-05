@@ -14,7 +14,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_w, self.screen_h))
 
-        self.imagen_tuberia = pygame.image.load("data\img\image.png").convert()
+        self.imagen_tuberia = pygame.image.load("../data/img/image.png").convert()
         self.imagen_tuberia = pygame.transform.scale(self.imagen_tuberia,(70,400))
         self.hueco_entre_tuberias=200
         self.evento_nueva_tuberia = pygame.USEREVENT 
