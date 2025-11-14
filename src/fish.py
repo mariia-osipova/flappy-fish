@@ -1,19 +1,14 @@
 #child class from Screen, i think we need to redefine the Screen Class as the child class of Game
 
 import pygame
-import numpy as np
 
-from game import Game
-
-class Fish(Game):
+class Fish:
     def __init__(self, x, y, size, image):
-
-        super().__init__()
 
         self.size = size
         self.image = pygame.image.load(image).convert_alpha()
         self.image = pygame.transform.scale(self.image, (size[0], size[1]))
-        self.rect = self.image.get_rect(center=(x, y))
+        self.rect = self.image.get_rect(center = (x, y))
 
         self.velocity = 0
         self.gravity = 0.4
@@ -29,10 +24,10 @@ class Fish(Game):
         self.velocity = self.jump_strength
 
     def right(self):
-        self.rect.x += self.velocity
+        self.rect.x += 5
 
     def left(self):
-        self.rect.x -= self.velocity
+        self.rect.x -= 5
 
     def update(self):
         self.velocity += self.gravity
@@ -42,13 +37,13 @@ class Fish(Game):
 
         self.rect.y += self.velocity
 
-        if self.rect.top < 0 :
-            self.rect.top = 0
-            self.velocity = 0
+        #if self.rect.top < 0 :
+        #    self.rect.top = 0
+        #    self.velocity = 0
 
-        if self.rect.bottom > self.screen_h:
-            self.rect.bottom = self.screen_h
-            self.velocity = 0
+        #if self.rect.bottom > self.screen_h:
+        #    self.rect.bottom = self.screen_h
+        #    self.velocity = 0
         #
         # if self.rect.left < 0:
         #     self.rect.left = self.screen_w
@@ -58,3 +53,6 @@ class Fish(Game):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
+    def get_rect(self):
+        return self.rect
