@@ -11,7 +11,7 @@ class Fish:
         self.rect = self.image.get_rect(center = (x, y))
 
         self.velocity = 0
-        self.gravity = 0.4
+        self.gravity = 0.3
         # self.acceleration = 1.5
         self.jump_strength = -10
         self.max_fall_speed = 100

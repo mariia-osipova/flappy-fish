@@ -26,14 +26,26 @@ class SwimFish(Game):
         self.letra_puntuacion = pygame.font.Font(None, 64)
 
     def _dibujar_game_over(self):
-        texto_perdiste = self.letra_grande.render('FIN DEL JUEGO', True, (255, 0, 0))
-        texto_reiniciar = self.letra_pequena.render('Presiona R para reiniciar', True, (255, 255, 255))
-        
-        rect_perdiste = texto_perdiste.get_rect(center = (self.screen_w // 2, self.screen_h // 2 - 50))
-        rect_reiniciar = texto_reiniciar.get_rect(center = (self.screen_w // 2, self.screen_h // 2 + 30))
-        
+        pygame.mixer.music.stop()
+        texto_perdiste = self.letra_grande.render('- FIN DEL JUEGO -', True, (255, 0, 0))
+        texto_puntuacion_final = self.letra_pequena.render(f'Puntuación total: {self.puntuacion}', True, (255, 255, 255))
+        texto_reiniciar = self.letra_pequena.render('¡Presiona R para reiniciar!', True, (255, 255, 255))
+        centro_x = self.screen_w //2
+        centro_y = self.screen_h //2
+        rect_perdiste = texto_perdiste.get_rect(center = (centro_x, centro_y - 70))
+        rect_puntuacion_final = texto_puntuacion_final.get_rect(center = (centro_x, centro_y + 10))
+        rect_reiniciar = texto_reiniciar.get_rect(center = (centro_x, centro_y + 50))
         self.screen.blit(texto_perdiste, rect_perdiste)
+        self.screen.blit(texto_puntuacion_final, rect_puntuacion_final)
         self.screen.blit(texto_reiniciar, rect_reiniciar)
+
+    def reiniciar_juego(self):
+        self.game_over = False
+        self.puntuacion = 0
+        self.lista_tuberias = []
+        self.fish = Fish(x=150, y=300, size=(90, 90), image="data/img/img_1.png")
+        pygame.mixer.music.stop()
+        pygame.mixer.music.play(-1)
 
     def _dibujar_puntuacion(self):
         texto_puntuacion = self.letra_puntuacion.render(str(self.puntuacion), True, (255, 255, 255))
@@ -48,7 +60,8 @@ class SwimFish(Game):
                     self.running = False
 
                 if self.game_over and event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                    self.running = False
+                    #self.running = False
+                    self.reiniciar_juego()
 
                 if not self.game_over:
                     if event.type == self.evento_nueva_tuberia:
@@ -58,6 +71,7 @@ class SwimFish(Game):
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             self.fish.flap()
+                            self.sonido_salto.play()
                         elif event.key == pygame.K_RIGHT:
                             self.fish.right()
                         elif event.key == pygame.K_LEFT:
@@ -85,15 +99,17 @@ class SwimFish(Game):
                     if tuberia.x < fish_rect.left and not tuberia.pasada:
                         self.puntuacion += 1
                         tuberia.pasada = True
-                        print(f'Puntuación actual: {self.puntuacion}')
+                        #print(f'Puntuación actual: {self.puntuacion}')
 
-            self.screen.fill("skyblue3")
+            #self.screen.fill("skyblue3")
+            self.screen.blit(self.fondo_marino, (0, 0))
             
             for tuberia in self.lista_tuberias:
                 tuberia.dibujar_tuberias(self.screen)
             
             self.fish.draw(self.screen)
-            self._dibujar_puntuacion()
+            if not self.game_over:
+                self._dibujar_puntuacion()
 
             if self.game_over:
                 self._dibujar_game_over()
