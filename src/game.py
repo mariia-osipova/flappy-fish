@@ -8,6 +8,7 @@ class Game:
         pygame.init()
         pygame.mixer.init()
 
+        self.clock = pygame.time.Clock()
         self.FPS = 120
 
         self.screen_w = 1000
@@ -17,7 +18,7 @@ class Game:
 
         self.music_path = "data/audios/linkin park fondo.ogg"
         pygame.mixer.music.load(self.music_path)
-        pygame.mixer.music.play(-1)
+        #pygame.mixer.music.play(-1)
         self.sonido_salto = pygame.mixer.Sound("data/audios/efecto bubble.ogg")
         self.fondo_marino = pygame.image.load("data/img/fondo verde.png").convert()
         self.fondo_marino = pygame.transform.scale(self.fondo_marino, (self.screen_w, self.screen_h))
