@@ -17,19 +17,40 @@ class SwimFish(Game):
         self.letra_grande = pygame.font.Font(None, 80)
         self.letra_pequena = pygame.font.Font(None, 36)
         self.letra_puntuacion = pygame.font.Font(None, 64)
+    
+        self.color_sombra = (0, 0, 0) 
+        self.offset_sombra = 2.5
 
     def _dibujar_game_over(self):
         pygame.mixer.music.stop()
+
+        centro_x = self.screen_w // 2
+        centro_y = self.screen_h // 2
+
+        texto_perdiste_sombra = self.letra_grande.render('- FIN DEL JUEGO -', True, self.color_sombra)
+        rect_perdiste_sombra = texto_perdiste_sombra.get_rect(center=(centro_x + self.offset_sombra, centro_y - 70 + self.offset_sombra))
+        self.screen.blit(texto_perdiste_sombra, rect_perdiste_sombra)
+     
         texto_perdiste = self.letra_grande.render('- FIN DEL JUEGO -', True, (255, 0, 0))
-        texto_puntuacion_final = self.letra_pequena.render(f'Puntuación total: {self.puntuacion}', True, (255, 255, 255))
-        texto_reiniciar = self.letra_pequena.render('¡Presiona R para Reiniciar o M para volver al Menú!', True, (255, 255, 255))
-        centro_x = self.screen_w //2
-        centro_y = self.screen_h //2
-        rect_perdiste = texto_perdiste.get_rect(center = (centro_x, centro_y - 70))
-        rect_puntuacion_final = texto_puntuacion_final.get_rect(center = (centro_x, centro_y + 10))
-        rect_reiniciar = texto_reiniciar.get_rect(center = (centro_x, centro_y + 50))
+        rect_perdiste = texto_perdiste.get_rect(center=(centro_x, centro_y - 70))
         self.screen.blit(texto_perdiste, rect_perdiste)
+
+
+        texto_puntuacion_final_sombra = self.letra_pequena.render(f'Puntuación total: {self.puntuacion}', True, self.color_sombra)
+        rect_puntuacion_final_sombra = texto_puntuacion_final_sombra.get_rect(center=(centro_x + self.offset_sombra, centro_y + 10 + self.offset_sombra))
+        self.screen.blit(texto_puntuacion_final_sombra, rect_puntuacion_final_sombra)
+  
+        texto_puntuacion_final = self.letra_pequena.render(f'Puntuación total: {self.puntuacion}', True, (255, 255, 255))
+        rect_puntuacion_final = texto_puntuacion_final.get_rect(center=(centro_x, centro_y + 10))
         self.screen.blit(texto_puntuacion_final, rect_puntuacion_final)
+
+
+        texto_reiniciar_sombra = self.letra_pequena.render('¡Presiona R para Reiniciar o M para volver al Menú!', True, self.color_sombra)
+        rect_reiniciar_sombra = texto_reiniciar_sombra.get_rect(center=(centro_x + self.offset_sombra, centro_y + 50 + self.offset_sombra))
+        self.screen.blit(texto_reiniciar_sombra, rect_reiniciar_sombra)
+
+        texto_reiniciar = self.letra_pequena.render('¡Presiona R para Reiniciar o M para volver al Menú!', True, (255, 255, 255))
+        rect_reiniciar = texto_reiniciar.get_rect(center=(centro_x, centro_y + 50))
         self.screen.blit(texto_reiniciar, rect_reiniciar)
 
     def reiniciar_juego(self):
@@ -41,13 +62,22 @@ class SwimFish(Game):
         pygame.mixer.music.stop()
 
     def _dibujar_puntuacion(self):
-        texto_puntuacion = self.letra_puntuacion.render(str(self.puntuacion), True, (255, 255, 255))
-        self.screen.blit(texto_puntuacion, (20, 20))
+        puntuacion_str = str(self.puntuacion)
+        texto_sombra = self.letra_puntuacion.render(puntuacion_str, True, (0, 0, 0))
+        texto_puntuacion = self.letra_puntuacion.render(puntuacion_str, True, (255, 255, 255))
+        x_base, y_base = 20, 20
+        offset = 3 
+        self.screen.blit(texto_sombra, (x_base + offset, y_base + offset))
+        self.screen.blit(texto_puntuacion, (x_base, y_base))
 
     def swim(self):
         self.running_game = True
         while self.running_game:
-            self.clock.tick(self.FPS)
+            delta_time = self.clock.tick(self.FPS) / 1000.0
+            self.frame_timer += delta_time
+            if self.frame_timer >= 1.0 / self.frame_rate:
+                self.frame_index = (self.frame_index + 1) % len(self.background_frames)
+                self.frame_timer = 0
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -102,7 +132,8 @@ class SwimFish(Game):
                             self.game_over = True
                             break
 
-            self.screen.blit(self.fondo_marino, (0, 0))
+            current_frame = self.background_frames[self.frame_index]
+            self.screen.blit(current_frame, (0, 0))
             
             for tuberia in self.lista_tuberias:
                 tuberia.dibujar_tuberias(self.screen)
@@ -113,6 +144,10 @@ class SwimFish(Game):
                 if self.juego_iniciado: 
                     self._dibujar_puntuacion()
                 if not self.juego_iniciado:
+                    texto_inicio_sombra = self.letra_pequena.render('¡Presiona ESPACIO para comenzar!', True, self.color_sombra)
+                    rect_inicio_sombra = texto_inicio_sombra.get_rect(center = (self.screen_w // 2 + self.offset_sombra, self.screen_h // 2 + self.offset_sombra))
+                    self.screen.blit(texto_inicio_sombra, rect_inicio_sombra)
+    
                     texto_inicio = self.letra_pequena.render('¡Presiona ESPACIO para comenzar!', True, (255, 255, 255))
                     rect_inicio = texto_inicio.get_rect(center = (self.screen_w // 2, self.screen_h // 2))
                     self.screen.blit(texto_inicio, rect_inicio)
