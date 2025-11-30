@@ -1,6 +1,8 @@
 import pygame
 from fish import Fish
 from generacion_de_tuberias import tuberias
+from screamer import Scream
+import random
 from game import Game
 
 class SwimFish(Game):
@@ -20,6 +22,7 @@ class SwimFish(Game):
     
         self.color_sombra = (0, 0, 0) 
         self.offset_sombra = 2.5
+        self.jumpscare = Scream()
 
     def _dibujar_game_over(self):
         pygame.mixer.music.stop()
@@ -54,6 +57,8 @@ class SwimFish(Game):
         self.screen.blit(texto_reiniciar, rect_reiniciar)
 
     def reiniciar_juego(self):
+        self.mostrar_jumpscare = False
+        self.tiempo_jumpscare = 0
         self.game_over = False
         self.juego_iniciado = False
         self.puntuacion = 0
@@ -78,7 +83,7 @@ class SwimFish(Game):
             if self.frame_timer >= 1.0 / self.frame_rate:
                 self.frame_index = (self.frame_index + 1) % len(self.background_frames)
                 self.frame_timer = 0
-
+            self.jumpscare.actualizar_jumpscare()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -130,7 +135,11 @@ class SwimFish(Game):
                         offset_y = tuberia_rect.top - self.fish.rect.top
                         if self.fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
                             self.game_over = True
-                            break
+                            i=random.randint(0,10)
+                            if i<=4:
+                                self.jumpscare.asustar()
+                            else:
+                                break
 
             current_frame = self.background_frames[self.frame_index]
             self.screen.blit(current_frame, (0, 0))
@@ -154,7 +163,7 @@ class SwimFish(Game):
 
             if self.game_over:
                 self._dibujar_game_over()
-
+            self.jumpscare.dibujar_jumpscare()
             pygame.display.flip()
             
         return 'MENU'
