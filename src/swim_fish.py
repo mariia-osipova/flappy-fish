@@ -19,6 +19,9 @@ class SwimFish(Game):
         self.game_over = False
         self.juego_iniciado = False
 
+        self.fish_image_path = image
+        self.fish_size = size
+
         self.fish = Fish(x, y, size, image)
         self.puntuacion = 0
 
@@ -37,8 +40,8 @@ class SwimFish(Game):
         if not hasattr(self, "lista_tuberias"):
             self.lista_tuberias = []
 
-    def _calcular_estado_completo(self):
-        fish_rect = self.fish.get_rect()
+    def _calcular_estado_completo(self, fish):
+        fish_rect = fish.get_rect()
 
         proxima_tuberia = None
         for t in self.lista_tuberias:
@@ -52,7 +55,7 @@ class SwimFish(Game):
             dy = fish_rect.centery - (self.screen_h // 2)
             dx = 200.0
 
-        vy = self.fish.velocity
+        vy = fish.velocity
         return dy, dx, vy
 
     def _dibujar_game_over(self):
@@ -200,7 +203,7 @@ class SwimFish(Game):
 
             if not self.game_over and self.juego_iniciado:
                 if auto and decidir is not None:
-                    dy, dx, vy = self._calcular_estado_completo()
+                    dy, dx, vy = self._calcular_estado_completo(self.fish)
                     if decidir(dy, dx, vy):
                         self.fish.flap()
                         self.sonido_salto.play()
@@ -280,6 +283,112 @@ class SwimFish(Game):
 
             if self.enable_jumpscare:
                 self.jumpscare.dibujar_jumpscare()
+
+            pygame.display.flip()
+
+        return 'MENU'
+
+    def swim_population(self, n=100):
+        self.running_game = True
+        self.enable_jumpscare = False
+        self.lista_tuberias = []
+        self.puntuacion = 0
+        self.game_over = False
+        self.juego_iniciado = True
+
+        agentes = []
+        for i in range(n):
+            fish = Fish(150, 300, self.fish_size, self.fish_image_path)
+            pesos = random_vector()
+            decidir, pesos_usados = crear_politica(pesos)
+            agente = {
+                "fish": fish,
+                "pesos": pesos_usados,
+                "decidir": decidir,
+                "alive": True,
+                "score": 0,
+                "passed": set(),
+            }
+            agentes.append(agente)
+
+        while self.running_game:
+            delta_time = self.clock.tick(self.FPS) / 1000.0
+            self.frame_timer += delta_time
+            if self.frame_timer >= 1.0 / self.frame_rate:
+                self.frame_index = (self.frame_index + 1) % len(self.background_frames)
+                self.frame_timer = 0
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    self.running_game = False
+                    return 'QUIT'
+
+                if event.type == self.evento_nueva_tuberia and self.juego_iniciado:
+                    nueva_tuberia = tuberias(
+                        self.screen_w, self.hueco_entre_tuberias, self.imagen_tuberia
+                    )
+                    self.lista_tuberias.append(nueva_tuberia)
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_m:
+                        self.running_game = False
+                        return 'MENU'
+
+            vivos = [a for a in agentes if a["alive"]]
+            if len(vivos) == 0:
+                self.running_game = False
+                return 'MENU'
+
+            for t in self.lista_tuberias:
+                t.mover_tuberias()
+            self.lista_tuberias = [
+                t
+                for t in self.lista_tuberias
+                if t.x > -self.imagen_tuberia.get_width()
+            ]
+
+            for agente in agentes:
+                if not agente["alive"]:
+                    continue
+
+                fish = agente["fish"]
+                decidir = agente["decidir"]
+
+                dy, dx, vy = self._calcular_estado_completo(fish)
+                if decidir(dy, dx, vy):
+                    fish.flap()
+
+                fish.update()
+
+                fish_rect = fish.get_rect()
+                if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
+                    agente["alive"] = False
+                    continue
+
+                for tuberia in self.lista_tuberias:
+                    if tuberia.x < fish_rect.left and id(tuberia) not in agente["passed"]:
+                        agente["score"] += 1
+                        agente["passed"].add(id(tuberia))
+
+                    for tuberia_rect in tuberia.get_rects():
+                        tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
+                        offset_x = tuberia_rect.left - fish_rect.left
+                        offset_y = tuberia_rect.top - fish_rect.top
+                        if fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
+                            agente["alive"] = False
+                            break
+
+            current_frame = self.background_frames[self.frame_index]
+            self.screen.blit(current_frame, (0, 0))
+            self.screen.blit(self.fondo_marino, (0, 0))
+
+            for tuberia in self.lista_tuberias:
+                tuberia.dibujar_tuberias(self.screen)
+
+            for agente in agentes:
+                if agente["alive"]:
+                    agente["fish"].draw(self.screen)
 
             pygame.display.flip()
 
