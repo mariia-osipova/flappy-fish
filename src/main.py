@@ -1,7 +1,7 @@
 import pygame
-from src.game import Game
-from src.swim_fish import SwimFish
-from src.menu import Menu
+from game import Game
+from swim_fish import SwimFish
+from menu import Menu
 from ml.vector_w import random_vector
 from ml.genetics import nueva_generacion
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
             pygame.display.flip()
 
         elif current_state == 'SINGLE':
-            juego_manual = SwimFish(x=150, y=300, size=(90, 90), image="../data/img/fish1.png")
+            juego_manual = SwimFish(x=150, y=300, size=(90, 90), image="data/img/fish1.png")
             resultado = juego_manual.swim(auto=False)
             if resultado == 'MENU':
                 current_state = 'MENU'
@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 running = False
 
         elif current_state == 'EVOLUTIVO':
-            juego_auto = SwimFish(x=150, y=300, size=(30, 30), image="../data/img/fish1.png")
+            juego_auto = SwimFish(x=150, y=300, size=(30, 30), image="data/img/fish1.png")
 
             tam_poblacion = 100
             num_epocas = 100
