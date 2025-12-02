@@ -33,7 +33,7 @@ if __name__ == '__main__':
             pygame.display.flip()
 
         elif current_state == 'SINGLE':
-            juego_manual = SwimFish(x=150, y=300, size=(90, 90), image="data/img/fish1.png")
+            juego_manual = SwimFish(x=150, y=300, size=(90, 90), image="../data/img/fish1.png")
             resultado = juego_manual.swim(auto=False)
             if resultado == 'MENU':
                 current_state = 'MENU'
@@ -41,13 +41,14 @@ if __name__ == '__main__':
                 running = False
 
         elif current_state == 'EVOLUTIVO':
-            juego_auto = SwimFish(x=150, y=300, size=(30, 30), image="data/img/fish1.png")
+            juego_auto = SwimFish(x=150, y=300, size=(30, 30), image="../data/img/fish1.png")
 
-            tam_poblacion = 100
-            num_epocas = 100
-            tiempo_max_epoca = 120
-            umbral_distancia = 3
-            umbral_parada = 50
+            tam_poblacion = 60        
+            num_epocas = 40           
+            tiempo_max_epoca = 60     
+            umbral_distancia = 3      
+            umbral_parada = 50        
+
 
             pesos_poblacion = [random_vector() for _ in range(tam_poblacion)]
             mejor_global = 0
@@ -69,13 +70,13 @@ if __name__ == '__main__':
                     break
 
                 mejor_epoca = max(fitnesses)
-                juego_auto._actualizar_fitness_hist(mejor_epoca)
                 promedio_epoca = sum(fitnesses) / len(fitnesses)
 
                 if mejor_epoca > mejor_global:
                     mejor_global = mejor_epoca
 
                 juego_auto._actualizar_fitness_hist(mejor_epoca)
+
 
                 cantidad_sobre_umbral = sum(1 for f in fitnesses if f >= umbral_parada)
                 if epoca >= 10 and cantidad_sobre_umbral >= tam_poblacion // 2:
@@ -91,4 +92,5 @@ if __name__ == '__main__':
             current_state = 'MENU'
     pygame.quit()
 
+#comment to check more
 print("status")
