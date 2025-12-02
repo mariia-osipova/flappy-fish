@@ -1,7 +1,7 @@
 import pygame
-from game import Game
-from swim_fish import SwimFish
-from menu import Menu
+from src.game import Game
+from src.swim_fish import SwimFish
+from src.menu import Menu
 from ml.vector_w import random_vector
 from ml.genetics import nueva_generacion
 
