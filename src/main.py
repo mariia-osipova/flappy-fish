@@ -90,3 +90,6 @@ if __name__ == '__main__':
 
             current_state = 'MENU'
     pygame.quit()
+
+#comment to check more
+print("status")
