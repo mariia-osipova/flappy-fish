@@ -54,6 +54,8 @@ class SwimFish(Game):
         self.fitness_history = []
         self.fitness_history_max_len = 30
 
+        self.ghosts = []
+
         if not hasattr(self, "lista_tuberias"):
             self.lista_tuberias = []
 
@@ -477,8 +479,6 @@ class SwimFish(Game):
             }
             agentes.append(agente)
 
-        ghosts = []
-
         inicio_epoca = time.time()
 
         while self.running_game:
@@ -536,7 +536,7 @@ class SwimFish(Game):
                 fish_rect = fish.get_rect()
                 if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
                     agente["alive"] = False
-                    ghosts.append(fish_rect.center)
+                    self.ghosts.append(fish_rect.center)
                     continue
 
                 for tuberia in self.lista_tuberias:
@@ -550,7 +550,7 @@ class SwimFish(Game):
                         offset_y = tuberia_rect.top - fish_rect.top
                         if fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
                             agente["alive"] = False
-                            ghosts.append(fish_rect.center)
+                            self.ghosts.append(fish_rect.center)
                             break
 
             mejor_score = max(a["score"] for a in agentes)
@@ -573,7 +573,7 @@ class SwimFish(Game):
                 if agente["alive"]:
                     agente["fish"].draw(self.screen)
 
-            for cx, cy in ghosts:
+            for cx, cy in self.ghosts:
                 ghost_rect = self.death_image.get_rect(center=(cx, cy))
                 self.screen.blit(self.death_image, ghost_rect)
 
@@ -584,6 +584,9 @@ class SwimFish(Game):
                 dy, dx, vy = self._calcular_estado_completo(vivos[0]["fish"])
 
             self._dibujar_panel_info(dx, dy, vy, self.generacion, self.puntuacion)
+
+            if self.enable_jumpscare:
+                self.jumpscare.dibujar_jumpscare()
 
             pygame.display.flip()
 

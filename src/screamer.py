@@ -30,7 +30,7 @@ class Scream(Game):
             
     def actualizar_jumpscare(self):
         if self.mostrar_jumpscare:
-            if pygame.time.get_ticks() - self.tiempo_jumpscare > 2500:  
+            if pygame.time.get_ticks() - self.tiempo_jumpscare > 600:
                 self.mostrar_jumpscare = False
 
     # def scream(self):
