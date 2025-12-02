@@ -145,8 +145,8 @@ class SwimFish(Game):
         self.puntuacion = 0
         self.lista_tuberias = []
         self.fish.reset()
-        pygame.mixer.music.stop()
-        pygame.mixer.music.play(-1)
+        #pygame.mixer.music.stop()
+        #pygame.mixer.music.play(-1)
 
     def _dibujar_puntuacion(self):
         puntuacion_str = str(self.puntuacion)

@@ -11,7 +11,7 @@ class Menu:
         self.color_sombra = (0, 0, 0)
         self.offset = 2
 
-        font_path = "../data/font/StrangeFont-Regular.otf"
+        font_path = "data/font/StrangeFont-Regular.otf"
 
         self.letra_titulo = pygame.font.Font(font_path, 100)
         self.letra_opcion = pygame.font.Font(font_path, 50)
@@ -27,6 +27,12 @@ class Menu:
         self.titulo_sombra = self.letra_titulo.render('¡FLAPPY FISH!', True, self.color_sombra)
         self.opcion_single_sombra = self.letra_opcion.render('1. Single Player (Juego Manual)', True, self.color_sombra)
         self.opcion_evolutivo_sombra = self.letra_opcion.render('2. Simulación (Algoritmo Evolutivo)', True, self.color_sombra)
+
+        self.letra_grupo = pygame.font.Font(font_path, 30)
+        texto_a_mostrar = 'GRUPO 4: Osipova, Zanoni, Scofano y Roldan'
+        self.texto_grupo = self.letra_grupo.render(texto_a_mostrar, True, self.color_blanco)
+        self.texto_grupo_sombra = self.letra_grupo.render(texto_a_mostrar, True, self.color_sombra)
+        self.rect_grupo = self.texto_grupo.get_rect(center=(screen_w // 2, screen_h - 50))
         
         self.seleccion = None
 
@@ -42,6 +48,10 @@ class Menu:
         sombra_rect_evolutivo = self.rect_evolutivo.move(self.offset, self.offset)
         self.screen.blit(self.opcion_evolutivo_sombra, sombra_rect_evolutivo)
         self.screen.blit(self.opcion_evolutivo, self.rect_evolutivo)
+
+        sombra_rect_grupo = self.rect_grupo.move(self.offset, self.offset)
+        self.screen.blit(self.texto_grupo_sombra, sombra_rect_grupo)
+        self.screen.blit(self.texto_grupo, self.rect_grupo)
 
     def manejar_eventos(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
