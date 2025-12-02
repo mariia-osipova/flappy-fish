@@ -2,7 +2,7 @@ import random
 import math
 
 def seleccionar_proporcional(pesos_poblacion, fitnesses):
-    fitness_pos = [max(f, 0.0) + 1e-6 for f in fitnesses]
+    fitness_pos = [max(f, 0.0) ** 2 for f in fitnesses]
     total = sum(fitness_pos)
     if total == 0:
         return random.choice(pesos_poblacion)
@@ -24,7 +24,7 @@ def cruce_uniforme(p1, p2):
             hijo.append(p2[i])
     return hijo
 
-def mutar(pesos, prob_gen=0.1, sigma=0.5):
+def mutar(pesos, prob_gen=0.1, sigma=0.05):
     hijo = list(pesos)
     for i in range(len(hijo)):
         if random.random() < prob_gen:

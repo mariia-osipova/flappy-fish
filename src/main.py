@@ -46,7 +46,7 @@ if __name__ == '__main__':
             tam_poblacion = 100
             num_epocas = 100
             tiempo_max_epoca = 120
-            umbral_distancia = 50
+            umbral_distancia = 3
             umbral_parada = 50
 
             pesos_poblacion = [random_vector() for _ in range(tam_poblacion)]
@@ -69,6 +69,7 @@ if __name__ == '__main__':
                     break
 
                 mejor_epoca = max(fitnesses)
+                juego_auto._actualizar_fitness_hist(mejor_epoca)
                 promedio_epoca = sum(fitnesses) / len(fitnesses)
 
                 if mejor_epoca > mejor_global:

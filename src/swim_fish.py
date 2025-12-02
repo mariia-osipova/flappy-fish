@@ -22,6 +22,7 @@ class SwimFish(Game):
         self.juego_iniciado = False
 
         self.fish_image_path = image
+        self.fondo_dead_fish = pygame.image.load("../data/img/dead-fish.png").convert_alpha()
         self.fish_size = size
 
         self.fish = Fish(x, y, size, image)
@@ -81,6 +82,8 @@ class SwimFish(Game):
         pygame.mixer.music.stop()
         centro_x = self.screen_w // 2
         centro_y = self.screen_h // 2
+
+        self.screen.blit(self.fondo_dead_fish, (0, 0))
 
         texto_perdiste_sombra = self.letra_grande.render(
             '- FIN DEL JUEGO -', True, self.color_sombra
@@ -338,7 +341,7 @@ class SwimFish(Game):
         if len(self.fitness_history) > self.fitness_history_max_len:
             self.fitness_history.pop(0)
 
-    def _dibujar_panel_info(self, dx, dy, vy, generacion, tuberias):
+    def _dibujar_panel_info(self, dx, dy, vy, generacion, tuberias, vivos):
         panel_width = 340
         panel_rect = pygame.Rect(self.screen_w - panel_width, 0, panel_width, self.screen_h)
 
@@ -353,7 +356,7 @@ class SwimFish(Game):
         panel_surface.blit(titulo, (x, y))
         y += dy_line * 2
 
-        texto_gen = self.letra_panel.render(f"Generación: {generacion}", True, (255, 255, 255))
+        texto_gen = self.letra_panel.render(f"Generation: {generacion}", True, (255, 255, 255))
         panel_surface.blit(texto_gen, (x, y))
         y += dy_line
 
@@ -365,11 +368,17 @@ class SwimFish(Game):
         panel_surface.blit(texto_dy, (x, y))
         y += dy_line
 
-        texto_v = self.letra_panel.render(f"Velocidad: {vy: .4f}", True, (255, 255, 255))
+        texto_v = self.letra_panel.render(f"Velocity: {vy: .4f}", True, (255, 255, 255))
         panel_surface.blit(texto_v, (x, y))
         y += dy_line
 
-        texto_tub = self.letra_panel.render(f"Tuberías= {tuberias}", True, (255, 255, 255))
+        alive_count = len(vivos)
+
+        texto_tot = self.letra_panel.render(f"Alive = {alive_count}/100", True, (255, 255, 255))
+        panel_surface.blit(texto_tot, (x, y))
+        y += dy_line
+
+        texto_tub = self.letra_panel.render(f"Tubes= {tuberias}", True, (255, 255, 255))
         panel_surface.blit(texto_tub, (x, y))
         y += dy_line * 2
 
@@ -465,6 +474,8 @@ class SwimFish(Game):
         self.game_over = False
         self.juego_iniciado = True
 
+        self.ghosts = []
+
         agentes = []
         for pesos in pesos_poblacion:
             fish = Fish(150, 300, self.fish_size, self.fish_image_path)
@@ -475,6 +486,7 @@ class SwimFish(Game):
                 "decidir": decidir,
                 "alive": True,
                 "score": 0,
+                "time_alive": 0.0,
                 "passed": set(),
             }
             agentes.append(agente)
@@ -524,6 +536,8 @@ class SwimFish(Game):
                 if not agente["alive"]:
                     continue
 
+                agente["time_alive"] += delta_time
+
                 fish = agente["fish"]
                 decidir = agente["decidir"]
 
@@ -556,8 +570,13 @@ class SwimFish(Game):
             mejor_score = max(a["score"] for a in agentes)
             self.puntuacion = mejor_score
 
+            fitnesses = [
+                a["score"] * 1000.0 + a["time_alive"]
+                for a in agentes
+            ]
+
             self._actualizar_estadisticas_genoma([a["pesos"] for a in agentes])
-            self._actualizar_fitness_hist(mejor_score)
+            # self._actualizar_fitness_hist(mejor_score)
 
             if mejor_score >= umbral_distancia:
                 break
@@ -573,6 +592,9 @@ class SwimFish(Game):
                 if agente["alive"]:
                     agente["fish"].draw(self.screen)
 
+            if len(self.ghosts) > 500:
+                self.ghosts = self.ghosts[-500:]
+
             for cx, cy in self.ghosts:
                 ghost_rect = self.death_image.get_rect(center=(cx, cy))
                 self.screen.blit(self.death_image, ghost_rect)
@@ -583,7 +605,7 @@ class SwimFish(Game):
             if vivos:
                 dy, dx, vy = self._calcular_estado_completo(vivos[0]["fish"])
 
-            self._dibujar_panel_info(dx, dy, vy, self.generacion, self.puntuacion)
+            self._dibujar_panel_info(dx, dy, vy, self.generacion, self.puntuacion, vivos)
 
             if self.enable_jumpscare:
                 self.jumpscare.dibujar_jumpscare()
@@ -591,5 +613,4 @@ class SwimFish(Game):
             pygame.display.flip()
 
         pesos_finales = [a["pesos"] for a in agentes]
-        fitnesses = [a["score"] for a in agentes]
         return pesos_finales, fitnesses, 'OK'
