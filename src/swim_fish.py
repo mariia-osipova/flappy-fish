@@ -7,6 +7,8 @@ from game import Game
 from ml.policy import crear_politica
 from ml.calcular_estado import calcular_estado
 from ml.vector_w import random_vector
+import time
+import math
 
 
 class SwimFish(Game):
@@ -25,9 +27,11 @@ class SwimFish(Game):
         self.fish = Fish(x, y, size, image)
         self.puntuacion = 0
 
-        self.letra_grande = pygame.font.Font(None, 80)
-        self.letra_pequena = pygame.font.Font(None, 36)
-        self.letra_puntuacion = pygame.font.Font(None, 64)
+        font_path = "../data/font/StrangeFont-Regular.otf"
+        self.letra_grande = pygame.font.Font(font_path, 80)
+        self.letra_pequena = pygame.font.Font(font_path, 36)
+        self.letra_puntuacion = pygame.font.Font(font_path, 64)
+        self.letra_panel = pygame.font.Font(font_path, 26)
 
         self.color_sombra = (0, 0, 0)
         self.offset_sombra = 2.5
@@ -36,6 +40,19 @@ class SwimFish(Game):
         self.mostrar_jumpscare = False
         self.tiempo_jumpscare = 0
         self.enable_jumpscare = True
+
+        death_path = "../data/img/death.png"
+        self.death_image = pygame.image.load(death_path).convert_alpha()
+        self.death_image.set_alpha(120)
+
+        self.generacion = 1
+
+        self.genome_names = []
+        self.genome_avg = []
+        self.genome_std = []
+
+        self.fitness_history = []
+        self.fitness_history_max_len = 30
 
         if not hasattr(self, "lista_tuberias"):
             self.lista_tuberias = []
@@ -288,18 +305,167 @@ class SwimFish(Game):
 
         return 'MENU'
 
-    def swim_population(self, n=100):
+    def _actualizar_estadisticas_genoma(self, pesos_lista):
+        if not pesos_lista:
+            self.genome_avg = []
+            self.genome_std = []
+            return
+
+        n = len(pesos_lista)
+        m = len(pesos_lista[0])
+
+        promedios = []
+        desvios = []
+
+        for j in range(m):
+            vals = [w[j] for w in pesos_lista]
+            mean = sum(vals) / n
+            var = sum((v - mean) ** 2 for v in vals) / n
+            std = math.sqrt(var)
+            promedios.append(mean)
+            desvios.append(std)
+
+        self.genome_avg = promedios
+        self.genome_std = desvios
+
+        if not self.genome_names or len(self.genome_names) != m:
+            self.genome_names = [f"w{j}" for j in range(m)]
+
+    def _actualizar_fitness_hist(self, value):
+        self.fitness_history.append(float(value))
+        if len(self.fitness_history) > self.fitness_history_max_len:
+            self.fitness_history.pop(0)
+
+    def _dibujar_panel_info(self, dx, dy, vy, generacion, tuberias):
+        panel_width = 340
+        panel_rect = pygame.Rect(self.screen_w - panel_width, 0, panel_width, self.screen_h)
+
+        panel_surface = pygame.Surface((panel_rect.width, panel_rect.height), pygame.SRCALPHA)
+        panel_surface.fill((0, 0, 0, 220))
+
+        x = 20
+        y = 20
+        dy_line = 26
+
+        titulo = self.letra_panel.render("GA Statistics", True, (255, 255, 0))
+        panel_surface.blit(titulo, (x, y))
+        y += dy_line * 2
+
+        texto_gen = self.letra_panel.render(f"Generación: {generacion}", True, (255, 255, 255))
+        panel_surface.blit(texto_gen, (x, y))
+        y += dy_line
+
+        texto_dx = self.letra_panel.render(f"Dx= {dx:.1f}", True, (255, 255, 255))
+        panel_surface.blit(texto_dx, (x, y))
+        y += dy_line
+
+        texto_dy = self.letra_panel.render(f"Dy= {dy:.1f}", True, (255, 255, 255))
+        panel_surface.blit(texto_dy, (x, y))
+        y += dy_line
+
+        texto_v = self.letra_panel.render(f"Velocidad: {vy: .4f}", True, (255, 255, 255))
+        panel_surface.blit(texto_v, (x, y))
+        y += dy_line
+
+        texto_tub = self.letra_panel.render(f"Tuberías= {tuberias}", True, (255, 255, 255))
+        panel_surface.blit(texto_tub, (x, y))
+        y += dy_line * 2
+
+        titulo_gen = self.letra_panel.render("Genome (Avg ± Std)", True, (200, 200, 200))
+        panel_surface.blit(titulo_gen, (x, y))
+        y += dy_line + 10
+
+        bar_left = x + 55
+        bar_width = panel_rect.width - bar_left - 80
+        bar_height = 10
+        line_gap = 22
+
+        if self.genome_avg:
+            max_abs = max(abs(a) + s for a, s in zip(self.genome_avg, self.genome_std))
+            if max_abs == 0:
+                max_abs = 1.0
+        else:
+            max_abs = 1.0
+
+        for name, avg, std in zip(self.genome_names, self.genome_avg, self.genome_std):
+            label = self.letra_panel.render(name + ":", True, (200, 200, 200))
+            panel_surface.blit(label, (x, y - 4))
+
+            bar_rect = pygame.Rect(bar_left, y, bar_width, bar_height)
+            pygame.draw.rect(panel_surface, (60, 60, 60), bar_rect)
+
+            zero_x = bar_left + bar_width // 2
+
+            if std > 0:
+                ext = min((abs(std) / max_abs) * (bar_width / 2), bar_width / 2)
+                std_rect = pygame.Rect(zero_x - ext, y, 2 * ext, bar_height)
+                pygame.draw.rect(panel_surface, (90, 90, 90), std_rect)
+
+            if avg >= 0:
+                w = min((avg / max_abs) * (bar_width / 2), bar_width / 2)
+                val_rect = pygame.Rect(zero_x, y, w, bar_height)
+                color = (0, 180, 0)
+            else:
+                w = min((abs(avg) / max_abs) * (bar_width / 2), bar_width / 2)
+                val_rect = pygame.Rect(zero_x - w, y, w, bar_height)
+                color = (200, 60, 60)
+
+            pygame.draw.rect(panel_surface, color, val_rect)
+            pygame.draw.rect(panel_surface, (120, 120, 120), bar_rect, 1)
+
+            txt_val = self.letra_panel.render(f"{avg:.3f}", True, (200, 200, 200))
+            panel_surface.blit(txt_val, (bar_left + bar_width + 14, y - 6))
+
+            y += line_gap
+
+        graph_height = 70
+        graph_margin_bottom = 10
+        graph_rect = pygame.Rect(
+            15,
+            panel_rect.height - graph_height - graph_margin_bottom,
+            panel_rect.width - 30,
+            graph_height,
+        )
+
+        pygame.draw.rect(panel_surface, (40, 40, 40), graph_rect)
+        pygame.draw.rect(panel_surface, (255, 255, 255), graph_rect, 2)
+
+        label = self.letra_panel.render(
+            f"Fitness Progress ({self.fitness_history_max_len} gens)", True, (220, 220, 220)
+        )
+        panel_surface.blit(label, (graph_rect.x + 4, graph_rect.y + 4))
+
+        if len(self.fitness_history) >= 2:
+            values = self.fitness_history
+            v_min = min(values)
+            v_max = max(values)
+            if v_max == v_min:
+                v_max = v_min + 1.0
+
+            pts = []
+            for i, v in enumerate(values):
+                t = i / (len(values) - 1)
+                x_p = graph_rect.x + 4 + t * (graph_rect.width - 8)
+                norm = (v - v_min) / (v_max - v_min)
+                y_p = graph_rect.y + graph_rect.height - 4 - norm * (graph_rect.height - 20)
+                pts.append((x_p, y_p))
+
+            pygame.draw.lines(panel_surface, (255, 215, 0), False, pts, 2)
+
+        self.screen.blit(panel_surface, panel_rect.topleft)
+
+    def swim_population(self, pesos_poblacion, tiempo_max=120, umbral_distancia=30):
         self.running_game = True
         self.enable_jumpscare = False
+
         self.lista_tuberias = []
         self.puntuacion = 0
         self.game_over = False
         self.juego_iniciado = True
 
         agentes = []
-        for i in range(n):
+        for pesos in pesos_poblacion:
             fish = Fish(150, 300, self.fish_size, self.fish_image_path)
-            pesos = random_vector()
             decidir, pesos_usados = crear_politica(pesos)
             agente = {
                 "fish": fish,
@@ -311,7 +477,14 @@ class SwimFish(Game):
             }
             agentes.append(agente)
 
+        ghosts = []
+
+        inicio_epoca = time.time()
+
         while self.running_game:
+            if time.time() - inicio_epoca > tiempo_max:
+                break
+
             delta_time = self.clock.tick(self.FPS) / 1000.0
             self.frame_timer += delta_time
             if self.frame_timer >= 1.0 / self.frame_rate:
@@ -322,7 +495,7 @@ class SwimFish(Game):
                 if event.type == pygame.QUIT:
                     self.running = False
                     self.running_game = False
-                    return 'QUIT'
+                    return None, None, 'QUIT'
 
                 if event.type == self.evento_nueva_tuberia and self.juego_iniciado:
                     nueva_tuberia = tuberias(
@@ -333,12 +506,11 @@ class SwimFish(Game):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_m:
                         self.running_game = False
-                        return 'MENU'
+                        return None, None, 'MENU'
 
             vivos = [a for a in agentes if a["alive"]]
             if len(vivos) == 0:
-                self.running_game = False
-                return 'MENU'
+                break
 
             for t in self.lista_tuberias:
                 t.mover_tuberias()
@@ -364,6 +536,7 @@ class SwimFish(Game):
                 fish_rect = fish.get_rect()
                 if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
                     agente["alive"] = False
+                    ghosts.append(fish_rect.center)
                     continue
 
                 for tuberia in self.lista_tuberias:
@@ -377,7 +550,17 @@ class SwimFish(Game):
                         offset_y = tuberia_rect.top - fish_rect.top
                         if fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
                             agente["alive"] = False
+                            ghosts.append(fish_rect.center)
                             break
+
+            mejor_score = max(a["score"] for a in agentes)
+            self.puntuacion = mejor_score
+
+            self._actualizar_estadisticas_genoma([a["pesos"] for a in agentes])
+            self._actualizar_fitness_hist(mejor_score)
+
+            if mejor_score >= umbral_distancia:
+                break
 
             current_frame = self.background_frames[self.frame_index]
             self.screen.blit(current_frame, (0, 0))
@@ -390,6 +573,20 @@ class SwimFish(Game):
                 if agente["alive"]:
                     agente["fish"].draw(self.screen)
 
+            for cx, cy in ghosts:
+                ghost_rect = self.death_image.get_rect(center=(cx, cy))
+                self.screen.blit(self.death_image, ghost_rect)
+
+            self._dibujar_puntuacion()
+
+            dx = dy = vy = 0.0
+            if vivos:
+                dy, dx, vy = self._calcular_estado_completo(vivos[0]["fish"])
+
+            self._dibujar_panel_info(dx, dy, vy, self.generacion, self.puntuacion)
+
             pygame.display.flip()
 
-        return 'MENU'
+        pesos_finales = [a["pesos"] for a in agentes]
+        fitnesses = [a["score"] for a in agentes]
+        return pesos_finales, fitnesses, 'OK'

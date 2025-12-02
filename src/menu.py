@@ -10,13 +10,15 @@ class Menu:
         self.color_gris = (150, 150, 150)
         self.color_sombra = (0, 0, 0)
         self.offset = 2
-        
-        self.letra_titulo = pygame.font.Font(None, 100)
-        self.letra_opcion = pygame.font.Font(None, 50)
+
+        font_path = "../data/font/StrangeFont-Regular.otf"
+
+        self.letra_titulo = pygame.font.Font(font_path, 100)
+        self.letra_opcion = pygame.font.Font(font_path, 50)
         
         self.titulo = self.letra_titulo.render('¡FLAPPY FISH!', True, self.color_blanco)
         self.opcion_single = self.letra_opcion.render('1. Single Player (Juego Manual)', True, self.color_blanco)
-        self.opcion_evolutivo = self.letra_opcion.render('2. Simulación (Algoritmo Evolutivo)', True, self.color_gris)
+        self.opcion_evolutivo = self.letra_opcion.render('2. Simulación (Algoritmo Evolutivo)', True, self.color_blanco)
 
         self.rect_titulo = self.titulo.get_rect(center=(screen_w // 2, screen_h // 4))
         self.rect_single = self.opcion_single.get_rect(center=(screen_w // 2, screen_h // 2))

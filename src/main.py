@@ -2,6 +2,8 @@ import pygame
 from game import Game
 from swim_fish import SwimFish
 from menu import Menu
+from ml.vector_w import random_vector
+from ml.genetics import nueva_generacion
 
 if __name__ == '__main__':
     base_game = Game()
@@ -10,8 +12,6 @@ if __name__ == '__main__':
     running = True
     while running:
         if current_state == 'MENU':
-            #base_game.clock.tick(base_game.FPS)
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -19,9 +19,8 @@ if __name__ == '__main__':
                 if selection == 'SINGLE':
                     current_state = 'SINGLE'
                 elif selection == 'EVOLUTIVO':
-                    current_state = 'EVOLUTIVO_PENDIENTE'
+                    current_state = 'EVOLUTIVO'
 
-            #base_game.screen.blit(base_game.fondo_marino, (0, 0))
             delta_time = base_game.clock.tick(base_game.FPS) / 1000.0
             base_game.frame_timer += delta_time
             if base_game.frame_timer >= 1.0 / base_game.frame_rate:
@@ -35,28 +34,58 @@ if __name__ == '__main__':
 
         elif current_state == 'SINGLE':
             juego_manual = SwimFish(x=150, y=300, size=(30, 30), image="../data/img/fish1.png")
-
             resultado = juego_manual.swim(auto=False)
-
             if resultado == 'MENU':
                 current_state = 'MENU'
             elif resultado == 'QUIT':
                 running = False
 
-        elif current_state == 'EVOLUTIVO_PENDIENTE':
+        elif current_state == 'EVOLUTIVO':
             juego_auto = SwimFish(x=150, y=300, size=(30, 30), image="../data/img/fish1.png")
 
-            resultado = juego_auto.swim_population()
+            tam_poblacion = 100
+            num_epocas = 100
+            tiempo_max_epoca = 120
+            umbral_distancia = 50
+            umbral_parada = 50
 
-            # print("El modo Algoritmo Evolutivo todavía no esta terminado!")
-            # current_state = 'MENU'
+            pesos_poblacion = [random_vector() for _ in range(tam_poblacion)]
+            mejor_global = 0
 
-            if resultado == 'MENU':
-                current_state = 'MENU'
-            elif resultado == 'QUIT':
-                running = False
+            for epoca in range(num_epocas):
+                juego_auto.generacion = epoca + 1
+                pesos_finales, fitnesses, estado = juego_auto.swim_population(
+                    pesos_poblacion,
+                    tiempo_max=tiempo_max_epoca,
+                    umbral_distancia=umbral_distancia,
+                )
 
-            #TODO
-            #game.swim(auto=True)
+                if estado == 'QUIT':
+                    running = False
+                    break
+                if estado == 'MENU':
+                    break
+                if not pesos_finales or not fitnesses:
+                    break
 
+                mejor_epoca = max(fitnesses)
+                promedio_epoca = sum(fitnesses) / len(fitnesses)
+
+                if mejor_epoca > mejor_global:
+                    mejor_global = mejor_epoca
+
+                juego_auto._actualizar_fitness_hist(mejor_epoca)
+
+                cantidad_sobre_umbral = sum(1 for f in fitnesses if f >= umbral_parada)
+                if epoca >= 10 and cantidad_sobre_umbral >= tam_poblacion // 2:
+                    break
+
+                pesos_poblacion = nueva_generacion(
+                    pesos_finales,
+                    fitnesses,
+                    prob_mut=0.1,
+                    elitismo=2,
+                )
+
+            current_state = 'MENU'
     pygame.quit()

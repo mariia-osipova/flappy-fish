@@ -1,17 +1,6 @@
 from ml.vector_w import random_vector
 
-# def crear_politica(low, high):
-#     """Devuelve una función (dy, dx, vy) -> bool (True: aletear)."""
-#
-#     pesos = random_vector(low, high)
-#
-#     def decidir(dy, dx, vy):
-#         valor = (pesos[0] + pesos[1]*dy + pesos[2]*(dy*dy) +
-#                  pesos[3]*dx + pesos[4]*(dx*dx) + pesos[5]*vy)
-#         return valor > 0
-#     return decidir
-
-pesos_default = [0.0, 0.015, 0.0, 0.002, 0.0, 0.025]
+# pesos_default = [0.0, 0.015, 0.0, 0.002, 0.0, 0.025]
 
 def crear_politica(pesos=None, low=-0.5, high=0.5):
     """
@@ -23,8 +12,8 @@ def crear_politica(pesos=None, low=-0.5, high=0.5):
         pesos_usados        -> lista[6]
     """
     if pesos is None:
-        # pesos = random_vector(low, high)
-        pesos = pesos_default
+        pesos = random_vector(low, high)
+        # pesos = pesos_default
 
     w = list(pesos)
 
@@ -39,8 +28,3 @@ def crear_politica(pesos=None, low=-0.5, high=0.5):
         return valor > 0
 
     return decidir, pesos
-
-# def crear_politica(pesos=None, low=-0.5, high=0.5):
-#     def decidir(dy, dx, vy):
-#         return True
-#     return decidir, [0, 0, 0, 0, 0, 0]
