@@ -11,7 +11,7 @@ class Menu:
         self.color_sombra = (0, 0, 0)
         self.offset = 2
 
-        font_path = "data/font/StrangeFont-Regular.otf"
+        font_path = "../data/font/StrangeFont-Regular.otf"
 
         self.letra_titulo = pygame.font.Font(font_path, 100)
         self.letra_opcion = pygame.font.Font(font_path, 50)

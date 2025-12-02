@@ -3,7 +3,7 @@
 from PIL import Image
 import os
 
-def extract_frames(gif_path, output_folder="data/img/fondo_animado"):
+def extract_frames(gif_path, output_folder="../data/img/fondo_animado"):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     try:
@@ -24,8 +24,8 @@ def extract_frames(gif_path, output_folder="data/img/fondo_animado"):
     print(f"Extracción finalizada. Se guardaron {frame} frames en: {output_folder}")
 
 if __name__ == '__main__':
-    gif_source_path = "data/img/descarga.gif"
-    output_folder_path = "data/img/fondo_animado"
+    gif_source_path = "../data/img/descarga.gif"
+    output_folder_path = "../data/img/fondo_animado"
 
     print(f"Iniciando extracción de frames desde: {gif_source_path}")
     extract_frames(gif_source_path, output_folder_path)
