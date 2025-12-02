@@ -42,7 +42,8 @@ class SwimFish(Game):
         self.tiempo_jumpscare = 0
         self.enable_jumpscare = True
 
-        death_path = "data/img/death.png"
+        # ruta corregida con "../"
+        death_path = "../data/img/death.png"
         self.death_image = pygame.image.load(death_path).convert_alpha()
         self.death_image.set_alpha(120)
 
@@ -145,8 +146,8 @@ class SwimFish(Game):
         self.puntuacion = 0
         self.lista_tuberias = []
         self.fish.reset()
-        #pygame.mixer.music.stop()
-        #pygame.mixer.music.play(-1)
+        pygame.mixer.music.stop()
+        pygame.mixer.music.play(-1)
 
     def _dibujar_puntuacion(self):
         puntuacion_str = str(self.puntuacion)
@@ -245,18 +246,20 @@ class SwimFish(Game):
                 if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
                     self.game_over = True
 
+                tuberia_mask = self.tuberia_mask
+
                 for tuberia in self.lista_tuberias:
                     if tuberia.x < fish_rect.left and not tuberia.pasada:
                         self.puntuacion += 1
                         tuberia.pasada = True
 
                     for tuberia_rect in tuberia.get_rects():
-                        tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
                         offset_x = tuberia_rect.left - self.fish.rect.left
                         offset_y = tuberia_rect.top - self.fish.rect.top
 
                         if self.fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
                             self.game_over = True
+
                             if self.enable_jumpscare:
                                 i = random.randint(0, 10)
                                 if i <= 4:
@@ -492,8 +495,10 @@ class SwimFish(Game):
             agentes.append(agente)
 
         inicio_epoca = time.time()
+        frame_count = 0
 
         while self.running_game:
+            frame_count += 1
             if time.time() - inicio_epoca > tiempo_max:
                 break
 
@@ -532,6 +537,8 @@ class SwimFish(Game):
                 if t.x > -self.imagen_tuberia.get_width()
             ]
 
+            tuberia_mask = self.tuberia_mask
+
             for agente in agentes:
                 if not agente["alive"]:
                     continue
@@ -559,7 +566,6 @@ class SwimFish(Game):
                         agente["passed"].add(id(tuberia))
 
                     for tuberia_rect in tuberia.get_rects():
-                        tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
                         offset_x = tuberia_rect.left - fish_rect.left
                         offset_y = tuberia_rect.top - fish_rect.top
                         if fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
@@ -581,36 +587,38 @@ class SwimFish(Game):
             if mejor_score >= umbral_distancia:
                 break
 
-            current_frame = self.background_frames[self.frame_index]
-            self.screen.blit(current_frame, (0, 0))
-            self.screen.blit(self.fondo_marino, (0, 0))
+            # Solo dibujar cada 2 frames para que sea más liviano
+            if frame_count % 2 == 0:
+                current_frame = self.background_frames[self.frame_index]
+                self.screen.blit(current_frame, (0, 0))
+                self.screen.blit(self.fondo_marino, (0, 0))
 
-            for tuberia in self.lista_tuberias:
-                tuberia.dibujar_tuberias(self.screen)
+                for tuberia in self.lista_tuberias:
+                    tuberia.dibujar_tuberias(self.screen)
 
-            for agente in agentes:
-                if agente["alive"]:
-                    agente["fish"].draw(self.screen)
+                for agente in agentes:
+                    if agente["alive"]:
+                        agente["fish"].draw(self.screen)
 
-            if len(self.ghosts) > 500:
-                self.ghosts = self.ghosts[-500:]
+                if len(self.ghosts) > 500:
+                    self.ghosts = self.ghosts[-500:]
 
-            for cx, cy in self.ghosts:
-                ghost_rect = self.death_image.get_rect(center=(cx, cy))
-                self.screen.blit(self.death_image, ghost_rect)
+                for cx, cy in self.ghosts:
+                    ghost_rect = self.death_image.get_rect(center=(cx, cy))
+                    self.screen.blit(self.death_image, ghost_rect)
 
-            self._dibujar_puntuacion()
+                self._dibujar_puntuacion()
 
-            dx = dy = vy = 0.0
-            if vivos:
-                dy, dx, vy = self._calcular_estado_completo(vivos[0]["fish"])
+                dx = dy = vy = 0.0
+                if vivos:
+                    dy, dx, vy = self._calcular_estado_completo(vivos[0]["fish"])
 
-            self._dibujar_panel_info(dx, dy, vy, self.generacion, self.puntuacion, vivos)
+                self._dibujar_panel_info(dx, dy, vy, self.generacion, self.puntuacion, vivos)
 
-            if self.enable_jumpscare:
-                self.jumpscare.dibujar_jumpscare()
+                if self.enable_jumpscare:
+                    self.jumpscare.dibujar_jumpscare()
 
-            pygame.display.flip()
+                pygame.display.flip()
 
         pesos_finales = [a["pesos"] for a in agentes]
         return pesos_finales, fitnesses, 'OK'
