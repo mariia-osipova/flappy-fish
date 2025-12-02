@@ -16,17 +16,17 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.screen_w, self.screen_h))
 
-        self.animation_folder = "data/img/fondo_animado" 
+        self.animation_folder = "../data/img/fondo_animado"
         self.background_frames = self._load_background_frames()
         self.frame_index = 0
         self.frame_timer = 0
         self.frame_rate = 30
 
-        self.music_path = "data/audios/linkin park fondo.ogg"
+        self.music_path = "../data/audios/linkin park fondo.ogg"
         pygame.mixer.music.load(self.music_path)
         #pygame.mixer.music.play(-1)
-        self.sonido_salto = pygame.mixer.Sound("data/audios/efecto bubble.ogg")
-        self.imagen_tuberia = pygame.image.load("data/img/alga.png").convert_alpha()
+        self.sonido_salto = pygame.mixer.Sound("../data/audios/efecto bubble.ogg")
+        self.imagen_tuberia = pygame.image.load("../data/img/alga.png").convert_alpha()
         self.imagen_tuberia = pygame.transform.scale(self.imagen_tuberia,(70,400))
         self.hueco_entre_tuberias=300
         self.evento_nueva_tuberia = pygame.USEREVENT 

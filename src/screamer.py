@@ -12,9 +12,9 @@ class Scream(Game):
         self.definir_jumpscare()
 
     def definir_jumpscare(self):
-        self.jumpscare_imagen=pygame.image.load('data/img/img.png').convert_alpha()
+        self.jumpscare_imagen=pygame.image.load('../data/img/img.png').convert_alpha()
         self.jumpscare_imagen = pygame.transform.scale(self.jumpscare_imagen, (self.screen_w, self.screen_h))
-        self.jumpscare_ruido=pygame.mixer.Sound('data/audios/scream.mp3')
+        self.jumpscare_ruido=pygame.mixer.Sound('../data/audios/scream.mp3')
 
     def dibujar_jumpscare(self):
         if self.mostrar_jumpscare and self.jumpscare_imagen:

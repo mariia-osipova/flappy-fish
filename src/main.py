@@ -36,7 +36,7 @@ if __name__ == '__main__':
             
         
         elif current_state == 'SINGLE':
-            juego_manual = SwimFish(x=150, y=300, size=(90, 90), image="data/img/img_1.png") 
+            juego_manual = SwimFish(x=150, y=300, size=(90, 90), image="../data/img/img_1.png")
             
             resultado = juego_manual.swim()
             

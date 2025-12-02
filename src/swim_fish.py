@@ -63,7 +63,7 @@ class SwimFish(Game):
         self.juego_iniciado = False
         self.puntuacion = 0
         self.lista_tuberias = []
-        self.fish = Fish(x=150, y=300, size=(90, 90), image="data/img/img_1.png")
+        self.fish = Fish(x=150, y=300, size=(90, 90), image="../data/img/img_1.png")
         pygame.mixer.music.stop()
 
     def _dibujar_puntuacion(self):
