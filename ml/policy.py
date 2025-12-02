@@ -18,12 +18,17 @@ def crear_politica(pesos=None, low=-0.5, high=0.5):
     w = list(pesos)
 
     def decidir(dy, dx, vy):
+        dy_n = dy / 400.0
+        dx_n = dx / 400.0
+        vy_n = vy / 300.0
+
         valor = (w[0] +
-                 w[1] * dy +
-                 w[2] * (dy * dy) +
-                 w[3] * dx +
-                 w[4] * (dx * dx) +
-                 w[5] * vy)
+                 w[1] * dy_n +
+                 w[2] * (dy_n * dy_n) +
+                 w[3] * dx_n +
+                 w[4] * (dx_n * dx_n) +
+                 w[5] * vy_n)
+
         # print(f"dy={dy:.1f}, dx={dx:.1f}, vy={vy:.2f}, valor={valor:.2f}") #debug
         return valor > 0
 
