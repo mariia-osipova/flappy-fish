@@ -53,4 +53,13 @@ class Menu:
                 if self.rect_evolutivo.collidepoint(mouse_pos):
                     self.seleccion = 'EVOLUTIVO' 
                     return self.seleccion
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                self.seleccion = 'SINGLE'
+                return self.seleccion
+            elif event.key == pygame.K_2:
+                self.seleccion = 'EVOLUTIVO'
+                return self.seleccion
+
         return None

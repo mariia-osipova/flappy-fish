@@ -8,6 +8,7 @@ from ml.policy import crear_politica
 from ml.calcular_estado import calcular_estado
 from ml.vector_w import random_vector
 
+
 class SwimFish(Game):
     def __init__(self, x, y, size, image):
         super().__init__()
@@ -29,11 +30,12 @@ class SwimFish(Game):
         self.offset_sombra = 2.5
         self.jumpscare = Scream()
 
-        if not hasattr(self, "lista_tuberias"):
-            self.lista_tuberias = []
-
         self.mostrar_jumpscare = False
         self.tiempo_jumpscare = 0
+        self.enable_jumpscare = True
+
+        if not hasattr(self, "lista_tuberias"):
+            self.lista_tuberias = []
 
     def _calcular_estado_completo(self):
         fish_rect = self.fish.get_rect()
@@ -135,17 +137,19 @@ class SwimFish(Game):
     def swim(self, auto: bool = False, pesos=None):
         self.running_game = True
 
+        self.enable_jumpscare = not auto
+
+        decidir = None
         if auto:
-            # if pesos is None:
-            #     pesos = random_vector()
+            if pesos is None:
+                pesos = random_vector()
             decidir, pesos_usados = crear_politica(pesos)
             self.pesos_actuales = pesos_usados
-
-            if not self.juego_iniciado:
-                self.juego_iniciado = True
-                pygame.mixer.music.play(-1)
+            self.juego_iniciado = True
+            pygame.mixer.music.play(-1)
         else:
-            decidir = None
+            self.game_over = False
+            self.juego_iniciado = False
 
         while self.running_game:
             delta_time = self.clock.tick(self.FPS) / 1000.0
@@ -154,7 +158,12 @@ class SwimFish(Game):
                 self.frame_index = (self.frame_index + 1) % len(self.background_frames)
                 self.frame_timer = 0
 
-            self.jumpscare.actualizar_jumpscare()
+            if auto and self.game_over:
+                self.reiniciar_juego()
+                self.juego_iniciado = True
+
+            if self.enable_jumpscare:
+                self.jumpscare.actualizar_jumpscare()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -163,7 +172,7 @@ class SwimFish(Game):
                     return 'QUIT'
 
                 if self.game_over:
-                    if event.type == pygame.KEYDOWN:
+                    if (not auto) and event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_r:
                             self.reiniciar_juego()
                         elif event.key == pygame.K_m:
@@ -221,13 +230,12 @@ class SwimFish(Game):
                         offset_x = tuberia_rect.left - self.fish.rect.left
                         offset_y = tuberia_rect.top - self.fish.rect.top
 
-                        if self.fish.mask.overlap(
-                            tuberia_mask, (offset_x, offset_y)
-                        ):
+                        if self.fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
                             self.game_over = True
-                            i = random.randint(0, 10)
-                            if i <= 4:
-                                self.jumpscare.asustar()
+                            if self.enable_jumpscare:
+                                i = random.randint(0, 10)
+                                if i <= 4:
+                                    self.jumpscare.asustar()
                             break
 
             current_frame = self.background_frames[self.frame_index]
@@ -243,32 +251,36 @@ class SwimFish(Game):
                 if self.juego_iniciado:
                     self._dibujar_puntuacion()
                 else:
-                    texto_inicio_sombra = self.letra_pequena.render(
-                        '¡Presiona ESPACIO para comenzar!',
-                        True,
-                        self.color_sombra,
-                    )
-                    rect_inicio_sombra = texto_inicio_sombra.get_rect(
-                        center=(
-                            self.screen_w // 2 + self.offset_sombra,
-                            self.screen_h // 2 + self.offset_sombra,
+                    if not auto:
+                        texto_inicio_sombra = self.letra_pequena.render(
+                            '¡Presiona ESPACIO para comenzar!',
+                            True,
+                            self.color_sombra,
                         )
-                    )
-                    self.screen.blit(texto_inicio_sombra, rect_inicio_sombra)
+                        rect_inicio_sombra = texto_inicio_sombra.get_rect(
+                            center=(
+                                self.screen_w // 2 + self.offset_sombra,
+                                self.screen_h // 2 + self.offset_sombra,
+                            )
+                        )
+                        self.screen.blit(texto_inicio_sombra, rect_inicio_sombra)
 
-                    texto_inicio = self.letra_pequena.render(
-                        '¡Presiona ESPACIO para comenzar!',
-                        True,
-                        (255, 255, 255),
-                    )
-                    rect_inicio = texto_inicio.get_rect(
-                        center=(self.screen_w // 2, self.screen_h // 2)
-                    )
-                    self.screen.blit(texto_inicio, rect_inicio)
+                        texto_inicio = self.letra_pequena.render(
+                            '¡Presiona ESPACIO para comenzar!',
+                            True,
+                            (255, 255, 255),
+                        )
+                        rect_inicio = texto_inicio.get_rect(
+                            center=(self.screen_w // 2, self.screen_h // 2)
+                        )
+                        self.screen.blit(texto_inicio, rect_inicio)
             else:
-                self._dibujar_game_over()
+                if not auto:
+                    self._dibujar_game_over()
 
-            self.jumpscare.dibujar_jumpscare()
+            if self.enable_jumpscare:
+                self.jumpscare.dibujar_jumpscare()
+
             pygame.display.flip()
 
         return 'MENU'

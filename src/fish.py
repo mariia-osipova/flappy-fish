@@ -20,7 +20,6 @@ class Fish:
         self.max_fall_speed = 100
         self.air_resistance = 0.9
 
-
     def flap(self):
         self.velocity = self.jump_strength
 
@@ -62,3 +61,6 @@ class Fish:
     def reset(self):
         self.rect.center = self._start_pos
         self.velocity = 0
+        self.image = self.original_image
+        self.rect = self.image.get_rect(center=self._start_pos)
+        self.mask = pygame.mask.from_surface(self.image)
