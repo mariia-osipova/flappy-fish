@@ -28,7 +28,7 @@ class SwimFish(Game):
         self.fish = Fish(x, y, size, image)
         self.puntuacion = 0
 
-        font_path = "data/font/StrangeFont-Regular.otf"
+        font_path = "../data/font/StrangeFont-Regular.otf"
         self.letra_grande = pygame.font.Font(font_path, 80)
         self.letra_pequena = pygame.font.Font(font_path, 36)
         self.letra_puntuacion = pygame.font.Font(font_path, 64)
