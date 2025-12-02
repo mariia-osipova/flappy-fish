@@ -22,13 +22,13 @@ class SwimFish(Game):
         self.juego_iniciado = False
 
         self.fish_image_path = image
-        self.fondo_dead_fish = pygame.image.load("../data/img/dead-fish.png").convert_alpha()
+        self.fondo_dead_fish = pygame.image.load("data/img/dead-fish.png").convert_alpha()
         self.fish_size = size
 
         self.fish = Fish(x, y, size, image)
         self.puntuacion = 0
 
-        font_path = "../data/font/StrangeFont-Regular.otf"
+        font_path = "data/font/StrangeFont-Regular.otf"
         self.letra_grande = pygame.font.Font(font_path, 80)
         self.letra_pequena = pygame.font.Font(font_path, 36)
         self.letra_puntuacion = pygame.font.Font(font_path, 64)
@@ -42,7 +42,7 @@ class SwimFish(Game):
         self.tiempo_jumpscare = 0
         self.enable_jumpscare = True
 
-        death_path = "../data/img/death.png"
+        death_path = "data/img/death.png"
         self.death_image = pygame.image.load(death_path).convert_alpha()
         self.death_image.set_alpha(120)
 
