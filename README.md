@@ -43,4 +43,4 @@ Here is a video to demonstrate how to use the project:
 #TODO REQUIREMENTS  
 #TODO pic 3 (run the project)  
 #TODO githubpages  
-#CHANGE SCREAMER PIC  
+#CHANGE SCREAMER PIC, write bout screamer tmb HAHAHAHA    
