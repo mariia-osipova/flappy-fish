@@ -5,6 +5,8 @@ import pygame
 class Fish:
     def __init__(self, x, y, size, image):
 
+        self._start_pos = (x, y)
+
         self.size = size
         self.original_image = pygame.image.load(image).convert_alpha()
         self.original_image = pygame.transform.scale(self.original_image, (size[0], size[1]))
@@ -56,4 +58,7 @@ class Fish:
         old_center = self.rect.center
         self.rect = self.image.get_rect(center=old_center)
         self.mask = pygame.mask.from_surface(self.image)
-        
+
+    def reset(self):
+        self.rect.center = self._start_pos
+        self.velocity = 0

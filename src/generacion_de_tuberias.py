@@ -13,6 +13,8 @@ class tuberias:
         self.tubo_abajo = self.imagen_tuberia.get_rect(midtop = (x, self.altura_referencia + hueco // 2))
         self.pasada = False
 
+        self.gap_y = self.altura_referencia
+
     def dibujar_tuberias(self,screen):
         screen.blit(pygame.transform.flip(self.imagen_tuberia, False, True), self.tubo_arriba)
         screen.blit(self.imagen_tuberia, self.tubo_abajo)
@@ -24,3 +26,6 @@ class tuberias:
 
     def get_rects(self):
         return [self.tubo_arriba, self.tubo_abajo]
+
+    def top_rect(self):
+        return self.tubo_arriba
