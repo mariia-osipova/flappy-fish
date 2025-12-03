@@ -1,1 +1,6 @@
 pygame
+random
+os
+PIL
+time
+math
