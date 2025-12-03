@@ -34,6 +34,8 @@ python3 -m pip install -r requirements.txt
 
 Here is a video to demonstrate how to use the project:
 
+https://www.youtube.com/watch?v=RNBFtw6mRU4
+
 
 ----
 
