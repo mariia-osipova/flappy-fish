@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
             tam_poblacion = 100
             num_epocas = 50
-            tiempo_max_epoca = 60     
+            tiempo_max_epoca = 400     
             umbral_distancia = 50
             umbral_parada = 50        
 
