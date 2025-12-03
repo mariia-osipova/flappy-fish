@@ -42,10 +42,4 @@ https://www.youtube.com/watch?v=RNBFtw6mRU4
 
 ----
 
-#### GitHub Pages
  
-#TODO! implementation example!!!   
-#TODO REQUIREMENTS  
-#TODO pic 3 (run the project)  
-#TODO githubpages  
-#CHANGE SCREAMER PIC, write bout screamer tmb HAHAHAHA    
