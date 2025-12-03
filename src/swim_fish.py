@@ -25,6 +25,8 @@ class SwimFish(Game):
         self.fondo_dead_fish = pygame.image.load("../data/img/dead-fish.png").convert_alpha()
         self.fish_size = size
 
+        self.img_1 = pygame.image.load("../data/img/img_1.png").convert_alpha()
+
         self.fish = Fish(x, y, size, image)
         self.puntuacion = 0
 
@@ -326,6 +328,28 @@ class SwimFish(Game):
             return
 
         n = len(pesos_lista)
+        m = min(len(w) for w in pesos_lista)
+
+        promedios = []
+        desvios = []
+
+        for j in range(m):
+            vals = [w[j] for w in pesos_lista if len(w) > j]
+            if not vals:
+                continue
+            mean = sum(vals) / len(vals)
+            var = sum((v - mean) ** 2 for v in vals) / len(vals)
+            std = math.sqrt(var)
+            promedios.append(mean)
+            desvios.append(std)
+
+        self.genome_avg = promedios
+        self.genome_std = desvios
+
+        if not self.genome_names or len(self.genome_names) != len(promedios):
+            self.genome_names = [f"w{j}" for j in range(len(promedios))]
+
+        n = len(pesos_lista)
         m = len(pesos_lista[0])
 
         promedios = []
@@ -474,8 +498,63 @@ class SwimFish(Game):
 
         self.screen.blit(panel_surface, panel_rect.topleft)
 
-    def swim_population(self, pesos_poblacion, tiempo_max=120, umbral_distancia=30):
-        global fitnesses
+    def _mostrar_aprendizaje(self, peces_aprendidos, objetivo):
+        pygame.mixer.music.stop()
+        self.running_game = False
+
+        mostrando = True
+        while mostrando and self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    mostrando = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_ESCAPE, pygame.K_m):
+                        mostrando = False
+
+            if hasattr(self, "background_frames") and self.background_frames:
+                current_frame = self.background_frames[self.frame_index]
+                self.screen.blit(current_frame, (0, 0))
+            else:
+                self.screen.fill((0, 0, 0))
+
+            img_rect = self.img_1.get_rect(
+                center=(self.screen_w // 2, self.screen_h // 2 - 40)
+            )
+            self.screen.blit(self.img_1, img_rect)
+
+            texto1 = self.letra_pequena.render(
+                f"La educacion esta terminada: {peces_aprendidos} pezes с ≥ {objetivo} puntos",
+                True,
+                (255, 255, 255),
+            )
+            rect_texto1 = texto1.get_rect(
+                center=(self.screen_w // 2, self.screen_h // 2 + img_rect.height // 2 + 20)
+            )
+            self.screen.blit(texto1, rect_texto1)
+
+            texto2 = self.letra_pequena.render(
+                "Aprete ESC o M, para salir del juego.",
+                True,
+                (255, 255, 255),
+            )
+            rect_texto2 = texto2.get_rect(
+                center=(self.screen_w // 2, rect_texto1.bottom + 30)
+            )
+            self.screen.blit(texto2, rect_texto2)
+
+            pygame.display.flip()
+            self.clock.tick(self.FPS)
+
+    def swim_population(
+            self,
+            pesos_poblacion,
+            tiempo_max=200,
+            umbral_distancia=50,
+            required_fish=50,
+    ):
+        global fitnesses, peces_con_objetivo
+
         self.running_game = True
         self.enable_jumpscare = False
 
@@ -503,6 +582,7 @@ class SwimFish(Game):
 
         inicio_epoca = time.time()
         frame_count = 0
+        aprendieron = False
 
         while self.running_game:
             frame_count += 1
@@ -533,7 +613,7 @@ class SwimFish(Game):
                         return None, None, 'MENU'
 
             vivos = [a for a in agentes if a["alive"]]
-            if len(vivos) == 0:
+            if not vivos:
                 break
 
             for t in self.lista_tuberias:
@@ -562,11 +642,7 @@ class SwimFish(Game):
 
                 colision = False
                 for tuberia in self.lista_tuberias:
-                    # tube_center_x = tuberia.x + self.imagen_tuberia.get_width() // 2
                     tube_right = tuberia.x + self.imagen_tuberia.get_width()
-                    # if fish_rect.centerx > tube_center_x and id(tuberia) not in agente["passed"]:
-                    #     agente["score"] += 1
-                    #     agente["passed"].add(id(tuberia))
 
                     if tube_right < fish_rect.left and tuberia not in agente["passed"]:
                         agente["score"] += 1
@@ -587,6 +663,10 @@ class SwimFish(Game):
                     if colision:
                         break
 
+            vivos = [a for a in agentes if a["alive"]]
+            if not vivos:
+                break
+
             self.lista_tuberias = [
                 t for t in self.lista_tuberias
                 if t.x > -self.imagen_tuberia.get_width()
@@ -595,17 +675,22 @@ class SwimFish(Game):
             mejor_score = max(a["score"] for a in agentes)
             self.puntuacion = mejor_score
 
-            if mejor_score >= umbral_distancia:
-                break
-
-            fitnesses = [a["score"] * 1000.0 + a["time_alive"] for a in agentes]
+            peces_con_objetivo = sum(
+                1 for a in agentes if a["score"] >= umbral_distancia
+            )
+            objetivo_peces = min(required_fish, len(agentes))
 
             self._actualizar_estadisticas_genoma([a["pesos"] for a in agentes])
+
+            if peces_con_objetivo >= objetivo_peces:
+                aprendieron = True
+                break
 
             if frame_count % 2 == 0:
                 current_frame = self.background_frames[self.frame_index]
                 self.screen.blit(current_frame, (0, 0))
                 self.screen.blit(self.fondo_marino, (0, 0))
+
                 for tuberia in self.lista_tuberias:
                     tuberia.dibujar_tuberias(self.screen)
 
@@ -634,4 +719,10 @@ class SwimFish(Game):
                 pygame.display.flip()
 
         pesos_finales = [a["pesos"] for a in agentes]
+        fitnesses = [a["score"] * 1000.0 + a["time_alive"] for a in agentes]
+
+        if aprendieron:
+            self._mostrar_aprendizaje(peces_con_objetivo, umbral_distancia)
+            return pesos_finales, fitnesses, 'LEARNED'
+
         return pesos_finales, fitnesses, 'OK'
