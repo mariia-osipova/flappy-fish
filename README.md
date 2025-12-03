@@ -28,8 +28,10 @@ python3 -m pip install -r requirements.txt
 
 ### 3. Run the project
 
-'''cd src
-python3 main.py '''
+'''bash
+cd src
+python3 main.py 
+'''
 
 
 
