@@ -42,7 +42,6 @@ class SwimFish(Game):
         self.tiempo_jumpscare = 0
         self.enable_jumpscare = True
 
-        # ruta corregida con "../"
         death_path = "../data/img/death.png"
         self.death_image = pygame.image.load(death_path).convert_alpha()
         self.death_image.set_alpha(120)
@@ -60,6 +59,8 @@ class SwimFish(Game):
 
         if not hasattr(self, "lista_tuberias"):
             self.lista_tuberias = []
+
+        self.tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
 
     def _calcular_estado_completo(self, fish):
         fish_rect = fish.get_rect()
@@ -235,38 +236,41 @@ class SwimFish(Game):
 
                 for t in self.lista_tuberias:
                     t.mover_tuberias()
-                self.lista_tuberias = [
-                    t
-                    for t in self.lista_tuberias
-                    if t.x > -self.imagen_tuberia.get_width()
-                ]
 
                 fish_rect = self.fish.get_rect()
 
                 if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
                     self.game_over = True
 
-                if not hasattr(self, "tuberia_mask") or self.tuberia_mask is None:
-                    self.tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
-                tuberia_mask = self.tuberia_mask
-
                 for tuberia in self.lista_tuberias:
-                    if tuberia.tubo_arriba.right < fish_rect.left and not tuberia.pasada:
+                    tube_right = tuberia.x + self.imagen_tuberia.get_width()
+                    if tube_right < fish_rect.left and not getattr(tuberia, "pasada", False):
                         self.puntuacion += 1
                         tuberia.pasada = True
 
                     for tuberia_rect in tuberia.get_rects():
-                        # tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
-                        offset_x = tuberia_rect.left - self.fish.rect.left
-                        offset_y = tuberia_rect.top - self.fish.rect.top
+                        if not fish_rect.colliderect(tuberia_rect):
+                            continue
 
-                        if self.fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
+                        offset_x = tuberia_rect.left - fish_rect.left
+                        offset_y = tuberia_rect.top - fish_rect.top
+
+                        if self.fish.mask.overlap(self.tuberia_mask, (offset_x, offset_y)):
                             self.game_over = True
                             if self.enable_jumpscare:
                                 i = random.randint(0, 10)
                                 if i <= 4:
                                     self.jumpscare.asustar()
                             break
+
+                    if self.game_over:
+                        break
+
+                self.lista_tuberias = [
+                    t
+                    for t in self.lista_tuberias
+                    if t.x > -self.imagen_tuberia.get_width()
+                ]
 
             current_frame = self.background_frames[self.frame_index]
             self.screen.blit(current_frame, (0, 0))
@@ -346,7 +350,7 @@ class SwimFish(Game):
         if len(self.fitness_history) > self.fitness_history_max_len:
             self.fitness_history.pop(0)
 
-    def _dibujar_panel_info(self, dx, dy, vy, generacion, tuberias, vivos):
+    def _dibujar_panel_info(self, dx, dy, vy, generacion, tuberias_count, vivos):
         panel_width = 340
         panel_rect = pygame.Rect(self.screen_w - panel_width, 0, panel_width, self.screen_h)
 
@@ -383,7 +387,7 @@ class SwimFish(Game):
         panel_surface.blit(texto_tot, (x, y))
         y += dy_line
 
-        texto_tub = self.letra_panel.render(f"Tubes= {tuberias}", True, (255, 255, 255))
+        texto_tub = self.letra_panel.render(f"Tubes= {tuberias_count}", True, (255, 255, 255))
         panel_surface.blit(texto_tub, (x, y))
         y += dy_line * 2
 
@@ -534,13 +538,6 @@ class SwimFish(Game):
 
             for t in self.lista_tuberias:
                 t.mover_tuberias()
-            self.lista_tuberias = [
-                t
-                for t in self.lista_tuberias
-                if t.x > -self.imagen_tuberia.get_width()
-            ]
-
-            tuberia_mask = self.tuberia_mask
 
             for agente in agentes:
                 if not agente["alive"]:
@@ -563,41 +560,52 @@ class SwimFish(Game):
                     self.ghosts.append(fish_rect.center)
                     continue
 
-                # tuberia_mask = self.tuberia_mask
-
+                colision = False
                 for tuberia in self.lista_tuberias:
-                    if tuberia.tubo_arriba.right < fish_rect.left and id(tuberia) not in agente["passed"]:
+                    # tube_center_x = tuberia.x + self.imagen_tuberia.get_width() // 2
+                    tube_right = tuberia.x + self.imagen_tuberia.get_width()
+                    # if fish_rect.centerx > tube_center_x and id(tuberia) not in agente["passed"]:
+                    #     agente["score"] += 1
+                    #     agente["passed"].add(id(tuberia))
+
+                    if tube_right < fish_rect.left and tuberia not in agente["passed"]:
                         agente["score"] += 1
-                        agente["passed"].add(id(tuberia))
+                        agente["passed"].add(tuberia)
 
                     for tuberia_rect in tuberia.get_rects():
-                        # tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
+                        if not fish_rect.colliderect(tuberia_rect):
+                            continue
+
                         offset_x = tuberia_rect.left - fish_rect.left
                         offset_y = tuberia_rect.top - fish_rect.top
-                        if fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
+                        if fish.mask.overlap(self.tuberia_mask, (offset_x, offset_y)):
                             agente["alive"] = False
                             self.ghosts.append(fish_rect.center)
+                            colision = True
                             break
+
+                    if colision:
+                        break
+
+            self.lista_tuberias = [
+                t for t in self.lista_tuberias
+                if t.x > -self.imagen_tuberia.get_width()
+            ]
 
             mejor_score = max(a["score"] for a in agentes)
             self.puntuacion = mejor_score
 
-            fitnesses = [
-                a["score"] * 1000.0 + a["time_alive"]
-                for a in agentes
-            ]
-
-            self._actualizar_estadisticas_genoma([a["pesos"] for a in agentes])
-            # self._actualizar_fitness_hist(mejor_score)
-
             if mejor_score >= umbral_distancia:
                 break
+
+            fitnesses = [a["score"] * 1000.0 + a["time_alive"] for a in agentes]
+
+            self._actualizar_estadisticas_genoma([a["pesos"] for a in agentes])
 
             if frame_count % 2 == 0:
                 current_frame = self.background_frames[self.frame_index]
                 self.screen.blit(current_frame, (0, 0))
                 self.screen.blit(self.fondo_marino, (0, 0))
-
                 for tuberia in self.lista_tuberias:
                     tuberia.dibujar_tuberias(self.screen)
 
