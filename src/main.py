@@ -43,12 +43,11 @@ if __name__ == '__main__':
         elif current_state == 'EVOLUTIVO':
             juego_auto = SwimFish(x=150, y=300, size=(30, 30), image="../data/img/fish1.png")
 
-            tam_poblacion = 60        
-            num_epocas = 40           
+            tam_poblacion = 100
+            num_epocas = 50
             tiempo_max_epoca = 60     
-            umbral_distancia = 3      
+            umbral_distancia = 50
             umbral_parada = 50        
-
 
             pesos_poblacion = [random_vector() for _ in range(tam_poblacion)]
             mejor_global = 0

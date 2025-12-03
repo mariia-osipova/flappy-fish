@@ -10,7 +10,7 @@ class Game:
         pygame.mixer.init()
 
         self.clock = pygame.time.Clock()
-        self.FPS = 60
+        self.FPS = 120
 
         self.screen_w = 1000
         self.screen_h = 600

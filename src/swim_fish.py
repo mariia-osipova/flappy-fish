@@ -22,7 +22,7 @@ class SwimFish(Game):
         self.juego_iniciado = False
 
         self.fish_image_path = image
-        self.fondo_dead_fish = pygame.image.load("data/img/dead-fish.png").convert_alpha()
+        self.fondo_dead_fish = pygame.image.load("../data/img/dead-fish.png").convert_alpha()
         self.fish_size = size
 
         self.fish = Fish(x, y, size, image)
@@ -246,20 +246,22 @@ class SwimFish(Game):
                 if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
                     self.game_over = True
 
+                if not hasattr(self, "tuberia_mask") or self.tuberia_mask is None:
+                    self.tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
                 tuberia_mask = self.tuberia_mask
 
                 for tuberia in self.lista_tuberias:
-                    if tuberia.x < fish_rect.left and not tuberia.pasada:
+                    if tuberia.tubo_arriba.right < fish_rect.left and not tuberia.pasada:
                         self.puntuacion += 1
                         tuberia.pasada = True
 
                     for tuberia_rect in tuberia.get_rects():
+                        # tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
                         offset_x = tuberia_rect.left - self.fish.rect.left
                         offset_y = tuberia_rect.top - self.fish.rect.top
 
                         if self.fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
                             self.game_over = True
-
                             if self.enable_jumpscare:
                                 i = random.randint(0, 10)
                                 if i <= 4:
@@ -469,6 +471,7 @@ class SwimFish(Game):
         self.screen.blit(panel_surface, panel_rect.topleft)
 
     def swim_population(self, pesos_poblacion, tiempo_max=120, umbral_distancia=30):
+        global fitnesses
         self.running_game = True
         self.enable_jumpscare = False
 
@@ -560,12 +563,15 @@ class SwimFish(Game):
                     self.ghosts.append(fish_rect.center)
                     continue
 
+                # tuberia_mask = self.tuberia_mask
+
                 for tuberia in self.lista_tuberias:
-                    if tuberia.x < fish_rect.left and id(tuberia) not in agente["passed"]:
+                    if tuberia.tubo_arriba.right < fish_rect.left and id(tuberia) not in agente["passed"]:
                         agente["score"] += 1
                         agente["passed"].add(id(tuberia))
 
                     for tuberia_rect in tuberia.get_rects():
+                        # tuberia_mask = pygame.mask.from_surface(self.imagen_tuberia)
                         offset_x = tuberia_rect.left - fish_rect.left
                         offset_y = tuberia_rect.top - fish_rect.top
                         if fish.mask.overlap(tuberia_mask, (offset_x, offset_y)):
@@ -587,7 +593,6 @@ class SwimFish(Game):
             if mejor_score >= umbral_distancia:
                 break
 
-            # Solo dibujar cada 2 frames para que sea más liviano
             if frame_count % 2 == 0:
                 current_frame = self.background_frames[self.frame_index]
                 self.screen.blit(current_frame, (0, 0))
