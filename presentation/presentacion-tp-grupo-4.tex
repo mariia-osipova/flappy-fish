@@ -354,16 +354,21 @@ mroldan@udesa.edu.ar}
 \begin{frame}
 \frametitle{Módulo game.py}
 
-    Game, en game.py, es el marco general del que hereda la clase de juego SwimFish. En el constructor:
+    Game, definido en \texttt{game.py}, es el marco general del que hereda la clase
+    de juego \texttt{SwimFish}. Su constructor realiza toda la configuración inicial
+    del entorno:
 
-– Se inicializan Pygame, el temporizador y el objeto Clock; el objetivo de FPS se establece en 120;
-– Se crea una ventana de 1000x600;
-– Se cargan una serie de fotogramas de fondo animados desde el directorio ../data/img/fondo_animado y se configuran para que giren a una velocidad de fotogramas de 30;
-– Se cargan la música de fondo (Linkin Park fondo.ogg) y el efecto de sonido de explosión de burbujas para el salto;
-– Se carga y escala el sprite de la tubería (alga2.png), y se calcula una máscara de colisión para colisiones de precisión;
-– Se establece el tamaño del espacio vertical entre las tuberías (hueco_entre_tuberias = 300) y se inicia un evento personalizado, evento_nueva_tuberia, que indicará cada 1500 ms que es hora de añadir un nuevo par de tuberías.
+\begin{itemize}
+    \item Inicializa Pygame, el temporizador y el objeto \texttt{Clock}; el objetivo de FPS se fija en 120.
+    \item Crea la ventana principal del juego con dimensiones de 1000×600 píxeles.
+    \item Carga los fotogramas del fondo animado desde \texttt{../data/img/fondo\_animado} y los configura para rotar a 30 FPS.
+    \item Carga la música de fondo (\textit{Linkin Park fondo.ogg}) y el sonido del salto (\textit{efecto bubble.ogg}).
+    \item Carga y escala el sprite de la tubería (\textit{alga2.png}) y genera su máscara de colisión pixel-perfect.
+    \item Define el tamaño del hueco vertical entre tuberías (\texttt{hueco\_entre\_tuberias = 300}).
+    \item Inicia un evento personalizado (\texttt{evento\_nueva\_tuberia}) que se activa cada 1500 ms para generar nuevos obstáculos.
+\end{itemize}
+
 \end{frame}
-
 %------------------------------------------------
 
 \begin{frame}
