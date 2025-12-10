@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.12.9)  10 DEC 2025 19:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.12.9)  10 DEC 2025 20:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -952,7 +952,7 @@ LaTeX Font Info:    Font shape `OT1/opensans-TLF/m/n' will be
 [2
 
 ]
-<Images/img.png, id=109, 953.5625pt x 598.235pt>
+<Images/img.png, id=114, 953.5625pt x 598.235pt>
 File: Images/img.png Graphic file (type png)
 <use Images/img.png>
 Package pdftex.def Info: Images/img.png  used on input line 232.
@@ -962,7 +962,7 @@ Package pdftex.def Info: Images/img.png  used on input line 232.
 [3
 
  <./Images/img.png>]
-<Images/img_1.png, id=137, 999.735pt x 626.34pt>
+<Images/img_1.png, id=142, 999.735pt x 626.34pt>
 File: Images/img_1.png Graphic file (type png)
 <use Images/img_1.png>
 Package pdftex.def Info: Images/img_1.png  used on input line 248.
@@ -972,7 +972,7 @@ Package pdftex.def Info: Images/img_1.png  used on input line 248.
 [4
 
  <./Images/img_1.png>]
-<Images/diagram-initial-class-structure.png, id=164, 2785.40625pt x 3457.91875p
+<Images/diagram-initial-class-structure.png, id=169, 2785.40625pt x 3457.91875p
 t>
 File: Images/diagram-initial-class-structure.png Graphic file (type png)
 <use Images/diagram-initial-class-structure.png>
@@ -984,12 +984,12 @@ put line 270.
 [5
 
  <./Images/diagram-initial-class-structure.png>]
-<Images/img_3.png, id=194, 925.4575pt x 684.5575pt>
+<Images/img_3.png, id=199, 925.4575pt x 684.5575pt>
 File: Images/img_3.png Graphic file (type png)
 <use Images/img_3.png>
 Package pdftex.def Info: Images/img_3.png  used on input line 317.
 (pdftex.def)             Requested size: 159.79204pt x 118.19075pt.
-<Images/img_2.png, id=195, 925.4575pt x 602.25pt>
+<Images/img_2.png, id=200, 925.4575pt x 602.25pt>
 File: Images/img_2.png Graphic file (type png)
 <use Images/img_2.png>
 Package pdftex.def Info: Images/img_2.png  used on input line 317.
@@ -999,7 +999,7 @@ Package pdftex.def Info: Images/img_2.png  used on input line 317.
 [6
 
  <./Images/img_3.png> <./Images/img_2.png>]
-<Images/diagram-whole-class-structure.png, id=225, 8591.09625pt x 6102.8pt>
+<Images/diagram-whole-class-structure.png, id=230, 8591.09625pt x 6102.8pt>
 File: Images/diagram-whole-class-structure.png Graphic file (type png)
 <use Images/diagram-whole-class-structure.png>
 Package pdftex.def Info: Images/diagram-whole-class-structure.png  used on inpu
@@ -1088,16 +1088,12 @@ live/2025/texmf-dist/fonts/enc/dvips/opensans/a_nvvucy.enc}]
 \openout4 = `presentacion-tp-grupo-4.vrb'.
 
  (./presentacion-tp-grupo-4.vrb
-<Images/fish1.png, id=355, 30.1125pt x 30.1125pt>
+<Images/fish1.png, id=360, 30.1125pt x 30.1125pt>
 File: Images/fish1.png Graphic file (type png)
 <use Images/fish1.png>
 Package pdftex.def Info: Images/fish1.png  used on input line 10.
 (pdftex.def)             Requested size: 30.73085pt x 30.73178pt.
 )
-Overfull \vbox (127.31424pt too high) detected at line 488
- []
-
-
 
 [12
 
@@ -1133,13 +1129,13 @@ Overfull \vbox (127.31424pt too high) detected at line 488
 \openout4 = `presentacion-tp-grupo-4.vrb'.
 
  (./presentacion-tp-grupo-4.vrb
-<Images/alga2.png, id=487, 70.2625pt x 150.5625pt>
+<Images/alga2.png, id=492, 70.2625pt x 150.5625pt>
 File: Images/alga2.png Graphic file (type png)
 <use Images/alga2.png>
 Package pdftex.def Info: Images/alga2.png  used on input line 10.
 (pdftex.def)             Requested size: 15.36542pt x 32.92397pt.
 )
-Overfull \vbox (1.88756pt too high) detected at line 634
+Overfull \vbox (1.88756pt too high) detected at line 638
  []
 
 
@@ -1167,10 +1163,10 @@ Overfull \hbox (143.91042pt too wide) in paragraph at lines 19--19
 [19
 
 ]
-<Images/img_4.png, id=564, 999.735pt x 626.34pt>
+<Images/img_4.png, id=569, 999.735pt x 626.34pt>
 File: Images/img_4.png Graphic file (type png)
 <use Images/img_4.png>
-Package pdftex.def Info: Images/img_4.png  used on input line 698.
+Package pdftex.def Info: Images/img_4.png  used on input line 702.
 (pdftex.def)             Requested size: 245.83282pt x 154.01373pt.
 
 
@@ -1221,15 +1217,22 @@ pos):[]
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
-Package rerunfilecheck Info: File `presentacion-tp-grupo-4.out' has not changed
-.
-(rerunfilecheck)             Checksum: 2340BC646DA4DF87192F58C7914B35A9;1027.
+
+
+Package rerunfilecheck Warning: File `presentacion-tp-grupo-4.out' has changed.
+
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `presentacion-tp-grupo-4.out':
+(rerunfilecheck)             Before: 85F5C9D591E5821A384C3894B17AFB3D;1187
+(rerunfilecheck)             After:  E8781436DF4C1048A5E15B34635F6AEF;1184.
  ) 
 Here is how much of TeX's memory you used:
- 22523 strings out of 473190
- 435979 string characters out of 5715800
+ 22528 strings out of 473190
+ 436025 string characters out of 5715800
  803772 words of memory out of 5000000
- 45199 multiletter control sequences out of 15000+600000
+ 45203 multiletter control sequences out of 15000+600000
  574713 words of font info for 82 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  128i,14n,123p,508b,617s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1242,10 +1245,10 @@ fonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsf
 onts/cm/cmsy8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/u
 crr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.p
 fb>
-Output written on presentacion-tp-grupo-4.pdf (23 pages, 2594766 bytes).
+Output written on presentacion-tp-grupo-4.pdf (23 pages, 2595039 bytes).
 PDF statistics:
- 720 PDF objects out of 1000 (max. 8388607)
- 647 compressed objects within 7 object streams
- 54 named destinations out of 1000 (max. 500000)
- 144 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 726 PDF objects out of 1000 (max. 8388607)
+ 653 compressed objects within 7 object streams
+ 55 named destinations out of 1000 (max. 500000)
+ 152 words of extra memory for PDF output out of 10000 (max. 10000000)
 
