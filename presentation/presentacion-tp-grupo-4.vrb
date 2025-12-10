@@ -1,0 +1,17 @@
+\frametitle{Módulo fish.py (V)}
+
+\begin{itemize}
+    \item El método \texttt{reset()} restablece el pez a su posición inicial, reinicia su velocidad y reconstruye el \texttt{rect} y la máscara originales. Se usa en el caso de una colicion para reiniciar el juego.
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    def reset(self):
+        self.rect.center = self._start_pos
+        self.velocity = 0
+        self.image = self.original_image
+        self.rect = self.image.get_rect(center=self._start_pos)
+        self.mask = pygame.mask.from_surface(self.image)
+\end{verbatim}
+}

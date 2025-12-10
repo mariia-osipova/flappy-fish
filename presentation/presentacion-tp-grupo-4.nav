@@ -24,8 +24,24 @@
 \headcommand {\beamer@subsectionentry {0}{2}{1}{9}{Módulo game.py}}
 \headcommand {\slideentry {2}{1}{1}{9/9}{Módulo game.py}{0}}
 \headcommand {\beamer@framepages {9}{9}}
-\headcommand {\beamer@partpages {1}{9}}
-\headcommand {\beamer@subsectionpages {10}{9}}
-\headcommand {\beamer@sectionpages {10}{9}}
-\headcommand {\beamer@documentpages {9}}
-\headcommand {\gdef \inserttotalframenumber {9}}
+\headcommand {\slideentry {2}{1}{2}{10/10}{Módulo game.py}{0}}
+\headcommand {\beamer@framepages {10}{10}}
+\headcommand {\slideentry {2}{1}{3}{11/11}{Módulo game.py}{0}}
+\headcommand {\beamer@framepages {11}{11}}
+\headcommand {\beamer@subsectionpages {9}{11}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{12}{Módulo fish.py}}
+\headcommand {\slideentry {2}{2}{1}{12/12}{Módulo fish.py}{0}}
+\headcommand {\beamer@framepages {12}{12}}
+\headcommand {\slideentry {2}{2}{2}{13/13}{Módulo fish.py}{0}}
+\headcommand {\beamer@framepages {13}{13}}
+\headcommand {\slideentry {2}{2}{3}{14/14}{Módulo fish.py}{0}}
+\headcommand {\beamer@framepages {14}{14}}
+\headcommand {\slideentry {2}{2}{4}{15/15}{Módulo fish.py}{0}}
+\headcommand {\beamer@framepages {15}{15}}
+\headcommand {\slideentry {2}{2}{5}{16/16}{Módulo fish.py}{0}}
+\headcommand {\beamer@framepages {16}{16}}
+\headcommand {\beamer@partpages {1}{16}}
+\headcommand {\beamer@subsectionpages {12}{16}}
+\headcommand {\beamer@sectionpages {5}{16}}
+\headcommand {\beamer@documentpages {16}}
+\headcommand {\gdef \inserttotalframenumber {16}}

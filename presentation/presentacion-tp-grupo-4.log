@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.12.9)  10 DEC 2025 12:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.12.9)  10 DEC 2025 17:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -952,7 +952,7 @@ LaTeX Font Info:    Font shape `OT1/opensans-TLF/m/n' will be
 [2
 
 ]
-<Images/img.png, id=84, 953.5625pt x 598.235pt>
+<Images/img.png, id=91, 953.5625pt x 598.235pt>
 File: Images/img.png Graphic file (type png)
 <use Images/img.png>
 Package pdftex.def Info: Images/img.png  used on input line 232.
@@ -962,7 +962,7 @@ Package pdftex.def Info: Images/img.png  used on input line 232.
 [3
 
  <./Images/img.png>]
-<Images/img_1.png, id=112, 999.735pt x 626.34pt>
+<Images/img_1.png, id=119, 999.735pt x 626.34pt>
 File: Images/img_1.png Graphic file (type png)
 <use Images/img_1.png>
 Package pdftex.def Info: Images/img_1.png  used on input line 248.
@@ -972,7 +972,7 @@ Package pdftex.def Info: Images/img_1.png  used on input line 248.
 [4
 
  <./Images/img_1.png>]
-<Images/diagram-initial-class-structure.png, id=139, 2785.40625pt x 3457.91875p
+<Images/diagram-initial-class-structure.png, id=146, 2785.40625pt x 3457.91875p
 t>
 File: Images/diagram-initial-class-structure.png Graphic file (type png)
 <use Images/diagram-initial-class-structure.png>
@@ -984,12 +984,12 @@ put line 270.
 [5
 
  <./Images/diagram-initial-class-structure.png>]
-<Images/img_3.png, id=169, 925.4575pt x 684.5575pt>
+<Images/img_3.png, id=176, 925.4575pt x 684.5575pt>
 File: Images/img_3.png Graphic file (type png)
 <use Images/img_3.png>
 Package pdftex.def Info: Images/img_3.png  used on input line 317.
 (pdftex.def)             Requested size: 159.79204pt x 118.19075pt.
-<Images/img_2.png, id=170, 925.4575pt x 602.25pt>
+<Images/img_2.png, id=177, 925.4575pt x 602.25pt>
 File: Images/img_2.png Graphic file (type png)
 <use Images/img_2.png>
 Package pdftex.def Info: Images/img_2.png  used on input line 317.
@@ -999,50 +999,125 @@ Package pdftex.def Info: Images/img_2.png  used on input line 317.
 [6
 
  <./Images/img_3.png> <./Images/img_2.png>]
-<Images/diagram-whole-class-structure.png, id=200, 8780.805pt x 5144.21875pt>
+<Images/diagram-whole-class-structure.png, id=207, 8591.09625pt x 6102.8pt>
 File: Images/diagram-whole-class-structure.png Graphic file (type png)
 <use Images/diagram-whole-class-structure.png>
 Package pdftex.def Info: Images/diagram-whole-class-structure.png  used on inpu
 t line 330.
-(pdftex.def)             Requested size: 307.28987pt x 179.98755pt.
+(pdftex.def)             Requested size: 307.28987pt x 218.27588pt.
 
 
 [7
 
  <./Images/diagram-whole-class-structure.png>]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 347
+LaTeX Font Info:    Trying to load font information for U+msa on input line 348
 .
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 347
+LaTeX Font Info:    Trying to load font information for U+msb on input line 348
 .
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for OT1+phv on input line 3
-47.
+48.
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ot1phv.fd
 File: ot1phv.fd 2020/03/25 scalable font definitions for OT1/phv.
 )
 LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <10.95> not available
-(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 347.
+(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 348.
 LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <8> not available
-(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 347.
+(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 348.
 LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <6> not available
-(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 347.
+(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 348.
 LaTeX Font Info:    Font shape `OT1/opensans-TLF/b/n' will be
-(Font)              scaled to size 10.95pt on input line 347.
+(Font)              scaled to size 10.95pt on input line 348.
 
 
 [8
 
 ]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+ (./presentacion-tp-grupo-4.vrb
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 3
+.
+
+(/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ot1pcr.fd
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+)
+LaTeX Font Info:    Trying to load font information for TS1+opensans-TLF on inp
+ut line 8.
+
+(/usr/local/texlive/2025/texmf-dist/tex/latex/opensans/TS1opensans-TLF.fd
+File: TS1opensans-TLF.fd 2019/06/24 Font definitions for TS1/opensans-TLF.
+)
+LaTeX Font Info:    Font shape `TS1/opensans-TLF/m/n' will be
+(Font)              scaled to size 10.95pt on input line 8.
+)
 
 [9
+
+{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/local/tex
+live/2025/texmf-dist/fonts/enc/dvips/opensans/a_nvvucy.enc}]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+
+(./presentacion-tp-grupo-4.vrb)
+
+[10
+
+]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+ (./presentacion-tp-grupo-4.vrb)
+
+[11
+
+]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+ (./presentacion-tp-grupo-4.vrb
+<Images/fish1.png, id=337, 30.1125pt x 30.1125pt>
+File: Images/fish1.png Graphic file (type png)
+<use Images/fish1.png>
+Package pdftex.def Info: Images/fish1.png  used on input line 10.
+(pdftex.def)             Requested size: 30.73085pt x 30.73178pt.
+)
+
+[12
+
+ <./Images/fish1.png>]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+ (./presentacion-tp-grupo-4.vrb)
+
+[13
+
+]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+ (./presentacion-tp-grupo-4.vrb)
+
+[14
+
+]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+ (./presentacion-tp-grupo-4.vrb)
+
+[15
+
+]
+\openout4 = `presentacion-tp-grupo-4.vrb'.
+
+ (./presentacion-tp-grupo-4.vrb)
+
+[16
 
 ]
 \tf@nav=\write6
@@ -1061,25 +1136,29 @@ L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `presentacion-tp-grupo-4.out' has not changed
 .
-(rerunfilecheck)             Checksum: 2A516BDE5B6A0640130A36BCBE7D3199;398.
+(rerunfilecheck)             Checksum: C07B3FE21A1756BACB07ED0D2B68CD51;532.
  ) 
 Here is how much of TeX's memory you used:
- 22289 strings out of 473190
- 431610 string characters out of 5715800
- 795768 words of memory out of 5000000
- 45038 multiletter control sequences out of 15000+600000
- 571862 words of font info for 75 fonts, out of 8000000 for 9000
+ 22455 strings out of 473190
+ 434930 string characters out of 5715800
+ 798771 words of memory out of 5000000
+ 45158 multiletter control sequences out of 15000+600000
+ 574713 words of font info for 82 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 128i,14n,123p,465b,600s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 128i,14n,123p,508b,617s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/ascender/opensans/OpenSans-Bo
 ld.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/ascender/opensans/OpenSa
 ns-Italic.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/ascender/opensans
 /OpenSans-Regular.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmsy10.pfb>
-Output written on presentacion-tp-grupo-4.pdf (9 pages, 1722983 bytes).
+sfonts/cm/cmss10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmsy8.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/courier/u
+crr8a.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.p
+fb>
+Output written on presentacion-tp-grupo-4.pdf (16 pages, 1775047 bytes).
 PDF statistics:
- 306 PDF objects out of 1000 (max. 8388607)
- 266 compressed objects within 3 object streams
- 22 named destinations out of 1000 (max. 500000)
- 97 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 521 PDF objects out of 1000 (max. 8388607)
+ 461 compressed objects within 5 object streams
+ 37 named destinations out of 1000 (max. 500000)
+ 110 words of extra memory for PDF output out of 10000 (max. 10000000)
 
