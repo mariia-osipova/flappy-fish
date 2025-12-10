@@ -1,0 +1,381 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 2.0 (March 8, 2022)
+%
+% This template originates from:
+% https://www.LaTeXTemplates.com
+%
+% Author:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+	11pt, % Set the default font size, options include: 8pt, 9pt, 10pt, 11pt, 12pt, 14pt, 17pt, 20pt
+	%t, % Uncomment to vertically align all slide content to the top of the slide, rather than the default centered
+	%aspectratio=169, % Uncomment to set the aspect ratio to a 16:9 ratio which matches the aspect ratio of 1080p and 4K screens and projectors
+]{beamer}
+
+\graphicspath{{Images/}{./}} % Specifies where to look for included images (trailing slash required)
+
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule for better rules in tables
+
+%----------------------------------------------------------------------------------------
+%	SELECT LAYOUT THEME
+%----------------------------------------------------------------------------------------
+
+% Beamer comes with a number of default layout themes which change the colors and layouts of slides. Below is a list of all themes available, uncomment each in turn to see what they look like.
+
+\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+%----------------------------------------------------------------------------------------
+%	SELECT COLOR THEME
+%----------------------------------------------------------------------------------------
+
+% Beamer comes with a number of color themes that can be applied to any layout theme to change its colors. Uncomment each of these in turn to see how they change the colors of your selected layout theme.
+%
+%\usecolortheme{default}
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{monarca}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{spruce}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%----------------------------------------------------------------------------------------
+%	SELECT FONT THEME & FONTS
+%----------------------------------------------------------------------------------------
+
+% Beamer comes with several font themes to easily change the fonts used in various parts of the presentation. Review the comments beside each one to decide if you would like to use it. Note that additional options can be specified for several of these font themes, consult the beamer documentation for more information.
+
+\usefonttheme{default} % Typeset using the default sans serif font
+%\usefonttheme{serif} % Typeset using the default serif font (make sure a sans font isn't being set as the default font if you use this option!)
+%\usefonttheme{structurebold} % Typeset important structure text (titles, headlines, footlines, sidebar, etc) in bold
+%\usefonttheme{structureitalicserif} % Typeset important structure text (titles, headlines, footlines, sidebar, etc) in italic serif
+%\usefonttheme{structuresmallcapsserif} % Typeset important structure text (titles, headlines, footlines, sidebar, etc) in small caps serif
+
+%------------------------------------------------
+
+%\usepackage{mathptmx} % Use the Times font for serif text
+\usepackage{palatino} % Use the Palatino font for serif text
+
+%\usepackage{helvet} % Use the Helvetica font for sans serif text
+\usepackage[default]{opensans}
+\usepackage{hyperref} % Use the Open Sans font for sans serif text
+%\usepackage[default]{FiraSans} % Use the Fira Sans font for sans serif text
+%\usepackage[default]{lato} % Use the Lato font for sans serif text
+
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue,
+    linkcolor=blue,
+    citecolor=blue,
+    pdfborderstyle={/S/U/W 1}
+}
+
+%----------------------------------------------------------------------------------------
+%	SELECT INNER THEME
+%----------------------------------------------------------------------------------------
+
+% Inner themes change the styling of internal slide elements, for example: bullet points, blocks, bibliography entries, title pages, theorems, etc. Uncomment each theme in turn to see what changes it makes to your presentation.
+
+%\useinnertheme{default}
+\useinnertheme{circles}
+%\useinnertheme{rectangles}
+%\useinnertheme{rounded}
+%\useinnertheme{inmargin}
+
+%----------------------------------------------------------------------------------------
+%	SELECT OUTER THEME
+%----------------------------------------------------------------------------------------
+
+% Outer themes change the overall layout of slides, such as: header and footer lines, sidebars and slide titles. Uncomment each theme in turn to see what changes it makes to your presentation.
+
+%\useoutertheme{default}
+%\useoutertheme{infolines}
+%\useoutertheme{miniframes}
+%\useoutertheme{smoothbars}
+%\useoutertheme{sidebar}
+%\useoutertheme{split}
+%\useoutertheme{shadow}
+%\useoutertheme{tree}
+%\useoutertheme{smoothtree}
+
+%\setbeamertemplate{footline} % Uncomment this line to remove the footer line in all slides
+%\setbeamertemplate{footline}[page number] % Uncomment this line to replace the footer line in all slides with a simple slide count
+
+%\setbeamertemplate{navigation symbols}{} % Uncomment this line to remove the navigation symbols from the bottom of all slides
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION INFORMATION
+%----------------------------------------------------------------------------------------
+
+
+\title{Trabajo Práctico Final — Programación Computacional \\[6pt]} % The short title in the optional parameter appears at the bottom of every slide, the full title in the main parameter is only on the title page
+
+\subtitle{Flappy Fish: Juego basado en Pygame} % Presentation subtitle, remove this command if a subtitle isn't required
+
+\author[Osipova, Zanoni, Scofano y Roldan]{Julieta Zanoni, Mariia Osipova, Santino Scofano y Morena Roldan} % Presenter name(s), the optional parameter can contain a shortened version to appear on the bottom of every slide, while the main parameter will appear on the title slide
+
+\institute[UdeSA]{Universidad de San Andrés \\[6pt]
+\textit{
+jzanoni@udesa.edu.ar \\[1.5pt]
+mosipova@udesa.edu.ar \\[1.5pt]
+sscofano@udesa.edu.ar \\[1.5pt]
+mroldan@udesa.edu.ar}
+}
+
+\date[12 de diciembre 2025]{12 de diciembre 2025}
+
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SLIDE
+%----------------------------------------------------------------------------------------
+
+\begin{frame}
+	\titlepage % Output the title slide, automatically created using the text entered in the PRESENTATION INFORMATION block above
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS SLIDE
+%----------------------------------------------------------------------------------------
+
+% The table of contents outputs the sections and subsections that appear in your presentation, specified with the standard \section and \subsection commands. You may either display all sections and subsections on one slide with \tableofcontents, or display each section at a time on subsequent slides with \tableofcontents[pausesections]. The latter is useful if you want to step through each section and mention what you will discuss.
+
+\begin{frame}
+	\frametitle{Resumen de la presentación}
+	\tableofcontents
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION BODY SLIDES
+%----------------------------------------------------------------------------------------
+
+%\section{Text Examples} % Sections are added in order to organize your presentation into discrete blocks, all sections and subsections are automatically output to the table of contents as an overview of the talk but NOT output in the presentation as separate slides
+
+%\section{Introducción}
+%
+%\section{Arquitectura del Juego}
+%
+%\section{Algoritmo Genético}
+%\subsection{Representación del Individuo}
+%\subsection{Función de Aptitud}
+%\subsection{Selección, Cruza y Mutación}
+%
+%\section{Resultados y Visualización}
+%
+%\section{Conclusiones}
+
+\section{Introducción}
+
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Introducción}
+
+    \begin{columns}[T]
+        \begin{column}{0.35\textwidth}
+            Nuestro trabajo práctico está dividido en dos partes: trata sobre el desarrollo de un videojuego maunal inspirado en Flappy Bird, llamado Flappy Fish, implementado en Python utilizando la librería Pygame.
+        \end{column}
+
+        \begin{column}{0.65\textwidth}
+            \includegraphics[width=\textwidth]{img.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Introducción}
+
+    \begin{columns}[T]
+        \begin{column}{0.35\textwidth}
+            La segunda parte del Trabajo Práctico  se enfoca en la implementación de un Algoritmo Genético (AG) para entrenar a una población de “peces” a jugar de forma autónoma al videojuego.        \end{column}
+
+        \begin{column}{0.65\textwidth}
+            \includegraphics[width=\textwidth]{img_1.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Arquitectura del Juego}
+
+%------------------------------------------------
+\begin{frame}
+    \frametitle{Arquitectura del Juego}
+
+    \begin{columns}[T]
+        \begin{column}{0.40\textwidth}
+            Pensando en la arquitectura del juego, nos enfrentamos al primer desafío:
+            ¿cómo debíamos estructurar y organizar el proyecto?
+            Comenzamos trabajando a partir de este borrador inicial.
+        \end{column}
+
+        \begin{column}{0.58\textwidth}
+            \includegraphics[width=\textwidth]{diagram-initial-class-structure.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+%\begin{frame}
+%    \frametitle{Arquitectura del Juego}
+%
+%    Para entender mejor cómo estructurar el proyecto, analizamos varios juegos desarrollados
+%        con Pygame y publicados de forma abierta. Estas referencias nos permitieron observar
+%        enfoques comunes de arquitectura y organización del código. Entre ellos, miramos
+%        proyectos como \href{https://github.com/mx0c/super-mario-python}{Super Mario Python}
+%        y \href{https://github.com/techwithtim/Tower-Defense-Game}{Tower Defence Game},
+%        que utilizamos como guía conceptual. \\[5pt]
+%
+%    \begin{columns}[T]
+%        \begin{column}{0.5\textwidth}
+%            \includegraphics[width=\textwidth]{img_3.png}
+%        \end{column}
+%        \begin{column}{0.5\textwidth}
+%            \includegraphics[width=\textwidth]{img_2.png}
+%        \end{column}
+%    \end{columns}
+%
+%\end{frame}
+
+
+\begin{frame}
+\frametitle{Arquitectura del Juego}
+
+\begin{columns}[T]
+
+    \begin{column}{0.45\textwidth}
+        Para entender mejor cómo estructurar el proyecto, analizamos varios juegos desarrollados
+        con Pygame y publicados de forma abierta. Estas referencias nos permitieron observar
+        enfoques comunes de arquitectura y organización del código. Entre ellos, miramos
+        proyectos como \href{https://github.com/mx0c/super-mario-python}{Super Mario Python}
+        y \href{https://github.com/techwithtim/Tower-Defense-Game}{Tower Defence Game},
+        que utilizamos como guía conceptual.
+    \end{column}
+
+    \begin{column}{0.52\textwidth}
+        \includegraphics[width=\textwidth]{img_3.png}\\[8pt]
+        \includegraphics[width=\textwidth]{img_2.png}
+    \end{column}
+
+\end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Arquitectura del Juego}
+
+    \begin{columns}[T]
+        \begin{column}{1\textwidth}
+            \includegraphics[width=\textwidth]{diagram-whole-class-structure.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Arquitectura del Juego}
+
+    El proyecto se estructura en los siguientes módulos: \\[4pt]
+
+    \begin{itemize}
+        \item \textbf{game.py} — una clase de juego base que abre una ventana de Pygame, establece los FPS, carga el fondo, la música, el sonido de salto y la imagen de la tubería, e inicia un temporizador de eventos personalizado para generar periódicamente nuevas tuberías.
+        \item \textbf{fish.py} — física, movimiento y máscara del pez.
+        \item \textbf{generacion\_de\_tuberias.py} — creación y movimiento de tuberías.
+        \item \textbf{menu.py} — interfaz de menú.
+        \item \textbf{swim\_fish.py} — lógica manual y modo de Algoritmo Genético.
+        \item \textbf{ml/} — política del agente, estado, pesos y genética.
+    \end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Módulo game.py}
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Módulo game.py}
+
+    Game, en game.py, es el marco general del que hereda la clase de juego SwimFish. En el constructor:
+
+– Se inicializan Pygame, el temporizador y el objeto Clock; el objetivo de FPS se establece en 120;
+– Se crea una ventana de 1000x600;
+– Se cargan una serie de fotogramas de fondo animados desde el directorio ../data/img/fondo_animado y se configuran para que giren a una velocidad de fotogramas de 30;
+– Se cargan la música de fondo (Linkin Park fondo.ogg) y el efecto de sonido de explosión de burbujas para el salto;
+– Se carga y escala el sprite de la tubería (alga2.png), y se calcula una máscara de colisión para colisiones de precisión;
+– Se establece el tamaño del espacio vertical entre las tuberías (hueco_entre_tuberias = 300) y se inicia un evento personalizado, evento_nueva_tuberia, que indicará cada 1500 ms que es hora de añadir un nuevo par de tuberías.
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Módulo game.py}
+
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Modo manual del Juego}
+
+\end{document}
+
+
