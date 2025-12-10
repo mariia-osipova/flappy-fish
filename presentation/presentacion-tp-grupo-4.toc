@@ -2,3 +2,6 @@
 \beamer@sectionintoc {2}{Arquitectura del Juego}{5}{0}{2}
 \beamer@subsectionintoc {2}{1}{Módulo game.py}{9}{0}{2}
 \beamer@subsectionintoc {2}{2}{Módulo fish.py}{12}{0}{2}
+\beamer@subsectionintoc {2}{3}{Módulo generacion\_de\_tuberias.py}{17}{0}{2}
+\beamer@subsectionintoc {2}{4}{Módulo menu.py}{20}{0}{2}
+\beamer@subsectionintoc {2}{5}{Module main.py}{22}{0}{2}

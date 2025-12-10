@@ -221,7 +221,7 @@ mroldan@udesa.edu.ar}
 
     \begin{columns}[T]
         \begin{column}{0.35\textwidth}
-            Nuestro trabajo práctico está dividido en dos partes: trata sobre el desarrollo de un videojuego maunal inspirado en Flappy Bird, llamado Flappy Fish, implementado en Python utilizando la librería Pygame.
+            Nuestro trabajo práctico está dividido en dos partes: la primera es soble el desarrollo de un videojuego manual inspirado en Flappy Bird, llamado Flappy Fish, implementado en Python con la librería Pygame.
         \end{column}
 
         \begin{column}{0.65\textwidth}
@@ -238,7 +238,7 @@ mroldan@udesa.edu.ar}
 
     \begin{columns}[T]
         \begin{column}{0.35\textwidth}
-            La segunda parte del Trabajo Práctico  se enfoca en la implementación de un Algoritmo Genético (AG) para entrenar a una población de “peces” a jugar de forma autónoma al videojuego.        \end{column}
+            La segunda parte se enfoca en la implementación de un Algoritmo Genético (AG) para entrenar a una población de “peces”, se juega de forma autónoma al videojuego manual.        \end{column}
 
         \begin{column}{0.65\textwidth}
             \includegraphics[width=\textwidth]{img_1.png}
@@ -299,7 +299,7 @@ mroldan@udesa.edu.ar}
 \begin{columns}[T]
 
     \begin{column}{0.45\textwidth}
-        Para entender mejor cómo estructurar el proyecto, analizamos varios juegos desarrollados
+        Analizamos varios juegos desarrollados
         con Pygame y publicados de forma abierta. Estas referencias nos permitieron observar
         enfoques comunes de arquitectura y organización del código. Entre ellos, miramos
         proyectos como \href{https://github.com/mx0c/super-mario-python}{Super Mario Python}
@@ -338,10 +338,10 @@ mroldan@udesa.edu.ar}
     \begin{itemize}
         \item \textbf{game.py} — clase base del juego (ventana, fondo, sonido y tuberías).
         \item \textbf{fish.py} — física, movimiento y máscara de colisión del pez.
-        \item \textbf{screamer.py} — módulo del screamer para el juego en modo manual.
+        \item \textbf{screamer.py} — módulo del screamer para el juego.
         \item \textbf{generacion\_de\_tuberias.py} — creación, posición y movimiento de las tuberías.
         \item \textbf{menu.py} — interfaz del menú principal y manejo de opciones.
-        \item \textbf{swim\_fish.py} — lógica del juego (modo manual) y modo con Algoritmo Genético.
+        \item \textbf{swim\_fish.py} — lógica del juego (manual/modo con Algoritmo Genético).
         \item \textbf{ml/} — política del agente, cálculo del estado, generación de pesos y genética.
     \end{itemize}
 
@@ -367,18 +367,18 @@ Su constructor realiza la configuración inicial del entorno:
 \vspace{4pt}
 {\scriptsize
 \begin{verbatim}
-class Game:
-    def __init__(self):
-        pygame.init()
-        self.clock = pygame.time.Clock()
-        self.FPS = 120
-        self.screen = pygame.display.set_mode((1000, 600))
+    class Game:
+        def __init__(self):
+            pygame.init()
+            self.clock = pygame.time.Clock()
+            self.FPS = 120
+            self.screen = pygame.display.set_mode((1000, 600))
 
-        # Animación de fondo
-        self.animation_folder = "../data/img/fondo_animado"
-        self.background_frames = self._load_background_frames()
-        self.frame_index = 0
-        self.frame_rate = 30
+            # Animación de fondo
+            self.animation_folder = "../data/img/fondo_animado"
+            self.background_frames = self._load_background_frames()
+            self.frame_index = 0
+            self.frame_rate = 30
 \end{verbatim}
 }
 \end{frame}
@@ -436,7 +436,7 @@ class Game:
 \end{verbatim}
 }
 
-Entonces, el Game sabe todo sobre la ventana, el fondo y las tuberías,
+Entonces, Game sabe todo sobre la ventana, el fondo y las tuberías,
 pero no sabe nada sobre quién está volando alrededor de este mundo o cómo se desarrolla exactamente el juego;
 esa es responsabilidad de SwimFish.
 
@@ -448,7 +448,7 @@ esa es responsabilidad de SwimFish.
 
 %------------------------------------------------
 \begin{frame}[fragile]
-\frametitle{Módulo fish.py: el Fish y su fisica (I)}
+\frametitle{Módulo fish.py: Fish y su fisica (I)}
 
 \begin{columns}[T]
 
@@ -470,19 +470,19 @@ esa es responsabilidad de SwimFish.
 
 {\scriptsize
 \begin{verbatim}
-class Fish:
-    def __init__(self, x, y, size, image):
+    class Fish:
+        def __init__(self, x, y, size, image):
 
-        self._start_pos = (x, y)
+            self._start_pos = (x, y)
 
-        self.size = size
-        self.original_image = pygame.image.load(
-            image).convert_alpha()
-        self.original_image = pygame.transform.scale(
-            self.original_image, (size[0], size[1]))
-        self.image = self.original_image
-        self.rect = self.image.get_rect(center = (x, y))
-        self.mask = pygame.mask.from_surface(self.image)
+            self.size = size
+            self.original_image = pygame.image.load(
+                image).convert_alpha()
+            self.original_image = pygame.transform.scale(
+                self.original_image, (size[0], size[1]))
+            self.image = self.original_image
+            self.rect = self.image.get_rect(center = (x, y))
+            self.mask = pygame.mask.from_surface(self.image)
 \end{verbatim}
 }
 \end{frame}
@@ -490,7 +490,7 @@ class Fish:
 %------------------------------------------------
 
 \begin{frame}[fragile]
-\frametitle{Módulo fish.py: el Fish y su fisica (II)}
+\frametitle{Módulo fish.py: Fish y su fisica (II)}
 
 \begin{itemize}
     \item El pez posee una velocidad vertical, una gravedad constante, una fuerza de salto, (donde un valor negativo indica movimiento ascendente) y una velocidad máxima de caída.
@@ -514,7 +514,7 @@ class Fish:
 %------------------------------------------------
 
 \begin{frame}[fragile]
-\frametitle{Módulo fish.py: el Fish y su fisica (III)}
+\frametitle{Módulo fish.py: Fish y su fisica (III)}
 
 \begin{itemize}
     \item El método \texttt{update()} incrementa la velocidad con la gravedad, la limita según \texttt{max\_fall\_speed}, actualiza la posición vertical del \texttt{rect} y recalcula la rotación del sprite: el ángulo es proporcional a la velocidad, pero está acotado aproximadamente entre $-30^\circ$ durante el ascenso y $+90^\circ$ durante la caída. Tras la rotación, se recalculan el \texttt{rect} y la máscara.
@@ -538,7 +538,7 @@ class Fish:
 %------------------------------------------------
 
 \begin{frame}[fragile]
-\frametitle{Módulo fish.py (IV)}
+\frametitle{Módulo fish.py: Fish y su fisica (IV)}
 
 \begin{itemize}
     \item El método \texttt{\_rotar\_pez()} controla la orientación visual del sprite según su velocidad vertical.
@@ -568,10 +568,10 @@ class Fish:
 %------------------------------------------------
 
 \begin{frame}[fragile]
-\frametitle{Módulo fish.py (V)}
+\frametitle{Módulo fish.py: Fish y su fisica (V)}
 
 \begin{itemize}
-    \item El método \texttt{reset()} restablece el pez a su posición inicial, reinicia su velocidad y reconstruye el \texttt{rect} y la máscara originales. Se usa en el caso de una colicion para reiniciar el juego.
+    \item El método \texttt{reset()} restablece el pez a su posición inicial, reinicia su velocidad y reconstruye el \texttt{rect} y la máscara originales. Se usa en el caso de una colision para reiniciar el juego.
 \end{itemize}
 
 \vspace{4pt}
@@ -588,6 +588,187 @@ class Fish:
 \end{frame}
 
 %------------------------------------------------
+
+\subsection{Módulo generacion\_de\_tuberias.py}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo generacion\_de\_tuberias.py (I)}
+
+\begin{columns}[T]
+
+    \begin{column}{0.95\textwidth}
+        La clase \texttt{tuberias} en \texttt{generacion\_de\_tuberias.py} define un par de obstáculos: el tubo de algas superior e inferior.
+    \end{column}
+
+    \begin{column}{0.05\textwidth}
+        \includegraphics[width=\textwidth]{alga2.png}
+    \end{column}
+
+\end{columns}
+
+\vspace{6pt}
+
+\begin{itemize}
+    \item Se selecciona una \texttt{altura\_referencia} en el rango [150, 450];
+    \item A partir de esa posición se construyen los rectángulos de dos tuberias, tal que entre ambos se mantenga un hueco vertical de altura \texttt{hueco} (parámetro recibido desde \texttt{Game}).
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    class tuberias:
+        def __init__(self, x, hueco, imagen):
+            self.imagen_tuberia = imagen
+            self.altura_referencia = random.randint(150, 450)
+            self.x = x
+            self.hueco = hueco
+            self.tubo_arriba = self.imagen_tuberia.get_rect(
+                midbottom = (
+                    x, self.altura_referencia - hueco // 2))
+            self.tubo_abajo = self.imagen_tuberia.get_rect(
+                midtop = (
+                    x, self.altura_referencia + hueco // 2))
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo generacion\_de\_tuberias.py (II)}
+
+\begin{itemize}
+     \item El método \texttt{mover\_tuberias()} simplemente desplaza la coordenada \texttt{x} y sincroniza ese movimiento con los rectángulos de ambas tuberías.
+    \item El método \texttt{dibujar\_tuberias()} dibuja la tubería superior invertida y la inferior en su orientación normal.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    def mover_tuberias(self):
+        self.x -= self.velocidad
+        self.tubo_arriba.x = self.x
+        self.tubo_abajo.x = self.x
+
+    def dibujar_tuberias(self,screen):
+        screen.blit(pygame.transform.flip(self.imagen_tuberia, False, True), self.tubo_arriba)
+        screen.blit(self.imagen_tuberia, self.tubo_abajo)
+
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo generacion\_de\_tuberias.py (III)}
+
+\begin{itemize}
+    \item Ambas tuberías comparten una misma coordenada horizontal \texttt{x},
+    que posteriormente se reduce a una velocidad constante \texttt{velocidad = 4},
+    pidiendo que las tuberias se desplacen de derecha a izquierda.
+    \item Se almacena \texttt{gap\_y = altura\_referencia}, es decir,
+    la coordenada vertical del centro del pasaje,
+    utilizada para calcular la característica \texttt{dy} del agente.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    self.velocidad = 4
+    self.gap_y = self.altura_referencia
+\end{verbatim}
+}
+\end{frame}
+
+
+%------------------------------------------------
+\subsection{Módulo menu.py}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Módulo menu.py (I)}
+
+El menú en \texttt{menu.py} recibe la pantalla y sus dimensiones, y crea el título \texttt{FLAPPY FISH!} junto con dos opciones: o el juego manual o la simulacion (AG).
+
+\vspace{6pt}
+
+\centering
+    \includegraphics[width=0.8\textwidth]{img_4.png}
+
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Módulo menu.py (II)}
+
+El método \texttt{manejar\_eventos()} devuelve el modo de juego cuando el usuario hace clik con el mouse sobre la opción correspondiente o al presionar las teclas 1/2.
+
+{\scriptsize
+\begin{verbatim}
+    def manejar_eventos(self, event):
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_pos = event.pos
+                    if self.rect_single.collidepoint(mouse_pos):
+                        self.seleccion = 'SINGLE'
+                        return self.seleccion
+                    if self.rect_evolutivo.collidepoint(mouse_pos):
+                        self.seleccion = 'EVOLUTIVO'
+                        return self.seleccion
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    self.seleccion = 'SINGLE'
+                    return self.seleccion
+                elif event.key == pygame.K_2:
+                    self.seleccion = 'EVOLUTIVO'
+                    return self.seleccion
+\end{verbatim}
+}
+\end{frame}
+
+
+%------------------------------------------------
+
+\subsection{Module main.py}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo main.py (I)}
+
+El método \texttt{manejar\_eventos()} devuelve el modo de juego cuando el usuario hace clik con el mouse sobre la opción correspondiente o al presionar las teclas 1/2.
+
+{\scriptsize
+\begin{verbatim}
+    def manejar_eventos(self, event):
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_pos = event.pos
+                    if self.rect_single.collidepoint(mouse_pos):
+                        self.seleccion = 'SINGLE'
+                        return self.seleccion
+                    if self.rect_evolutivo.collidepoint(mouse_pos):
+                        self.seleccion = 'EVOLUTIVO'
+                        return self.seleccion
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    self.seleccion = 'SINGLE'
+                    return self.seleccion
+                elif event.key == pygame.K_2:
+                    self.seleccion = 'EVOLUTIVO'
+                    return self.seleccion
+\end{verbatim}
+}
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{LALALALALLALA}
+
+
+\end{frame}
 
 %\section{Modo manual del Juego}
 
