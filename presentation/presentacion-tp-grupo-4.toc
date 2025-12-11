@@ -1,8 +1,16 @@
-\beamer@sectionintoc {1}{Introducción}{3}{0}{1}
-\beamer@sectionintoc {2}{Arquitectura del Juego}{5}{0}{2}
-\beamer@sectionintoc {3}{Modo manual del juego}{9}{0}{3}
-\beamer@subsectionintoc {3}{1}{Módulo game.py}{9}{0}{3}
-\beamer@subsectionintoc {3}{2}{Módulo fish.py}{12}{0}{3}
-\beamer@subsectionintoc {3}{3}{Módulo generacion\_de\_tuberias.py}{17}{0}{3}
-\beamer@subsectionintoc {3}{4}{Módulo menu.py}{20}{0}{3}
-\beamer@subsectionintoc {3}{5}{Module main.py}{22}{0}{3}
+\beamer@sectionintoc {1}{Introducción}{4}{0}{1}
+\beamer@sectionintoc {2}{Arquitectura del Juego}{6}{0}{2}
+\beamer@sectionintoc {3}{Modo manual del juego}{10}{0}{3}
+\beamer@subsectionintoc {3}{1}{Módulo game.py}{10}{0}{3}
+\beamer@subsectionintoc {3}{2}{Módulo fish.py}{13}{0}{3}
+\beamer@subsectionintoc {3}{3}{Módulo generacion\_de\_tuberias.py}{18}{0}{3}
+\beamer@subsectionintoc {3}{4}{Módulo menu.py}{21}{0}{3}
+\beamer@subsectionintoc {3}{5}{Módulo main.py}{23}{0}{3}
+\beamer@sectionintoc {4}{Agente evolutivo y Algoritmo Genético}{23}{0}{4}
+\beamer@subsectionintoc {4}{1}{Idea general del modo evolutivo}{23}{0}{4}
+\beamer@subsectionintoc {4}{2}{Arquitectura de la parte AG}{25}{0}{4}
+\beamer@subsubsectionintoc {4}{2}{1}{Módulo ml/calcular\_estado.py}{26}{0}{4}
+\beamer@subsubsectionintoc {4}{2}{2}{Módulo ml/policy.py}{30}{0}{4}
+\beamer@subsubsectionintoc {4}{2}{3}{Módulo ml/genetics.py}{35}{0}{4}
+\beamer@subsectionintoc {4}{3}{Ciclo de entrenamiento por generaciones}{48}{0}{4}
+\beamer@subsectionintoc {4}{4}{Detalle de swim\_population()}{54}{0}{4}

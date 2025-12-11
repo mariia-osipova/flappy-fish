@@ -1,26 +1,38 @@
-\frametitle{Módulo main.py (I)}
+\frametitle{swim\_population(): bucle principal (III)}
 
-El método \texttt{manejar\_eventos()} devuelve el modo de juego cuando el usuario hace clik con el mouse sobre la opción correspondiente o al presionar las teclas 1/2.
+Dentro de \texttt{swim\_population} se ejecuta el bucle principal de simulación:
 
 {\scriptsize
 \begin{verbatim}
-    def manejar_eventos(self, event):
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    mouse_pos = event.pos
-                    if self.rect_single.collidepoint(mouse_pos):
-                        self.seleccion = 'SINGLE'
-                        return self.seleccion
-                    if self.rect_evolutivo.collidepoint(mouse_pos):
-                        self.seleccion = 'EVOLUTIVO'
-                        return self.seleccion
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    self.seleccion = 'SINGLE'
-                    return self.seleccion
-                elif event.key == pygame.K_2:
-                    self.seleccion = 'EVOLUTIVO'
-                    return self.seleccion
+paso = 0
+running = True
+while running:
+    paso += 1
+    self._actualizar_fondo()
+    self._actualizar_tuberias()
+    for i, fish in enumerate(peces):
+        if not vivos[i]:
+            continue
+        dy, dx = calcular_estado(fish.rect,
+                                 self.proxima_tuberia())
+        vy = fish.velocity
+        if politicas[i](dy, dx, vy):
+            fish.flap()
+        fish.update()
+        self._actualizar_estado_del_pez(i, fish, scores, vivos)
+        time_alive[i] += 1
 \end{verbatim}
 }
+
+%\begin{itemize}
+%    \item En cada paso se actualiza el fondo y las tuberías.
+%    \item Para cada pez vivo:
+%    \begin{itemize}
+%        \item se calcula el estado \((dy, dx, vy)\),
+%        \item la política decide si llamar a \texttt{flap()},
+%        \item se aplica la física con \texttt{update()},
+%        \item se revisan colisiones y se actualizan \texttt{score} y \texttt{vivos},
+%        \item se incrementa \texttt{time\_alive}.
+%    \end{itemize}
+%\end{itemize}
+
