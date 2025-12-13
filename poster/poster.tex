@@ -9,6 +9,7 @@
 % Packages
 % ====================
 
+\usepackage{tabularx}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage[orientation=portrait,size=a2,scale=1.15]{beamerposter}
@@ -20,7 +21,6 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.14}
 \usepackage{anyfontsize}
-
 
 % ====================
 % Lengths
@@ -38,21 +38,202 @@
 % ====================
 % Title
 % ====================
+\definecolor{HeaderFg}{HTML}{0F2438}
 
-\title{Some fancy title: followed by some more text}
+% НЕ задаём bg для headline, иначе тема закрасит шапку поверх текстуры
+\setbeamercolor{headline}{bg=, fg=HeaderFg}
+\setbeamercolor{title in headline}{bg=, fg=HeaderFg}
+\setbeamercolor{author in headline}{bg=, fg=HeaderFg}
+\setbeamercolor{institute in headline}{bg=, fg=HeaderFg}
 
-\author{Agajan Torayev \inst{1} \and Ben Bitdiddle \inst{2} \and Lem E. Tweakit \inst{2}}
+% --- СДЕЛАТЬ ШАПКУ КОРОЧЕ (это ключевой параметр) ---
+\newlength{\headerbgheight}
+\setlength{\headerbgheight}{0.15\paperheight} % было 0.22 -> стало короче
 
-\institute[shortinst]{\inst{1} Some Institute \samelineand \inst{2} Another Institute}
+
+\newlength{\footerbgheight}
+\setlength{\footerbgheight}{0.11\paperheight}
+
+\setbeamercolor{footline}{bg=, fg=HeaderFg}
+\setbeamercolor{footer}{bg=, fg=HeaderFg}
+
+% (рекомендую) чуть уменьшить элементы в шапке, чтобы всё влезло
+\setbeamerfont{title in headline}{size=\LARGE}
+\setbeamerfont{author in headline}{size=\large}
+\setbeamerfont{institute in headline}{size=\normalsize}
+
+% и/или уменьшите логотипы:
+% \logoleft{\includegraphics[height=2.6cm]{logos/fish.png}}
+% \logoright{\includegraphics[height=2.6cm]{logos/university-logo.pdf}}
+
+% --- Фон: белая страница + текстура только в шапке ---
+\usebackgroundtemplate{%
+\begin{tikzpicture}[remember picture,overlay]
+
+  % 1) фон всей страницы с запасом за края (убирает hairlines)
+  \fill[white]
+    ([xshift=-1mm,yshift=-1mm]current page.south west)
+    rectangle
+    ([xshift= 1mm,yshift= 1mm]current page.north east);
+
+  % 2) фон только в области шапки
+  \begin{scope}
+  \clip (current page.north west)
+    rectangle ([yshift=-\headerbgheight]current page.north east);
+
+  \fill[black!6]
+    (current page.north west) rectangle ([yshift=-1mm]current page.north east);
+
+  \draw[line width=1pt] (current page.north west)
+  ++(0,-\headerbgheight) -- ++(\paperwidth,0);
+
+  % картинка чуть выше по высоте, без yshift
+  \node[
+  opacity=0.25,
+  anchor=north,
+  inner sep=0pt,
+  outer sep=0pt
+  ] at (current page.north) {%
+    \includegraphics[
+      width=\paperwidth,
+      height=\dimexpr\headerbgheight+2pt\relax,
+      trim=0 0 0 2pt,
+      clip
+    ]{logos/background.png}
+  };
+
+  \fill[white,opacity=0.15] (current page.north west)
+    rectangle ([yshift=-\headerbgheight]current page.north east);
+  \end{scope}
+
+  % 3) финальный “колпачок” по самому верху (на случай артефакта рендера)
+  \fill[black!6]
+    ([yshift=1mm]current page.north west) rectangle (current page.north east);
+
+    % 2b) фон только в области НИЖНЕЙ шапки (footer)
+  \begin{scope}
+    \clip (current page.south west)
+      rectangle ([yshift=\footerbgheight]current page.south east);
+
+    % подложка (с небольшим запасом за края — против hairlines)
+    \fill[black!6]
+      ([xshift=-1mm,yshift=-1mm]current page.south west)
+      rectangle
+      ([xshift= 1mm,yshift=\footerbgheight]current page.south east);
+
+    % текстура (привязка к низу)
+    \node[
+      opacity=0.25,
+      anchor=south,
+      inner sep=0pt,
+      outer sep=0pt
+    ] at (current page.south) {%
+      \includegraphics[
+        width=\paperwidth,
+        height=\dimexpr\footerbgheight+2pt\relax,
+        trim=0 2pt 0 0, % если у background.png есть прозрачная кромка снизу
+        clip
+      ]{logos/background.png}%
+    };
+
+    % лёгкая "вуаль" как в шапке
+    \fill[white,opacity=0.15]
+      (current page.south west) rectangle ([yshift=\footerbgheight]current page.south east);
+
+    % линия по ВЕРХУ футера
+    \draw[line width=1pt]
+      ([yshift=\footerbgheight]current page.south west) --
+      ([yshift=\footerbgheight]current page.south east);
+  \end{scope}
+    % 2b) фон только в области НИЖНЕЙ шапки (footer)
+  \begin{scope}
+    \clip (current page.south west)
+      rectangle ([yshift=\footerbgheight]current page.south east);
+
+    % подложка (с небольшим запасом за края — против hairlines)
+    \fill[black!6]
+      ([xshift=-1mm,yshift=-1mm]current page.south west)
+      rectangle
+      ([xshift= 1mm,yshift=\footerbgheight]current page.south east);
+
+    % текстура (привязка к низу)
+    \node[
+      opacity=0.25,
+      anchor=south,
+      inner sep=0pt,
+      outer sep=0pt
+    ] at (current page.south) {%
+      \includegraphics[
+        width=\paperwidth,
+        height=\dimexpr\footerbgheight+2pt\relax,
+        trim=0 2pt 0 0, % если у background.png есть прозрачная кромка снизу
+        clip
+      ]{logos/background.png}%
+    };
+
+    % лёгкая "вуаль" как в шапке
+    \fill[white,opacity=0.15]
+      (current page.south west) rectangle ([yshift=\footerbgheight]current page.south east);
+
+    % линия по ВЕРХУ футера
+    \draw[line width=1pt]
+      ([yshift=\footerbgheight]current page.south west) --
+      ([yshift=\footerbgheight]current page.south east);
+  \end{scope}
+
+\end{tikzpicture}%
+}
+
+\title{Flappy Fish: Juego basado en Pygame}
+
+
+\author{%
+  \vspace{19pt}
+  Julieta Zanoni \and Mariia Osipova \\
+  Santino Scofano \and Morena Roldan
+}
+
+\institute[shortinst]{Univercidad de San Andrés}
 
 % ====================
 % Footer (optional)
 % ====================
 
-\footercontent{
-  \href{https://utfpr.edu.br/ct/ppgca}{utfpr.edu.br/ct/ppgca} \hfill
-  Mostra de Trabalhos do PPGCA --- TechTalks 2024 \hfill
-  \href{mailto:ppgca-ct@utfpr.edu.br}{ppgca-ct@utfpr.edu.br}}
+\footercontent{%
+  \vspace*{0.1\footerbgheight}%
+  \footnotesize
+  % левая колонка
+  \begin{minipage}[c]{0.40\textwidth}
+    \raggedright
+    Universidad de San Andrés \\[4pt]
+    \textit{%
+      jzanoni@udesa.edu.ar \\[1.5pt]
+      mosipova@udesa.edu.ar \\[1.5pt]
+      sscofano@udesa.edu.ar \\[1.5pt]
+      mroldan@udesa.edu.ar}
+  \end{minipage}%
+  \hfill
+  % Центр: опускаем текст вниз, выравнивание по центру
+  \begin{minipage}[c]{0.1\textwidth}
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\\[2pt]
+  \end{minipage}%
+  \begin{minipage}[c]{0.1\textwidth}
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\\[2pt]
+  \end{minipage}%
+  \begin{minipage}[c]{0.1\textwidth}
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\\[2pt]
+  \end{minipage}%
+  % правая колонка
+  \begin{minipage}[c]{0.20\textwidth}
+    \raggedleft
+    \includegraphics[height=0.6\footerbgheight]{logos/qr.png}\\[2pt]
+    \footnotesize
+    ¡Este QR te dirigirá al repositorio\\
+    de nuestro proyecto!
+  \end{minipage}%
+}
+
+
 % (can be left out to remove footer)
 
 
@@ -60,9 +241,86 @@
 % Logo (optional)
 % ====================
 
-% use this to include logos on the left and/or right side of the header:
-\logoright{\includegraphics[height=2.5cm]{logos/utfpr-logo.png}}
-\logoleft{\hspace{20ex}\includegraphics[height=3.5cm]{logos/ppgca-logo.png}}
+%\logoright{%
+%  \hspace*{-2cm}% <-- чем больше по модулю, тем левее
+%  \includegraphics[height=1.5cm]{logos/fish-game.png}%
+%}
+
+
+\logoright{}
+
+\addtobeamertemplate{headline}{}{%
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north east, xshift=-2.5cm, yshift=-3.5cm]
+    at (current page.north east)
+    {%
+      \includegraphics[height=1.8cm]{logos/img.png}%
+    };
+\end{tikzpicture}%
+}
+
+
+\newlength{\fishX}
+\setlength{\fishX}{15ex}
+
+% --- насколько водоросль "заходит" под рыбку:
+%  0pt  = ровно встык слева
+%  >0   = чуть под рыбку (обычно выглядит лучше)
+%  <0   = небольшой зазор между ними
+\newlength{\algaOverlap}
+\setlength{\algaOverlap}{1cm}
+
+% --- водоросль: слева от рыбки, от нижнего края шапки ---
+\addtobeamertemplate{headline}{% ДО содержимого шапки (будет под рыбкой/текстом)
+  \begin{tikzpicture}[remember picture,overlay]
+    \begin{scope}
+      % ограничиваем областью шапки
+      \clip (current page.north west)
+        rectangle ([yshift=-\headerbgheight]current page.north east);
+
+      % нижний левый угол шапки
+      \node[
+        anchor=south east,
+        inner sep=0pt,
+        outer sep=0pt,
+        xshift=\dimexpr\fishX+\algaOverlap\relax,
+        yshift=1pt
+      ] at ([yshift=-\headerbgheight]current page.north west) {%
+        \includegraphics[height=8cm]{logos/alga2.png}%
+      };
+    \end{scope}
+  \end{tikzpicture}%
+}{}
+
+% --- рыбка слева в логотипе ---
+\logoleft{%
+  \hspace{\fishX}%
+  \includegraphics[height=7cm]{logos/fish-big.png}%
+}%
+
+
+% (если у тебя есть логотип справа через \logoright, оставь его как был)
+% например:
+% \logoright{\includegraphics[height=1.8cm]{logos/img.png}}
+
+% --- водоросль, прижатая к НИЗУ шапки, рисуем оверлеем ---
+% предполагается, что \headerbgheight уже задана, например:
+% \setlength{\headerbgheight}{3cm}
+%
+%\addtobeamertemplate{headline}{}{%
+%  \begin{tikzpicture}[remember picture,overlay]
+%    % точка: левый нижний угол шапки (top - \headerbgheight)
+%    \node[
+%      anchor=south west,
+%      xshift=8ex % сдвиг вправо от левого края; подстрой по вкусу
+%    ] at ([yshift=-\headerbgheight]current page.north west)
+%    {%
+%      \includegraphics[height=7cm]{logos/alga2.png}%
+%    };
+%  \end{tikzpicture}%
+%}
+
+
 
 % ====================
 % Body
@@ -86,103 +344,104 @@
 
 \begin{column}{\colwidth}
 
-  \begin{block}{A block title}
+  \begin{block}{Resumen del proyecto}
 
-    Some block contents, followed by a diagram, followed by a dummy paragraph.
+    Lo primero, que se ve, cuando se ejecuta el codigo es el menu, donde se puede elegir el modo del juego.
 
     \begin{figure}
       \centering
-      \begin{tikzpicture}[scale=3]
-        \draw[step=0.25cm,color=gray] (-1,-1) grid (1,1);
-        \draw (1,0) -- (0.2,0.2) -- (0,1) -- (-0.2,0.2) -- (-1,0)
-          -- (-0.2,-0.2) -- (0,-1) -- (0.2,-0.2) -- cycle;
-      \end{tikzpicture}
-      \caption{A figure caption.}
+      % ----- верхний ряд -----
+      \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{logos/menu.png}
+        \caption{Menú principal}
+      \end{minipage}\hfill
+      \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{logos/fish-game.png}
+        \caption{Flappy Fish en el modo manual}
+      \end{minipage}
+
+      \vspace{0.7cm} % расстояние между рядами
+
+      % ----- нижний ряд -----
+      \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{logos/modoag.png} % <- картинка с modo automático, если есть
+        \caption{Flappy Fish en el modo automático}
+      \end{minipage}\hfill
+      \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{logos/findeljuego.png} % <- сюда картинку со смертью рыбы
+        \caption{Estado de game over (pez muerto)}
+      \end{minipage}
+
     \end{figure}
 
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ultricies
-    eget libero ac ullamcorper. Integer et euismod ante. Aenean vestibulum
-    lobortis augue, ut lobortis turpis rhoncus sed. Proin feugiat nibh a
-    lacinia dignissim. Proin scelerisque, risus eget tempor fermentum, ex
-    turpis condimentum urna, quis malesuada sapien arcu eu purus.
+    Nuestro trabajo práctico se divide en dos partes: primero, el desarrollo
+    de un videojuego tipo Flappy Bird llamado Flappy Fish, implementado en Python con Pygame;
+    y segundo, la implementación de un Algoritmo Genético para entrenar una población
+    de peces que juegan de forma autónoma.
 
   \end{block}
 
-  \begin{block}{A block containing a list}
+  \vspace{25pt}
 
-    Nam vulputate nunc felis, non condimentum lacus porta ultrices. Nullam sed
-    sagittis metus. Etiam consectetur gravida urna quis suscipit.
+  \begin{alertblock}{Objetivos del Proyecto}
 
-    \begin{itemize}
-      \item \textbf{Mauris tempor} risus nulla, sed ornare
-      \item \textbf{Libero tincidunt} a duis congue vitae
-      \item \textbf{Dui ac pretium} morbi justo neque, ullamcorper
-    \end{itemize}
+    El proyecto va más allá de la implementación básica de la simulación,
+    centrándose en el diseño de una plataforma operativa dual y el análisis
+    del rendimiento algorítmico.
 
-    Eget augue porta, bibendum venenatis tortor.
-
-  \end{block}
-
-  \begin{alertblock}{A highlighted block}
-
-    This block catches your eye, so \textbf{important stuff} should probably go
-    here.
-
-    Curabitur eu libero vehicula, cursus est fringilla, luctus est. Morbi
-    consectetur mauris quam, at finibus elit auctor ac. Aliquam erat volutpat.
-    Aenean at nisl ut ex ullamcorper eleifend et eu augue. Aenean quis velit
-    tristique odio convallis ultrices a ac odio.
 
     \begin{itemize}
-      \item \textbf{Fusce dapibus tellus} vel tellus semper finibus. In
-        consequat, nibh sed mattis luctus, augue diam fermentum lectus.
-      \item \textbf{In euismod erat metus} non ex. Vestibulum luctus augue in
-        mi condimentum, at sollicitudin lorem viverra.
-      \item \textbf{Suspendisse vulputate} mauris vel placerat consectetur.
-        Mauris semper, purus ac hendrerit molestie, elit mi dignissim odio, in
-        suscipit felis sapien vel ex.
-    \end{itemize}
+      \item \textbf{Implementar una Arquitectura Modular de Dualidad Operativa:} Diseñar y construir una arquitectura completa y
+      modular capaz de integrar dos modos de juego distintos (Manual y Algorítmico). El objetivo es demostrar la separación
+      de responsabilidades (lógica de juego vs. lógica algorítmica), garantizando la funcionalidad completa y
+      optimizada de cada modo dentro de una misma base de código.
+      \vspace{17pt}
+      \item \textbf{Optimizar el Comportamiento de Agentes mediante Aprendizaje Automático:} Optimizar el Comportamiento de Agentes mediante Aprendizaje Automático:
+      \vspace{17pt}
+      \item \textbf{Visualizar y Analizar la Evolución de la Aptitud Algorítmica:} Desarrollar herramientas de visualización gráfica para monitorear y analizar la evolución del proceso de optimización. Esto incluye graficar la evolución de la aptitud de los agentes a lo largo de las generaciones y evaluar la influencia de los parámetros de política y los pesos en el rendimiento del modelo.
 
-    Aenean tincidunt risus eros, at gravida lorem sagittis vel. Vestibulum ante
-    ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.
+    \end{itemize}
 
   \end{alertblock}
 
- \begin{block}{Nullam vel erat at velit convallis laoreet}
+  \vspace{17pt}
 
-    Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-    inceptos himenaeos. Phasellus libero enim, gravida sed erat sit amet,
-    scelerisque congue diam. Fusce dapibus dui ut augue pulvinar iaculis.
+  \begin{block}{Metodología y Dualidad Operativa}
 
-    \begin{table}
-      \centering
-      \begin{tabular}{l r r c}
-        \toprule
-        \textbf{First column} & \textbf{Second column} & \textbf{Third column} & \textbf{Fourth} \\
-        \midrule
-        Foo & 13.37 & 384,394 & $\alpha$ \\
-        Bar & 2.17 & 1,392 & $\beta$ \\
-        Baz & 3.14 & 83,742 & $\delta$ \\
-        Qux & 7.59 & 974 & $\gamma$ \\
-        \bottomrule
-      \end{tabular}
-      \caption{A table caption.}
-    \end{table}
+    Este proyecto de arquitectura completa se diseñó para explorar
+    y contrastar dos paradigmas fundamentales: la interacción manual directa con el usuario
+    y la automatización algorítmica mediante técnicas de aprendizaje automático.
+    La implementación se realizó bajo un diseño modular que garantiza la dualidad operativa,
+    permitiendo la integración fluida de ambos modos dentro de un marco unificado. El proyecto cuenta con dos modos de operación distintos, cada uno con un enfoque y objetivos diferentes:
+    1) Modo Manual (Single Player): jugabilidad y experiencia del usuario; y 2) Modo Algorítmico (Simulación): simulación y apredizaje automático.
 
-    Donec quis posuere ligula. Nunc feugiat elit a mi malesuada consequat. Sed
-    imperdiet augue ac nibh aliquet tristique. Aenean eu tortor vulputate,
-    eleifend lorem in, dictum urna. Proin auctor ante in augue tincidunt
-    tempor. Proin pellentesque vulputate odio, ac gravida nulla posuere
-    efficitur. Aenean at velit vel dolor blandit molestie. Mauris laoreet
-    commodo quam, non luctus nibh ullamcorper in. Class aptent taciti sociosqu
-    ad litora torquent per conubia nostra, per inceptos himenaeos.
-
-    Nulla varius finibus volutpat. Mauris molestie lorem tincidunt, iaculis
-    libero at, gravida ante. Phasellus at felis eu neque suscipit suscipit.
-    Integer ullamcorper, dui nec pretium ornare, urna dolor consequat libero,
-    in feugiat elit lorem euismod lacus. Pellentesque sit amet dolor mollis,
-    auctor urna non, tempus sem.
-
+%    \vspace{17pt}
+%
+%    \begin{tabularx}{\linewidth}{@{}X X@{}}  % два столбца одинаковой ширины
+%
+%      \textbf{1. Modo Manual (Single Player)} &
+%      \textbf{2. Modo Algorítmico (Simulación)} \\[0.5em]
+%
+%      \vspace{10pt}
+%
+%      \textbf{Enfoque principal:} jugabilidad y experiencia del usuario. &
+%      \textbf{Enfoque principal:} simulación y aprendizaje automático. \\[0.4em]
+%
+%      \textbf{Mecanismo de control:} control directo por el usuario (teclado). &
+%      \textbf{Mecanismo de control:} algoritmo evolutivo (estrategia autónoma). \\[0.4em]
+%
+%      \textbf{Detalle operativo:} el bucle principal del juego lee eventos de teclado
+%      (\texttt{ESPACIO}), llamando directamente a la función \texttt{fish.flap()}. Se priorizan
+%      la interfaz, el audio y la experiencia interactiva. &
+%      \textbf{Detalle operativo:} se genera una población de agentes donde cada uno posee
+%      una política de salto propia, definida por un vector de pesos que parametriza su
+%      toma de decisiones. No se utiliza interacción manual. \\
+%
+%    \end{tabularx}
   \end{block}
 
 \end{column}
@@ -191,121 +450,114 @@
 
 \begin{column}{\colwidth}
 
-  \begin{block}{A block containing an enumerated list}
+  \begin{block}{Arquitectura general del juego}
 
-    Vivamus congue volutpat elit non semper. Praesent molestie nec erat ac
-    interdum. In quis suscipit erat. \textbf{Phasellus mauris felis, molestie
-    ac pharetra quis}, tempus nec ante. Donec finibus ante vel purus mollis
-    fermentum.
-
-    \begin{enumerate}
-      \item \textbf{Morbi mauris purus}, egestas at vehicula et, convallis
-        accumsan orci. Orci varius natoque penatibus et magnis dis parturient
-        montes, nascetur ridiculus mus.
-      \item \textbf{Cras vehicula blandit urna ut maximus}. Aliquam blandit nec
-        massa ac sollicitudin. Curabitur cursus, metus nec imperdiet bibendum,
-        velit lectus faucibus dolor, quis gravida metus mauris gravida turpis.
-      \item \textbf{Vestibulum et massa diam}. Phasellus fermentum augue non
-        nulla accumsan, non rhoncus lectus condimentum.
-    \end{enumerate}
-
-  \end{block}
-
-  \begin{block}{Fusce aliquam magna velit}
-
-    Et rutrum ex euismod vel. Pellentesque ultricies, velit in fermentum
-    vestibulum, lectus nisi pretium nibh, sit amet aliquam lectus augue vel
-    velit. Suspendisse rhoncus massa porttitor augue feugiat molestie. Sed
-    molestie ut orci nec malesuada. Sed ultricies feugiat est fringilla
-    posuere.
+    La arquitectura del proyecto se diseñó de manera modular y orientada a objetos.
+    Este enfoque permitió establecer una estructura clara y organizada que facilita
+    la separación de responsabilidades: la lógica general del juego,
+    la física del agente (pez), la gestión de elementos visuales (tuberías, screamer) y,
+    fundamentalmente, la lógica de la automatización algorítmica (AG).
 
     \begin{figure}
       \centering
-      \begin{tikzpicture}[scale=0.75]
-        \begin{axis}[
-            scale only axis,
-            no markers,
-            domain=0:2*pi,
-            samples=100,
-            axis lines=center,
-            axis line style={-},
-            ticks=none]
-          \addplot[red] {sin(deg(x))};
-          \addplot[blue] {cos(deg(x))};
-        \end{axis}
-      \end{tikzpicture}
-      \caption{Another figure caption.}
+      \includegraphics[width=\linewidth]{logos/arq.png}\\[15pt]
+      \small Figure 5: Flowchart de la arquitectura del proyecto
     \end{figure}
 
-  \end{block}
+\end{block}
 
-  \begin{block}{Nam cursus consequat egestas}
+%  \begin{block}{Estructura y Módulos Principales}
+%
+%    La implementación se organiza en una serie de módulos de Python,
+%    con una clase principal (Game) que gestiona el contexto general y coordina las funcionalidades específicas.
+%    Los principales módulos y su rol son:
 
-    Etiam sit amet tempus lorem, aliquet condimentum velit. Donec et nibh
-    consequat, sagittis ex eget, dictum orci. Etiam quis semper ante. Ut eu
-    mauris purus. Proin nec consectetur ligula. Mauris pretium molestie
-    ullamcorper. Integer nisi neque, aliquet et odio non, sagittis porta justo.
+%    \begin{itemize}
+%      \item \texttt{game.py}: Contiene la clase base (\texttt{Game}) para la inicialización
+%            y el contexto general del juego (ventana, fondo, sonido y la gestión de tuberías).
+%      \item \texttt{menu.py}: Gestiona la interfaz del menú principal y el manejo de opciones
+%            al inicio del juego.
+%      \item \texttt{fish.py}: Implementa la física, el movimiento (función \texttt{flap()})
+%            y la máscara de colisión del pez para el modo manual.
+%      \item \texttt{generacion\_de\_tuberias.py}: Se encarga de la creación, posición
+%            y el movimiento de los obstáculos (tuberías).
+%      \item \texttt{screamer.py}: Módulo dedicado a la gestión de elementos visuales especiales,
+%            como el jumpscare.
+%      \item \texttt{ml/vector\_w.py} — generación de vectores de pesos iniciales.
+%      \item \texttt{ml/policy.py} — definición de la política \texttt{decidir(dy,dx,vy)}.
+%      \item \texttt{ml/calcular\_estado.py} — construcción del estado $(dy,dx)$ a partir de la próxima tubería.
+%      \item \texttt{ml/genetics.py} — selección proporcional, cruza, mutación y nueva generación.
+%    \end{itemize}
+%  \end{block}
 
-    \begin{itemize}
-      \item \textbf{Sed consequat} id ante vel efficitur. Praesent congue massa
-        sed est scelerisque, elementum mollis augue iaculis.
-        \begin{itemize}
-          \item In sed est finibus, vulputate
-            nunc gravida, pulvinar lorem. In maximus nunc dolor, sed auctor eros
-            porttitor quis.
-          \item Fusce ornare dignissim nisi. Nam sit amet risus vel lacus
-            tempor tincidunt eu a arcu.
-          \item Donec rhoncus vestibulum erat, quis aliquam leo
-            gravida egestas.
-        \end{itemize}
-      \item \textbf{Pellentesque facilisis dolor in leo} bibendum congue.
-        Maecenas congue finibus justo, vitae eleifend urna facilisis at.
-    \end{itemize}
+  \begin{exampleblock}{Diseño Algorítmico y Fundamento Matemático del AG}
 
-  \end{block}
+    El núcleo de la simulación reside en una política de salto
+    $\gamma : \mathbb{R}^{3} \to \{\text{True}, \text{False}\}$,
+    que determina si el pez debe saltar basándose en el estado del juego:
+    la diferencia vertical $\mathrm{dy}$, la distancia horizontal $\mathrm{dx}$ a la próxima tubería
+    y la velocidad vertical $v_y$.
 
+    La política se modela como una combinación lineal del estado normalizado,
+    ponderada por un vector de pesos
+    \[
+      \mathbf{w} = [w_0, w_1, \dots, w_5],
+    \]
+    de modo que el pez salta si una función lineal del estado supera cierto umbral
+    (por ejemplo, si $z > 0$).
 
-  \begin{exampleblock}{A highlighted block containing some math}
+    La clave del Algoritmo Genético (AG) es la selección proporcional
+    (\emph{``método de la ruleta''}), que utiliza el \emph{fitness}
+    (distancia recorrida y el tiempo de supervivencia) de cada individuo.
 
-    A different kind of highlighted block.
+%    La probabilidad de que el individuo $i$  sea elegido como padre es:
+%
+%    \[
+%      P(i) = \frac{\max(f_i)^2}{\sum_j \max(f_j)^2}.
+%    \]
 
-    $$
-    \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
-    $$
+    \begin{minipage}[t]{0.48\textwidth}
+      \vspace{0pt}%
+      \raggedright
 
-    Interdum et malesuada fames $\{1, 4, 9, \ldots\}$ ac ante ipsum primis in
-    faucibus. Cras eleifend dolor eu nulla suscipit suscipit. Sed lobortis non
-    felis id vulputate.
+      \begin{itemize}
+        \item Imaginamos una ruleta donde cada individuo ocupa un sector.
+        \item El tamaño de cada sector es proporcional a su fitness.
+        \item Giramos la ruleta (elegimos un número aleatorio) y vemos en qué sector cae.
+        \item El individuo de ese sector es el padre seleccionado.
+      \end{itemize}
 
-    \heading{A heading inside a block}
+      La probabilidad de que el individuo $i$ sea elegido como padre es:
 
-    Praesent consectetur mi $x^2 + y^2$ metus, nec vestibulum justo viverra
-    nec. Proin eget nulla pretium, egestas magna aliquam, mollis neque. Vivamus
-    dictum $\mathbf{u}^\intercal\mathbf{v}$ sagittis odio, vel porta erat
-    congue sed. Maecenas ut dolor quis arcu auctor porttitor.
+      \[
+        P(i) = \frac{\max(f_i, 0)^2}{\sum_j \max(f_j, 0)^2}.
+      \]
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+      \vspace{0pt}%
+      \centering
+      \includegraphics[width=\linewidth]{logos/CHART.png}\\[0.5em]
+      \small Figure 6: Visualizacion de la ruleta
+  \end{minipage}
 
-    \heading{Another heading inside a block}
-
-    Sed augue erat, scelerisque a purus ultricies, placerat porttitor neque.
-    Donec $P(y \mid x)$ fermentum consectetur $\nabla_x P(y \mid x)$ sapien
-    sagittis egestas. Duis eget leo euismod nunc viverra imperdiet nec id
-    justo.
 
   \end{exampleblock}
 
+  \begin{block}{Conclusión}
 
-
-  \begin{block}{References (opcional)}
-
-    \nocite{*}
-    \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
+    En esencia, el proyecto materializa con éxito una arquitectura íntegra y modular, demostrando la viabilidad de integrar dos paradigmas operativos: la interacción manual del usuario y la simulación autónoma. Además, sirvió como una plataforma de prueba robusta para la experimentación con algoritmos, la validación de técnicas evolutivas en la toma de decisiones y un laboratorio de simulación de Machine Learning.
 
   \end{block}
 
 \end{column}
+
+%  \begin{block}
+%    \centering
+%    IA Fest UdeSA  Diciembre, 2025
+%  \end{block}
+
 \separatorcolumn
-
-
 
 \end{columns}
 \end{frame}
