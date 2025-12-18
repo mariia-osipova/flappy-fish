@@ -130,22 +130,28 @@ Intuition:
 
 ---
 
-### Authors / Course
+## Project Setup
 
-Pensamiento Computacional (I100) — Universidad de San Andrés
+Follow these steps to get your project up and running:
 
-- [Julieta Zanoni](https://github.com/julietazanoni)
-- [Mariia Osipova](https://github.com/mariia-osipova)
-- [Santino Scofano](https://github.com/SantuCode11)
-- [Morena Roldan](https://github.com/mroldan-netizen)
+### 1. Clone the project
 
----
+Copy the project from the `main` branch.
+![Screenshot 2025-12-02 at 5.06.26 AM.png](data/readme/Screenshot%202025-12-02%20at%205.06.26%E2%80%AFAM.png)
 
-### Notes
+### 2. Install requirements
 
-- This project is intended as an academic practical assignment and a sandbox for experimenting with:
-  - modular architecture,
-  - evolutionary optimization (GA),
-  - and agent decision-making in a game environment.
+Run the following command to install the necessary dependencies:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+### 3. Run the project
+
+```bash
+cd src
+python3 main.py 
+```
 
  
