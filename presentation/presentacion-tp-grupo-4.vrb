@@ -1,38 +1,264 @@
-\frametitle{swim\_population(): bucle principal (III)}
+\frametitle{Módulo \texttt{swimfish.py}: Fin del Juego (IV)}
 
-Dentro de \texttt{swim\_population} se ejecuta el bucle principal de simulación:
+Finalmente, se añaden las instrucciones de control para que el usuario pueda interactuar tras el Game Over.
 
-{\scriptsize
-\begin{verbatim}
-paso = 0
-running = True
-while running:
-    paso += 1
-    self._actualizar_fondo()
-    self._actualizar_tuberias()
-    for i, fish in enumerate(peces):
-        if not vivos[i]:
-            continue
-        dy, dx = calcular_estado(fish.rect,
-                                 self.proxima_tuberia())
-        vy = fish.velocity
-        if politicas[i](dy, dx, vy):
-            fish.flap()
-        fish.update()
-        self._actualizar_estado_del_pez(i, fish, scores, vivos)
-        time_alive[i] += 1
-\end{verbatim}
-}
+\begin{itemize} \item Se indica la tecla 'R' para reiniciar la partida. \item Se indica la tecla 'M' para volver a la pantalla de menú principal. \item El texto, también con sombra, se sitúa en la parte inferior de la pantalla de Game Over. \end{itemize}
 
-%\begin{itemize}
-%    \item En cada paso se actualiza el fondo y las tuberías.
-%    \item Para cada pez vivo:
-%    \begin{itemize}
-%        \item se calcula el estado \((dy, dx, vy)\),
-%        \item la política decide si llamar a \texttt{flap()},
-%        \item se aplica la física con \texttt{update()},
-%        \item se revisan colisiones y se actualizan \texttt{score} y \texttt{vivos},
-%        \item se incrementa \texttt{time\_alive}.
-%    \end{itemize}
-%\end{itemize}
+\vspace{4pt} {\scriptsize \begin{verbatim} texto_reiniciar_sombra = self.letra_pequena.render( '¡Presiona R para Reiniciar o M para volver al Menú!', True, self.color_sombra, ) rect_reiniciar_sombra = texto_reiniciar_sombra.get_rect( center=(centro_x + self.offset_sombra, centro_y + 50 + self.offset_sombra) ) self.screen.blit(texto_reiniciar_sombra, rect_reiniciar_sombra)
+
+    texto_reiniciar = self.letra_pequena.render(
+        '¡Presiona R para Reiniciar o M para volver al Menú!',
+        True, (255, 255, 255),
+    )
+    rect_reiniciar = texto_reiniciar.get_rect(center=(centro_x, centro_y + 50))
+    self.screen.blit(texto_reiniciar, rect_reiniciar)
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Reinicio de Partida}
+
+El método \texttt{reiniciar_juego()} se llama al comienzo de una nueva partida o tras un Game Over (por ejemplo, al presionar 'R') para restablecer el estado del juego a su configuración inicial.
+
+\begin{itemize} \item Restablecimiento de Estados: Se resetean las banderas de estado clave que controlan la lógica del juego. \item Puntuación y Objetos: Se reinicia la puntuación y se vacía la lista de tuberías. \item Restablecimiento del Jugador: Se llama al método \texttt{self.fish.reset()} para devolver el pez a su posición, velocidad e imagen originales. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} def reiniciar_juego(self): self.mostrar_jumpscare = False self.tiempo_jumpscare = 0 self.game_over = False self.juego_iniciado = False self.puntuacion = 0 self.lista_tuberias = [] self.fish.reset() \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Control de Audio al Reiniciar}
+
+\begin{itemize} \item Una parte fundamental del reinicio es el manejo del audio. \item Se detiene cualquier reproducción de música o sonido de Game Over que pudiera estar activo. \item Se inicia nuevamente la música de fondo en modo loop (\texttt{-1}) para ambientar la nueva partida. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} pygame.mixer.music.stop() pygame.mixer.music.play(-1) \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Dibujando la Puntuación}
+
+El método privado \texttt{_dibujar_puntuacion()} es responsable de renderizar el contador de puntos en la esquina superior izquierda de la pantalla, aplicando un efecto de sombra para mejorar la visibilidad.
+
+\begin{itemize} \item Conversión: La puntuación (\texttt{self.puntuacion}) se convierte a string. \item Doble Renderizado (Sombra y Texto): Se renderiza el texto dos veces utilizando la fuente \texttt{letra_puntuacion}: \begin{itemize} \item Una vez en color negro (\texttt{(0, 0, 0)}) para la sombra. \item Una vez en color blanco (\texttt{(255, 255, 255)}) para el texto principal. \end{itemize} \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} def _dibujar_puntuacion(self): puntuacion_str = str(self.puntuacion) texto_sombra = self.letra_puntuacion.render(puntuacion_str, True, (0, 0, 0)) texto_puntuacion = self.letra_puntuacion.render( puntuacion_str, True, (255, 255, 255) ) \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Posicionamiento de la Puntuación}
+
+El efecto de sombra se consigue mediante un ligero desplazamiento al dibujar los dos textos:
+
+\begin{itemize} \item Posición Base: El punto de inicio de la puntuación es \texttt{(20, 20)} (cercano a la esquina superior izquierda). \item Offset de Sombra: Se define un desplazamiento de \texttt{3} píxeles (\texttt{offset}). \item Dibujado: \begin{enumerate} \item La sombra se dibuja primero con el desplazamiento:
+
+$(x_{\text{base}} + \text{offset}, y_{\text{base}} + \text{offset})$.
+\item El texto principal se dibuja encima en la posición base $(x_{\text{base}}, y_{\text{base}})$.
+\end{enumerate}
+\end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} x_base, y_base = 20, 20 offset = 3 self.screen.blit(texto_sombra, (x_base + offset, y_base + offset)) self.screen.blit(texto_puntuacion, (x_base, y_base)) \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]\frametitle{Módulo \texttt{swimfish.py}: Bucle Principal \texttt{swim()}}
+
+El método \texttt{swim(auto, pesos)} inicia y mantiene el bucle principal del juego. El parámetro \texttt{auto} controla si el juego se ejecuta en modo manual (jugador) o automático (ML).
+
+\begin{itemize}\item Modo Manual ($\texttt{auto=False}$):\begin{itemize}\item Se habilita el jumpscare (\texttt{enable_jumpscare}).\item Se asegura que el juego no esté en estado Game Over o iniciado.\end{itemize}\item Modo Automático ($\texttt{auto=True}$):\begin{itemize}\item Se deshabilita el jumpscare.\item Se crea o asigna la política de decisión (\texttt{decidir}) basada en los \texttt{pesos} de la red neuronal.
+
+\begin{itemize}
+\item Modo Manual ($\texttt{auto=False}$):
+\begin{itemize}
+\item Se habilita el jumpscare (\texttt{enable_jumpscare}).
+\item Se asegura que el juego no esté en estado Game Over o iniciado.
+\end{itemize}
+\item Modo Automático ($\texttt{auto=True}$):
+\begin{itemize}
+\item Se deshabilita el jumpscare.
+\item Se crea o asigna la política de decisión (\texttt{decidir}) basada en los \texttt{pesos} de la red neuronal.
+
+\item El juego se inicia inmediatamente y se reproduce la música.
+    \end{itemize}
+
+\end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} def swim(self, auto: bool = False, pesos=None): self.running_game = True self.enable_jumpscare = not auto
+decidir = None
+    if auto:
+        if pesos is None:
+            pesos = random_vector()
+        decidir, pesos_usados = crear_politica(pesos)
+        self.pesos_actuales = pesos_usados
+        self.juego_iniciado = True
+        pygame.mixer.music.play(-1)
+    else:
+        self.game_over = False
+        self.juego_iniciado = False
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Bucle Principal \texttt{swim()} (II)}
+
+El bucle \texttt{while self.running_game} es el corazón del juego.
+
+\begin{itemize} \item Control de FPS y Delta Time: Se mide el tiempo transcurrido desde el último frame (\texttt{delta_time}) para garantizar un movimiento independiente de la tasa de frames. \item Animación de Fondo: Se utiliza \texttt{delta_time} para controlar la velocidad de los fotogramas del fondo animado. \item Reinicio Automático (ML): Si está en modo \texttt{auto} y el juego ha terminado, se reinicia inmediatamente para continuar el entrenamiento. \item Actualización de Jumpscare: Se actualiza la lógica interna del jumpscare. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} while self.running_game: delta_time = self.clock.tick(self.FPS) / 1000.0 self.frame_timer += delta_time if self.frame_timer >= 1.0 / self.frame_rate: self.frame_index = (self.frame_index + 1) % len(self.background_frames) self.frame_timer = 0
+    if auto and self.game_over:
+            self.reiniciar_juego()
+            self.juego_iniciado = True
+
+        if self.enable_jumpscare:
+            self.jumpscare.actualizar_jumpscare()
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Manejo de Eventos (III)}
+
+Se procesan todos los eventos de Pygame (\texttt{eventos}).
+
+\begin{itemize} \item Salir del Juego (\texttt{QUIT}): Cierra la ventana y detiene el bucle. \item Control en Game Over (Solo Manual): Permite reiniciar (R) o volver al menú (M) si la partida terminó y no está en modo \texttt{auto}. \item Generación de Tuberías: Si ocurre el evento temporizado \texttt{evento_nueva_tuberia} y el juego ha comenzado, se crea y añade una nueva tubería. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} for event in pygame.event.get(): if event.type == pygame.QUIT: # ... lógica de salida ...
+    if self.game_over:
+                if (not auto) and event.type == pygame.KEYDOWN:
+                    # ... lógica de reiniciar (K_r) o menú (K_m) ...
+                continue
+
+            if event.type == self.evento_nueva_tuberia and self.juego_iniciado:
+                nueva_tuberia = tuberias(
+                    self.screen_w, self.hueco_entre_tuberias, self.imagen_tuberia
+                )
+                self.lista_tuberias.append(nueva_tuberia)
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Interacción del Jugador y la IA (IV)}
+
+Se maneja la interacción directa (pulsación de teclas) y la decisión del agente de ML.
+
+\begin{itemize} \item Jugador Manual (\texttt{not auto}): \begin{itemize} \item ESPACIO: Inicia el juego si no está iniciado, y realiza el aleteo (\texttt{flap()}) y reproduce el sonido de salto. \item DERECHA/IZQUIERDA: Control de movimiento horizontal (si estuviera implementado en \texttt{fish.py}). \end{itemize} \item Decisión de la IA (\texttt{auto}): Si está en modo automático y el juego está activo, se calcula el estado del pez (\texttt{dy, dx, vy}) y se le pide a la política de ML (\texttt{decidir}) si debe aletear. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} if (not auto) and event.type == pygame.KEYDOWN: if event.key == pygame.K_SPACE: # ... lógica de inicio y flap del pez ... elif event.key == pygame.K_RIGHT: self.fish.right() elif event.key == pygame.K_LEFT: self.fish.left()
+
+        if not self.game_over and self.juego_iniciado:
+            if auto and decidir is not None:
+                dy, dx, vy = self._calcular_estado_completo(self.fish)
+                if decidir(dy, dx, vy):
+                    self.fish.flap()
+                    self.sonido_salto.play()
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Lógica y Actualización (V)}
+
+Esta es la fase de actualización del estado del juego si no ha terminado.
+
+\begin{itemize} \item Física del Pez: Se actualiza la velocidad y posición del pez (\texttt{self.fish.update()}). \item Movimiento de Tuberías: Se mueven todas las tuberías de la lista. \item Colisión con Límites: Se comprueba si el pez ha chocado con el techo o el suelo. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} self.fish.update()
+    for t in self.lista_tuberias:
+                t.mover_tuberias()
+
+            fish_rect = self.fish.get_rect()
+
+            if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
+                self.game_over = True
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]\frametitle{Módulo \texttt{swimfish.py}: Puntuación y Detección de Colisiones (VI)}\begin{itemize}\item Puntuación: Para cada tubería, si su borde derecho está detrás del pez y no ha sido marcada como 'pasada', se incrementa la puntuación.\item Detección de Colisión (Bounding Box): Se itera sobre las partes de la tubería para la detección de colisiones inicial (\texttt{colliderect}).\item Colisión Pixel-Perfect (Mask): Si hay una superposición inicial, se calcula el offset y se utiliza el método \texttt{mask.overlap()} para una colisión precisa basada en píxeles.\item Efecto Jumpscare: Si ocurre una colisión y el jumpscare está habilitado, se activa con una probabilidad de $5/11$ (dado que $\texttt{i} \le 4$).\end{itemize}\vspace{4pt}{\scriptsize\begin{verbatim}for tuberia in self.lista_tuberias:# ... Lógica de Puntuación ...
+    for tuberia_rect in tuberia.get_rects():
+                    if not fish_rect.colliderect(tuberia_rect):
+                        continue
+
+                    offset_x = tuberia_rect.left - fish_rect.left
+                    offset_y = tuberia_rect.top - fish_rect.top
+
+                    if self.fish.mask.overlap(self.tuberia_mask, (offset_x, offset_y)):
+                        self.game_over = True
+                        if self.enable_jumpscare:
+                            i = random.randint(0, 10)
+                            if i <= 4:
+                                self.jumpscare.asustar()
+                        break
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Limpieza y Renderizado (VII)}
+
+La última parte del bucle se encarga de dibujar el juego en la pantalla.
+
+\begin{itemize} \item Limpieza de Tuberías: Se eliminan las tuberías que han salido completamente de la pantalla por la izquierda para optimizar la memoria. \item Dibujado de Fondo: Se dibuja el frame animado actual y la imagen estática del fondo marino. \item Dibujado de Objetos: Se dibujan las tuberías y el pez. \item HUD e Interfaz: Se dibuja la puntuación si el juego está activo, o el mensaje de inicio si no ha comenzado. Si el juego ha terminado, se llama a \texttt{_dibujar_game_over()} (solo en modo manual). \item Dibujado de Jumpscare: Si está activo, se dibuja la superposición del jumpscare. \item Actualización de Pantalla: \texttt{pygame.display.flip()} actualiza todo lo dibujado para mostrarlo al usuario. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} # ... Limpieza de tuberías ...
+    current_frame = self.background_frames[self.frame_index]
+        self.screen.blit(current_frame, (0, 0))
+        # ... Dibujado de fondo marino, tuberías, pez ...
+
+        if not self.game_over:
+            # ... Lógica de dibujar puntuación o texto de inicio ...
+        else:
+            if not auto:
+                self._dibujar_game_over()
+
+        if self.enable_jumpscare:
+            self.jumpscare.dibujar_jumpscare()
+
+        pygame.display.flip()
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\subsection{Módulo main.py}
+
+%------------------------------------------------
+
+
+
+
+%------------------------------------------------
+
+\section{Agente evolutivo y Algoritmo Genético}
+
+%------------------------------------------------
+
+\subsection{Idea general del modo evolutivo}
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Dos modos de juego: Manual vs. Simulación}
+
+En Flappy Fish tenemos dos modos de juego:
+
+\vspace{8pt}
+
+\begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+        \centering{Single Player (Juego Manual)}\\[6pt]
+        \raggedright
+        \begin{itemize}
+            \item El usuario controla un único pez con el teclado.
+            \item Cada salto se produce cuando el jugador presiona \texttt{ESPACIO}.
+            \item El bucle principal del juego lee los eventos de teclado
+                  y decide si llamar a \texttt{fish.flap()}.
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \centering{Simulación (Algoritmo Evolutivo)}\\[6pt]
+        \raggedright
+        \begin{itemize}
+            \item No se usan teclas para controlar el pez.
+            \item Una población de agentes decide cuándo saltar.
+            \item Cada agente tiene su propia política de salto,
+                  parametrizada por un vector de pesos.
+        \end{itemize}
+    \end{column}
+\end{columns}
 
