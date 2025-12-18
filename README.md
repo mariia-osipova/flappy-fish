@@ -45,7 +45,6 @@ This project goes beyond a basic game implementation, focusing on a dual-mode ar
 |---|---|
 | ![Menú principal](data/readme/menu.png) | ![Modo manual](data/readme/fish-game.png) |
 | Modo automático | Game over |
-|---|---|
 | ![Modo automático](data/readme/modoag.png) | ![Game over](data/readme/findeljuego.png) |
 
 [//]: # (---)
