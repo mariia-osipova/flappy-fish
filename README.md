@@ -116,7 +116,7 @@ Intuition:
 
 [//]: # (![Roulette visualization]&#40;data/readme/CHART.png&#41;)
 
----
+[//]: # (---)
 
 ### How to Use
 
