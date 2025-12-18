@@ -22,6 +22,9 @@
 \pgfplotsset{compat=1.14}
 \usepackage{anyfontsize}
 
+
+\renewcommand{\figurename}{Figura}
+
 % ====================
 % Lengths
 % ====================
@@ -39,6 +42,8 @@
 % Title
 % ====================
 \definecolor{HeaderFg}{HTML}{0F2438}
+
+\setbeamercolor{normal text}{fg=black}
 
 % НЕ задаём bg для headline, иначе тема закрасит шапку поверх текстуры
 \setbeamercolor{headline}{bg=, fg=HeaderFg}
@@ -185,15 +190,16 @@
 }
 
 \title{Flappy Fish: Juego con Algoritmo Inteligente}
-\subtitle{Pensamiento computacional (I100)}
 
 \author{%
-  \vspace{19pt}
+  \vspace{5pt}
+  {\usebeamerfont{author} Pensamiento computacional (I100)}\\
+  \vspace{11pt}
   Julieta Zanoni \and Mariia Osipova \\
   Santino Scofano \and Morena Roldan
 }
 
-\institute[shortinst]{Univercidad de San Andrés}
+\institute[shortinst]{Universidad de San Andrés}
 
 % ====================
 % Footer (optional)
@@ -203,7 +209,7 @@
   \vspace*{0.1\footerbgheight}%
   \footnotesize
   % левая колонка
-  \begin{minipage}[c]{0.40\textwidth}
+  \begin{minipage}[c]{0.10\textwidth}
     \raggedright
     Universidad de San Andrés \\[4pt]
     \textit{%
@@ -213,16 +219,17 @@
       mroldan@udesa.edu.ar}
   \end{minipage}%
   \hfill
-  % Центр: опускаем текст вниз, выравнивание по центру
-  \begin{minipage}[c]{0.1\textwidth}
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\\[2pt]
+  % центр: 3 рыбки без подбора ширин под каждую
+  \begin{minipage}[c]{0.60\textwidth}
+    \centering
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
+    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}%
   \end{minipage}%
-  \begin{minipage}[c]{0.1\textwidth}
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\\[2pt]
-  \end{minipage}%
-  \begin{minipage}[c]{0.1\textwidth}
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\\[2pt]
-  \end{minipage}%
+  \hfill
   % правая колонка
   \begin{minipage}[c]{0.20\textwidth}
     \raggedleft
@@ -347,6 +354,10 @@
   \begin{block}{Resumen del proyecto}
 
     Lo primero, que se ve, cuando se ejecuta el codigo es el menu, donde se puede elegir el modo del juego.
+    Nuestro trabajo práctico se divide en dos partes: primero, el desarrollo
+    de un videojuego tipo Flappy Bird llamado Flappy Fish, implementado en Python con Pygame;
+    y segundo, la implementación de un Algoritmo Genético para entrenar una población
+    de peces que juegan de forma autónoma.
 
     \begin{figure}
       \centering
@@ -378,16 +389,11 @@
 
     \end{figure}
 
-    Nuestro trabajo práctico se divide en dos partes: primero, el desarrollo
-    de un videojuego tipo Flappy Bird llamado Flappy Fish, implementado en Python con Pygame;
-    y segundo, la implementación de un Algoritmo Genético para entrenar una población
-    de peces que juegan de forma autónoma.
-
   \end{block}
 
   \vspace{25pt}
 
-  \begin{alertblock}{Objetivos del Proyecto}
+  \begin{alertblock}{Objetivos}
 
     El proyecto va más allá de la implementación básica de la simulación,
     centrándose en el diseño de una plataforma operativa dual y el análisis
@@ -396,11 +402,11 @@
 
     \begin{itemize}
       \item \textbf{Implementar una Arquitectura Modular de Dualidad Operativa:} Diseñar y construir una arquitectura completa y
-      modular capaz de integrar dos modos de juego distintos (Manual y Algorítmico). El objetivo es demostrar la separación
+      modular capaz de integrar dos modos de juego distintos (Manual y Simulado). El objetivo es demostrar la separación
       de responsabilidades (lógica de juego vs. lógica algorítmica), garantizando la funcionalidad completa y
       optimizada de cada modo dentro de una misma base de código.
       \vspace{17pt}
-      \item \textbf{Optimizar el Comportamiento de Agentes mediante Aprendizaje Automático:} Optimizar el Comportamiento de Agentes mediante Aprendizaje Automático:
+      \item \textbf{Optimizar el Comportamiento de Agentes mediante Aprendizaje Automático:}Capacitar a una población de agentes mediante mecanismos de evolución simulada (selección, cruce y mutación).
       \vspace{17pt}
       \item \textbf{Visualizar y Analizar la Evolución de la Aptitud Algorítmica:} Desarrollar herramientas de visualización gráfica para monitorear y analizar la evolución del proceso de optimización. Esto incluye graficar la evolución de la aptitud de los agentes a lo largo de las generaciones y evaluar la influencia de los parámetros de política y los pesos en el rendimiento del modelo.
 
@@ -416,8 +422,7 @@
     y contrastar dos paradigmas fundamentales: la interacción manual directa con el usuario
     y la automatización algorítmica mediante técnicas de aprendizaje automático.
     La implementación se realizó bajo un diseño modular que garantiza la dualidad operativa,
-    permitiendo la integración fluida de ambos modos dentro de un marco unificado. El proyecto cuenta con dos modos de operación distintos, cada uno con un enfoque y objetivos diferentes:
-    1) Modo Manual (Single Player): jugabilidad y experiencia del usuario; y 2) Modo Algorítmico (Simulación): simulación y apredizaje automático.
+    permitiendo la integración fluida de ambos modos dentro de un marco unificado.
 
 %    \vspace{17pt}
 %
@@ -461,7 +466,7 @@
     \begin{figure}
       \centering
       \includegraphics[width=\linewidth]{logos/arq.png}\\[15pt]
-      \small Figure 5: Flowchart de la arquitectura del proyecto
+      \small Figura 5: Flowchart de la arquitectura del proyecto
     \end{figure}
 
 \end{block}
@@ -503,8 +508,8 @@
     \[
       \mathbf{w} = [w_0, w_1, \dots, w_5],
     \]
-    de modo que el pez salta si una función lineal del estado supera cierto umbral
-    (por ejemplo, si $z > 0$).
+    de modo que el pez salta si una función lineal del estado supera cierto umbral.
+
 
     La clave del Algoritmo Genético (AG) es la selección proporcional
     (\emph{``método de la ruleta''}), que utiliza el \emph{fitness}
