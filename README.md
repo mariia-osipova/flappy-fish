@@ -134,10 +134,10 @@ Intuition:
 
 Pensamiento Computacional (I100) — Universidad de San Andrés
 
-- Julieta Zanoni — jzanoni@udesa.edu.ar
-- Mariia Osipova — mosipova@udesa.edu.ar
-- Santino Scofano — sscofano@udesa.edu.ar
-- Morena Roldan — mroldan@udesa.edu.ar
+- [Julieta Zanoni](https://github.com/julietazanoni)
+- [Mariia Osipova](https://github.com/mariia-osipova)
+- [Santino Scofano](https://github.com/SantuCode11)
+- [Morena Roldan](https://github.com/mroldan-netizen)
 
 ---
 
