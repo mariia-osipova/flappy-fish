@@ -73,7 +73,7 @@ Main responsibilities typically include:
 - Optional special effects (e.g., screamer/jumpscare module)
 - Genetic Algorithm logic and policy evaluation for autonomous play
 
-![Architecture flowchart](data/readme/diagram-whole-class-structure.png)
+![Architecture flowchart](data/readme/diagramarq.png)
 
 ---
 
