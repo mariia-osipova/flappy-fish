@@ -153,4 +153,8 @@ cd src
 python3 main.py 
 ```
 
- 
+---
+
+### More information
+Full project details, presentation, and our poster:  
+https://mariia-osipova.github.io/flappy-fish/
