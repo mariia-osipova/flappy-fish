@@ -1,0 +1,2336 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 2.0 (March 8, 2022)
+%
+% This template originates from:
+% https://www.LaTeXTemplates.com
+%
+% Author:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+	11pt, % Set the default font size, options include: 8pt, 9pt, 10pt, 11pt, 12pt, 14pt, 17pt, 20pt
+	%t, % Uncomment to vertically align all slide content to the top of the slide, rather than the default centered
+	%aspectratio=169, % Uncomment to set the aspect ratio to a 16:9 ratio which matches the aspect ratio of 1080p and 4K screens and projectors
+]{beamer}
+
+\usepackage[T1]{fontenc}
+
+\graphicspath{{Images/}{./}} % Specifies where to look for included images (trailing slash required)
+
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule for better rules in tables
+
+%----------------------------------------------------------------------------------------
+%	SELECT LAYOUT THEME
+%----------------------------------------------------------------------------------------
+
+% Beamer comes with a number of default layout themes which change the colors and layouts of slides. Below is a list of all themes available, uncomment each in turn to see what they look like.
+
+\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+%----------------------------------------------------------------------------------------
+%	SELECT COLOR THEME
+%----------------------------------------------------------------------------------------
+
+% Beamer comes with a number of color themes that can be applied to any layout theme to change its colors. Uncomment each of these in turn to see how they change the colors of your selected layout theme.
+%
+%\usecolortheme{default}
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{monarca}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{spruce}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%----------------------------------------------------------------------------------------
+%	SELECT FONT THEME & FONTS
+%----------------------------------------------------------------------------------------
+
+% Beamer comes with several font themes to easily change the fonts used in various parts of the presentation. Review the comments beside each one to decide if you would like to use it. Note that additional options can be specified for several of these font themes, consult the beamer documentation for more information.
+
+\usefonttheme{default} % Typeset using the default sans serif font
+%\usefonttheme{serif} % Typeset using the default serif font (make sure a sans font isn't being set as the default font if you use this option!)
+%\usefonttheme{structurebold} % Typeset important structure text (titles, headlines, footlines, sidebar, etc) in bold
+%\usefonttheme{structureitalicserif} % Typeset important structure text (titles, headlines, footlines, sidebar, etc) in italic serif
+%\usefonttheme{structuresmallcapsserif} % Typeset important structure text (titles, headlines, footlines, sidebar, etc) in small caps serif
+
+%------------------------------------------------
+
+%\usepackage{mathptmx} % Use the Times font for serif text
+\usepackage{palatino} % Use the Palatino font for serif text
+
+%\usepackage{helvet} % Use the Helvetica font for sans serif text
+\usepackage[default]{opensans}
+\usepackage{hyperref} % Use the Open Sans font for sans serif text
+%\usepackage[default]{FiraSans} % Use the Fira Sans font for sans serif text
+%\usepackage[default]{lato} % Use the Lato font for sans serif text
+
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue,
+    linkcolor=blue,
+    citecolor=blue,
+    pdfborderstyle={/S/U/W 1}
+}
+
+%----------------------------------------------------------------------------------------
+%	SELECT INNER THEME
+%----------------------------------------------------------------------------------------
+
+% Inner themes change the styling of internal slide elements, for example: bullet points, blocks, bibliography entries, title pages, theorems, etc. Uncomment each theme in turn to see what changes it makes to your presentation.
+
+%\useinnertheme{default}
+\useinnertheme{circles}
+%\useinnertheme{rectangles}
+%\useinnertheme{rounded}
+%\useinnertheme{inmargin}
+
+%----------------------------------------------------------------------------------------
+%	SELECT OUTER THEME
+%----------------------------------------------------------------------------------------
+
+% Outer themes change the overall layout of slides, such as: header and footer lines, sidebars and slide titles. Uncomment each theme in turn to see what changes it makes to your presentation.
+
+%\useoutertheme{default}
+%\useoutertheme{infolines}
+%\useoutertheme{miniframes}
+%\useoutertheme{smoothbars}
+%\useoutertheme{sidebar}
+%\useoutertheme{split}
+%\useoutertheme{shadow}
+%\useoutertheme{tree}
+%\useoutertheme{smoothtree}
+
+%\setbeamertemplate{footline} % Uncomment this line to remove the footer line in all slides
+%\setbeamertemplate{footline}[page number] % Uncomment this line to replace the footer line in all slides with a simple slide count
+
+%\setbeamertemplate{navigation symbols}{} % Uncomment this line to remove the navigation symbols from the bottom of all slides
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION INFORMATION
+%----------------------------------------------------------------------------------------
+
+
+\title{Trabajo Práctico Final — Programación Computacional \\[6pt]} % The short title in the optional parameter appears at the bottom of every slide, the full title in the main parameter is only on the title page
+
+\subtitle{Flappy Fish: Juego basado en Pygame} % Presentation subtitle, remove this command if a subtitle isn't required
+
+\author[Osipova, Zanoni, Scofano y Roldan]{Julieta Zanoni, Mariia Osipova, Santino Scofano y Morena Roldan} % Presenter name(s), the optional parameter can contain a shortened version to appear on the bottom of every slide, while the main parameter will appear on the title slide
+
+\institute[UdeSA]{Universidad de San Andrés \\[6pt]
+\textit{
+jzanoni@udesa.edu.ar \\[1.5pt]
+mosipova@udesa.edu.ar \\[1.5pt]
+sscofano@udesa.edu.ar \\[1.5pt]
+mroldan@udesa.edu.ar}
+}
+
+\date[12 de diciembre 2025]{12 de diciembre 2025}
+
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SLIDE
+%----------------------------------------------------------------------------------------
+
+\begin{frame}
+	\titlepage % Output the title slide, automatically created using the text entered in the PRESENTATION INFORMATION block above
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS SLIDE
+%----------------------------------------------------------------------------------------
+
+% The table of contents outputs the sections and subsections that appear in your presentation, specified with the standard \section and \subsection commands. You may either display all sections and subsections on one slide with \tableofcontents, or display each section at a time on subsequent slides with \tableofcontents[pausesections]. The latter is useful if you want to step through each section and mention what you will discuss.
+
+\begin{frame}
+\frametitle{Resumen de la presentación (I)}
+
+\tableofcontents[sections={1-3}]
+\end{frame}
+
+\begin{frame}
+\frametitle{Resumen de la presentación (II)}
+
+\tableofcontents[sections={4}]
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION BODY SLIDES
+%----------------------------------------------------------------------------------------
+
+%\section{Text Examples} % Sections are added in order to organize your presentation into discrete blocks, all sections and subsections are automatically output to the table of contents as an overview of the talk but NOT output in the presentation as separate slides
+
+%\section{Introducción}
+%
+%\section{Arquitectura del Juego}
+%
+%\section{Algoritmo Genético}
+%\subsection{Representación del Individuo}
+%\subsection{Función de Aptitud}
+%\subsection{Selección, Cruza y Mutación}
+%
+%\section{Resultados y Visualización}
+%
+%\section{Conclusiones}
+
+\section{Introducción}
+
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Introducción}
+
+    \begin{columns}[T]
+        \begin{column}{0.35\textwidth}
+            Nuestro trabajo práctico está dividido en dos partes: la primera es sobre el desarrollo de un videojuego manual inspirado en Flappy Bird, llamado Flappy Fish, implementado en Python con la librería Pygame.
+        \end{column}
+
+        \begin{column}{0.65\textwidth}
+            \includegraphics[width=\textwidth]{img.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Introducción}
+
+    \begin{columns}[T]
+        \begin{column}{0.35\textwidth}
+            La segunda parte se enfoca en la implementación de un Algoritmo Genético (AG) para entrenar a una población de “peces”, se juega de forma autónoma al videojuego manual.        \end{column}
+
+        \begin{column}{0.65\textwidth}
+            \includegraphics[width=\textwidth]{img_1.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Arquitectura del Juego}
+
+%------------------------------------------------
+\begin{frame}
+    \frametitle{Arquitectura del Juego}
+
+    \begin{columns}[T]
+        \begin{column}{0.40\textwidth}
+            Pensando en la arquitectura del juego, nos enfrentamos al primer desafío:
+            ¿cómo debíamos estructurar y organizar el proyecto?
+            Comenzamos trabajando a partir de este borrador inicial.
+        \end{column}
+
+        \begin{column}{0.58\textwidth}
+            \includegraphics[width=\textwidth]{diagram-initial-class-structure.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+%\begin{frame}
+%    \frametitle{Arquitectura del Juego}
+%
+%    Para entender mejor cómo estructurar el proyecto, analizamos varios juegos desarrollados
+%        con Pygame y publicados de forma abierta. Estas referencias nos permitieron observar
+%        enfoques comunes de arquitectura y organización del código. Entre ellos, miramos
+%        proyectos como \href{https://github.com/mx0c/super-mario-python}{Super Mario Python}
+%        y \href{https://github.com/techwithtim/Tower-Defense-Game}{Tower Defence Game},
+%        que utilizamos como guía conceptual. \\[5pt]
+%
+%    \begin{columns}[T]
+%        \begin{column}{0.5\textwidth}
+%            \includegraphics[width=\textwidth]{img_3.png}
+%        \end{column}
+%        \begin{column}{0.5\textwidth}
+%            \includegraphics[width=\textwidth]{img_2.png}
+%        \end{column}
+%    \end{columns}
+%
+%\end{frame}
+
+
+\begin{frame}
+\frametitle{Arquitectura del Juego}
+
+\begin{columns}[T]
+
+    \begin{column}{0.45\textwidth}
+        Analizamos varios juegos desarrollados
+        con Pygame y publicados de forma abierta. Estas referencias nos permitieron observar
+        enfoques comunes de arquitectura y organización del código. Entre ellos, miramos
+        proyectos como \href{https://github.com/mx0c/super-mario-python}{Super Mario Python}
+        y \href{https://github.com/techwithtim/Tower-Defense-Game}{Tower Defence Game},
+        que utilizamos como guía conceptual.
+    \end{column}
+
+    \begin{column}{0.52\textwidth}
+        \includegraphics[width=\textwidth]{img_3.png}\\[8pt]
+        \includegraphics[width=\textwidth]{img_2.png}
+    \end{column}
+
+\end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Arquitectura del Juego}
+
+    \begin{columns}[T]
+        \begin{column}{1\textwidth}
+            \includegraphics[width=\textwidth]{diagram-whole-class-structure.png}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Arquitectura del Juego}
+
+    El proyecto se estructura en los siguientes módulos: \\[4pt]
+
+    \begin{itemize}
+        \item \textbf{game.py} — clase base del juego (ventana, fondo, sonido y tuberías).
+        \item \textbf{fish.py} — física, movimiento y máscara de colisión del pez.
+        \item \textbf{screamer.py} — módulo del screamer para el juego.
+        \item \textbf{generacion\_de\_tuberias.py} — creación, posición y movimiento de las tuberías.
+        \item \textbf{menu.py} — interfaz del menú principal y manejo de opciones.
+        \item \textbf{swim\_fish.py} — lógica del juego (manual/modo con Algoritmo Genético).
+        \item \textbf{ml/} — política del agente, cálculo del estado, generación de pesos y genética.
+    \end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Modo manual del juego}
+
+%------------------------------------------------
+
+\subsection{Módulo game.py}
+
+%------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Módulo game.py (I)}
+
+La clase \texttt{Game} actúa como el marco general del que hereda \texttt{SwimFish}.
+Su constructor realiza la configuración inicial del entorno:
+
+\begin{itemize}
+    \item Inicializa Pygame y el objeto \texttt{Clock} (FPS = 120).
+    \item Crea la ventana principal del juego (1000×600 píxeles).
+    \item Carga los fotogramas del fondo animado.
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    class Game:
+        def __init__(self):
+            pygame.init()
+            self.clock = pygame.time.Clock()
+            self.FPS = 120
+            self.screen = pygame.display.set_mode((1000, 600))
+
+            # Animación de fondo
+            self.animation_folder = "../data/img/fondo_animado"
+            self.background_frames = self._load_background_frames()
+            self.frame_index = 0
+            self.frame_rate = 30
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo game.py (II)}
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Define la música de fondo y sonido del salto.
+    \item Sprite de tubería y máscara pixel-perfect.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    self.music_path = "../data/audios/linkin park fondo.ogg"
+    pygame.mixer.music.load(self.music_path)
+
+    self.sonido_salto = pygame.mixer.Sound(
+        "../data/audios/efecto bubble.ogg")
+
+    # Fondo marino
+    self.fondo_marino = pygame.image.load(
+        "../data/img/pixil-frame-0.png").convert()
+    self.fondo_marino = pygame.transform.scale(
+        self.fondo_marino, (self.screen_w, self.screen_h))
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo game.py (III)}
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Define el hueco vertical entre tuberías = \texttt{300}.
+    \item Define el evento \texttt{evento\_nueva\_tuberia} cada 1500 ms.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    # Tuberías
+    self.imagen_tuberia = pygame.image.load(
+        "../data/img/alga2.png").convert_alpha()
+    self.imagen_tuberia = pygame.transform.scale(
+        self.imagen_tuberia, (70, 400))
+    self.tuberia_mask = pygame.mask.from_surface(
+        self.imagen_tuberia)
+    self.hueco_entre_tuberias = 300
+
+    self.evento_nueva_tuberia = pygame.USEREVENT
+    pygame.time.set_timer(self.evento_nueva_tuberia, 1500)
+\end{verbatim}
+}
+
+Entonces, Game sabe todo sobre la ventana, el fondo y las tuberías,
+pero no sabe nada sobre quién está volando alrededor de este mundo o cómo se desarrolla exactamente el juego;
+eso es responsabilidad de SwimFish.
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Módulo fish.py}
+
+%------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Módulo fish.py: Fish y su física (I)}
+
+\begin{columns}[T]
+
+    \begin{column}{0.9\textwidth}
+        El Fish en fish.py es una clase independiente que luego se utiliza dentro de otras clases (principalmente dentro de SwimFish) como un objeto compuesto.
+    \end{column}
+
+    \begin{column}{0.1\textwidth}
+        \includegraphics[width=\textwidth]{fish1.png}
+    \end{column}
+
+\end{columns}
+
+\vspace{6pt}
+
+\begin{itemize}
+    \item En el constructor se carga la imagen del pez, se escala al tamaño indicado y se crean su \texttt{rect} y la máscara de colisión.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    class Fish:
+        def __init__(self, x, y, size, image):
+
+            self._start_pos = (x, y)
+
+            self.size = size
+            self.original_image = pygame.image.load(
+                image).convert_alpha()
+            self.original_image = pygame.transform.scale(
+                self.original_image, (size[0], size[1]))
+            self.image = self.original_image
+            self.rect = self.image.get_rect(center = (x, y))
+            self.mask = pygame.mask.from_surface(self.image)
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo fish.py: Fish y su física (II)}
+
+\begin{itemize}
+    \item El pez posee una velocidad vertical, una gravedad constante, una fuerza de salto, (donde un valor negativo indica movimiento ascendente) y una velocidad máxima de caída.
+    \item El método \texttt{flap()} simplemente reinicia la velocidad al valor de \texttt{jump\_strength}, produciendo un impulso instantáneo hacia arriba.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+        self.velocity = 0
+        self.gravity = 0.3
+        self.jump_strength = -10
+        self.max_fall_speed = 100
+        self.air_resistance = 0.9
+
+    def flap(self):
+        self.velocity = self.jump_strength
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo fish.py: Fish y su física (III)}
+
+\begin{itemize}
+    \item El método \texttt{update()} incrementa la velocidad con la gravedad, la limita según \texttt{max\_fall\_speed}, actualiza la posición vertical del \texttt{rect} y recalcula la rotación del sprite: el ángulo es proporcional a la velocidad, pero está acotado aproximadamente entre $-30^\circ$ durante el ascenso y $+90^\circ$ durante la caída. Tras la rotación, se recalculan el \texttt{rect} y la máscara.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    def update(self):
+        self.velocity += self.gravity
+
+        if self.velocity > self.max_fall_speed:
+            self.velocity = self.max_fall_speed
+
+        self.rect.y += self.velocity
+        self._rotar_pez()
+
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo fish.py: Fish y su física (IV)}
+
+\begin{itemize}
+    \item El método \texttt{\_rotar\_pez()} controla la orientación visual del sprite según su velocidad vertical.
+    Calcula un ángulo proporcional a la velocidad: cuando el pez asciende se limita a $-30^\circ$, y cuando cae a $+90^\circ$.
+    Rota la imagen original con \texttt{pygame.transform.rotate()} y actualiza el centro del \texttt{rect} para mantener la posición.
+    Finalmente, se recalcula la máscara de colisión a partir de la imagen rotada.
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    def _rotar_pez(self):
+        angulo = self.velocity * 3
+        if self.velocity > 0:
+            angulo = min(angulo, 90)
+        else:
+            angulo = max(angulo, -30)
+        self.image = pygame.transform.rotate(
+            self.original_image, -angulo)
+        old_center = self.rect.center
+        self.rect = self.image.get_rect(center=old_center)
+        self.mask = pygame.mask.from_surface(self.image)
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo fish.py: Fish y su física (V)}
+
+\begin{itemize}
+    \item El método \texttt{reset()} restablece el pez a su posición inicial, reinicia su velocidad y reconstruye el \texttt{rect} y la máscara originales. Se usa en el caso de una colision para reiniciar el juego.
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    def reset(self):
+        self.rect.center = self._start_pos
+        self.velocity = 0
+        self.image = self.original_image
+        self.rect = self.image.get_rect(center=self._start_pos)
+        self.mask = pygame.mask.from_surface(self.image)
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Módulo screamer.py}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo screamer.py: Definir jumpscare (I)}
+
+\begin{itemize}
+    \item \textbf{Carga la imagen} del susto desde la carpeta \texttt{data/img/}
+    \item \textbf{Escala la imagen} para que cubra toda la pantalla del juego
+    \item \textbf{Carga el sonido} del grito desde la carpeta \texttt{data/audios/}
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    def definir_jumpscare(self):
+        self.jumpscare_imagen=pygame.image.load('../data/img/img_1.png').convert_alpha()
+        self.jumpscare_imagen = pygame.transform.scale(self.jumpscare_imagen, (self.screen_w, self.screen_h))
+        self.jumpscare_ruido=pygame.mixer.Sound('../data/audios/scream.mp3')
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo screamer.py: Dibujar jumpscare (II)}
+
+\begin{itemize}
+    \item El método \texttt{\_dibujar\_jumpscare()} dibuja el screamer en toda la pantala completa si el \texttt{\_mostrar\_jumpscare()}
+          es {\_True}
+
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    def dibujar_jumpscare(self):
+        if self.mostrar_jumpscare and self.jumpscare_imagen:
+            self.screen.blit(self.jumpscare_imagen, (0,0))
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo screamer.py: Saltar screamer (III)}
+
+\begin{itemize}
+    \item \ Reproduce el sonido del grito
+    \item \ Pone \texttt{mostrar\_jumpscare} en verdadero
+    \item \ Dibuja la imagen del susto en pantalla
+    \item \ Guarda el tiempo exacto en que empezó el susto
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    def asustar(self):
+        if self.jumpscare_imagen and self.jumpscare_ruido:
+            self.jumpscare_ruido.play()
+            self.mostrar_jumpscare=True
+        if self.mostrar_jumpscare and self.jumpscare_imagen:
+            self.screen.blit(self.jumpscare_imagen, (0,0))
+        self.tiempo_jumpscare = pygame.time.get_ticks()
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo screamer.py: Actualizar Screamer (IV)}
+
+\begin{itemize}
+    \item \ el jumpscare está activo (se está mostrando)
+    \item \  Si han pasado más de 600 milisegundos (0.6 segundos) entonces Pone \texttt{mostrar\_jumpscare} en falso (quita el susto)
+\end{itemize}
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+    def actualizar_jumpscare(self):
+        if self.mostrar_jumpscare:
+            if pygame.time.get_ticks() - self.tiempo_jumpscare > 600:
+                self.mostrar_jumpscare = False
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Módulo generacion\_de\_tuberias.py}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo generacion\_de\_tuberias.py (I)}
+
+\begin{columns}[T]
+
+    \begin{column}{0.95\textwidth}
+        La clase \texttt{tuberias} en \texttt{generacion\_de\_tuberias.py} define un par de obstáculos: el tubo de algas superior e inferior.
+    \end{column}
+
+    \begin{column}{0.05\textwidth}
+        \includegraphics[width=\textwidth]{alga2.png}
+    \end{column}
+
+\end{columns}
+
+\vspace{6pt}
+
+\begin{itemize}
+    \item Se selecciona una \texttt{altura\_referencia} en el rango [150, 450];
+    \item A partir de esa posición se construyen los rectángulos de dos tuberias, tal que entre ambos se mantenga un hueco vertical de altura \texttt{hueco} (parámetro recibido desde \texttt{Game}).
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    class tuberias:
+        def __init__(self, x, hueco, imagen):
+            self.imagen_tuberia = imagen
+            self.altura_referencia = random.randint(150, 450)
+            self.x = x
+            self.hueco = hueco
+            self.tubo_arriba = self.imagen_tuberia.get_rect(
+                midbottom = (x, self.altura_referencia - hueco // 2))
+            self.tubo_abajo = self.imagen_tuberia.get_rect(
+                midtop = (x, self.altura_referencia + hueco // 2))
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo generacion\_de\_tuberias.py (II)}
+
+\begin{itemize}
+     \item El método \texttt{mover\_tuberias()} simplemente desplaza la coordenada \texttt{x} y sincroniza ese movimiento con los rectángulos de ambas tuberías.
+    \item El método \texttt{dibujar\_tuberias()} dibuja la tubería superior invertida y la inferior en su orientación normal.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    def mover_tuberias(self):
+        self.x -= self.velocidad
+        self.tubo_arriba.x = self.x
+        self.tubo_abajo.x = self.x
+
+    def dibujar_tuberias(self,screen):
+        screen.blit(pygame.transform.flip(self.imagen_tuberia, False, True), self.tubo_arriba)
+        screen.blit(self.imagen_tuberia, self.tubo_abajo)
+
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo generacion\_de\_tuberias.py (III)}
+
+\begin{itemize}
+    \item Ambas tuberías comparten una misma coordenada horizontal \texttt{x},
+    que posteriormente se reduce a una velocidad constante \texttt{velocidad = 4},
+    pidiendo que las tuberias se desplacen de derecha a izquierda.
+    \item Se almacena \texttt{gap\_y = altura\_referencia}, es decir,
+    la coordenada vertical del centro del pasaje,
+    utilizada para calcular la característica \texttt{dy} del agente.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    self.velocidad = 4
+    self.gap_y = self.altura_referencia
+\end{verbatim}
+}
+\end{frame}
+
+
+%------------------------------------------------
+\subsection{Módulo menu.py}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Módulo menu.py (I)}
+
+El menú en \texttt{menu.py} recibe la pantalla y sus dimensiones, y crea el título \texttt{FLAPPY FISH!} junto con dos opciones: o el juego manual o la simulacion (AG).
+
+\vspace{6pt}
+
+\centering
+    \includegraphics[width=0.8\textwidth]{img_4.png}
+
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Módulo menu.py (II)}
+
+El método \texttt{manejar\_eventos()} devuelve el modo de juego cuando el usuario hace click con el mouse sobre la opción correspondiente o al presionar las teclas 1/2.
+
+{\scriptsize
+\begin{verbatim}
+def manejar_eventos(self, event):
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_pos = event.pos
+                    if self.rect_single.collidepoint(mouse_pos):
+                        self.seleccion = 'SINGLE'
+                        return self.seleccion
+                    if self.rect_evolutivo.collidepoint(mouse_pos):
+                        self.seleccion = 'EVOLUTIVO'
+                        return self.seleccion
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    self.seleccion = 'SINGLE'
+                    return self.seleccion
+                elif event.key == pygame.K_2:
+                    self.seleccion = 'EVOLUTIVO'
+                    return self.seleccion
+\end{verbatim}
+}
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo \texttt{swimfish.py}: Fin del Juego (I)}
+
+El método \texttt{\_dibujar\_game\_over()} se encarga de la interfaz gráfica
+y los sonidos cuando el juego termina.
+
+\begin{itemize}
+    \item \textbf{Detención del Audio:} Detiene la música de fondo que estaba reproduciéndose.
+    \item \textbf{Cálculo de Centros:} Obtiene las coordenadas centrales de la pantalla
+          (\texttt{centro\_x}, \texttt{centro\_y}) para posicionar los textos.
+    \item \textbf{Fondo de Game Over:} Dibuja la imagen \texttt{fondo\_dead\_fish} sobre toda la pantalla.
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+def _dibujar_game_over(self):
+    pygame.mixer.music.stop()
+    centro_x = self.screen_w // 2
+    centro_y = self.screen_h // 2
+
+    self.screen.blit(self.fondo_dead_fish, (0, 0))
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo \texttt{swimfish.py}: Fin del Juego (II)}
+
+Se dibuja el texto principal ``- FIN DEL JUEGO -'' en la pantalla. Para lograr un
+efecto de sombra:
+
+\begin{itemize}
+    \item Se renderiza el texto dos veces: primero en color
+          \texttt{color\_sombra} (negro) y luego en color rojo.
+    \item El texto de sombra se posiciona con un pequeño desplazamiento
+          (\texttt{offset\_sombra}) respecto al texto principal, creando el efecto visual.
+\end{itemize}
+
+\vspace{4pt}
+{\scriptsize
+\begin{verbatim}
+texto_perdiste_sombra = self.letra_grande.render(
+    '- FIN DEL JUEGO -', True, self.color_sombra
+)
+rect_perdiste_sombra = texto_perdiste_sombra.get_rect(
+    center=(centro_x + self.offset_sombra,
+            centro_y - 70 + self.offset_sombra)
+)
+self.screen.blit(texto_perdiste_sombra, rect_perdiste_sombra)
+
+texto_perdiste = self.letra_grande.render(
+    '- FIN DEL JUEGO -', True, (255, 0, 0)
+)
+rect_perdiste = texto_perdiste.get_rect(center=(centro_x, centro_y - 70))
+self.screen.blit(texto_perdiste, rect_perdiste)
+\end{verbatim}
+}
+
+\end{frame}
+%------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Módulo \texttt{swimfish.py}: Fin del Juego (III)}
+
+Se muestra la puntuación final del jugador.
+
+\begin{itemize}
+    \item Se renderiza la puntuación dos veces (sombra y texto principal).
+    \item Se utiliza un f-string para incluir \texttt{self.puntuacion}.
+\end{itemize}
+
+\vspace{4pt}
+
+\scriptsize
+\begin{verbatim}
+texto_puntuacion_final_sombra = self.letra_pequena.render(
+    f'Puntuación total: {self.puntuacion}', True, self.color_sombra
+)
+rect_puntuacion_final_sombra = texto_puntuacion_final_sombra.get_rect(
+    center=(centro_x + self.offset_sombra,
+            centro_y + 10 + self.offset_sombra)
+)
+self.screen.blit(texto_puntuacion_final_sombra, rect_puntuacion_final_sombra)
+
+texto_puntuacion_final = self.letra_pequena.render(
+    f'Puntuación total: {self.puntuacion}', True, (255, 255, 255)
+)
+rect_puntuacion_final = texto_puntuacion_final.get_rect(
+    center=(centro_x, centro_y + 10)
+)
+self.screen.blit(texto_puntuacion_final, rect_puntuacion_final)
+\end{verbatim}
+\normalsize
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Fin del Juego (IV)}
+
+Finalmente, se añaden las instrucciones de control para que el usuario pueda interactuar tras el Game Over.
+
+\begin{itemize} \item Se indica la tecla 'R' para reiniciar la partida. \item Se indica la tecla 'M' para volver a la pantalla de menú principal. \item El texto, también con sombra, se sitúa en la parte inferior de la pantalla de Game Over. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} texto_reiniciar_sombra = self.letra_pequena.render( '¡Presiona R para Reiniciar o M para volver al Menú!', True, self.color_sombra, ) rect_reiniciar_sombra = texto_reiniciar_sombra.get_rect( center=(centro_x + self.offset_sombra, centro_y + 50 + self.offset_sombra) ) self.screen.blit(texto_reiniciar_sombra, rect_reiniciar_sombra)
+
+    texto_reiniciar = self.letra_pequena.render(
+        '¡Presiona R para Reiniciar o M para volver al Menú!',
+        True, (255, 255, 255),
+    )
+    rect_reiniciar = texto_reiniciar.get_rect(center=(centro_x, centro_y + 50))
+    self.screen.blit(texto_reiniciar, rect_reiniciar)
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Reinicio de Partida}
+
+El método \texttt{reiniciar_juego()} se llama al comienzo de una nueva partida o tras un Game Over (por ejemplo, al presionar 'R') para restablecer el estado del juego a su configuración inicial.
+
+\begin{itemize} \item Restablecimiento de Estados: Se resetean las banderas de estado clave que controlan la lógica del juego. \item Puntuación y Objetos: Se reinicia la puntuación y se vacía la lista de tuberías. \item Restablecimiento del Jugador: Se llama al método \texttt{self.fish.reset()} para devolver el pez a su posición, velocidad e imagen originales. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} def reiniciar_juego(self): self.mostrar_jumpscare = False self.tiempo_jumpscare = 0 self.game_over = False self.juego_iniciado = False self.puntuacion = 0 self.lista_tuberias = [] self.fish.reset() \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Control de Audio al Reiniciar}
+
+\begin{itemize} \item Una parte fundamental del reinicio es el manejo del audio. \item Se detiene cualquier reproducción de música o sonido de Game Over que pudiera estar activo. \item Se inicia nuevamente la música de fondo en modo loop (\texttt{-1}) para ambientar la nueva partida. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} pygame.mixer.music.stop() pygame.mixer.music.play(-1) \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Dibujando la Puntuación}
+
+El método privado \texttt{_dibujar_puntuacion()} es responsable de renderizar el contador de puntos en la esquina superior izquierda de la pantalla, aplicando un efecto de sombra para mejorar la visibilidad.
+
+\begin{itemize} \item Conversión: La puntuación (\texttt{self.puntuacion}) se convierte a string. \item Doble Renderizado (Sombra y Texto): Se renderiza el texto dos veces utilizando la fuente \texttt{letra_puntuacion}: \begin{itemize} \item Una vez en color negro (\texttt{(0, 0, 0)}) para la sombra. \item Una vez en color blanco (\texttt{(255, 255, 255)}) para el texto principal. \end{itemize} \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} def _dibujar_puntuacion(self): puntuacion_str = str(self.puntuacion) texto_sombra = self.letra_puntuacion.render(puntuacion_str, True, (0, 0, 0)) texto_puntuacion = self.letra_puntuacion.render( puntuacion_str, True, (255, 255, 255) ) \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Posicionamiento de la Puntuación}
+
+El efecto de sombra se consigue mediante un ligero desplazamiento al dibujar los dos textos:
+
+\begin{itemize} \item Posición Base: El punto de inicio de la puntuación es \texttt{(20, 20)} (cercano a la esquina superior izquierda). \item Offset de Sombra: Se define un desplazamiento de \texttt{3} píxeles (\texttt{offset}). \item Dibujado: \begin{enumerate} \item La sombra se dibuja primero con el desplazamiento:
+
+$(x_{\text{base}} + \text{offset}, y_{\text{base}} + \text{offset})$.
+\item El texto principal se dibuja encima en la posición base $(x_{\text{base}}, y_{\text{base}})$.
+\end{enumerate}
+\end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} x_base, y_base = 20, 20 offset = 3 self.screen.blit(texto_sombra, (x_base + offset, y_base + offset)) self.screen.blit(texto_puntuacion, (x_base, y_base)) \end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]\frametitle{Módulo \texttt{swimfish.py}: Bucle Principal \texttt{swim()}}
+
+El método \texttt{swim(auto, pesos)} inicia y mantiene el bucle principal del juego. El parámetro \texttt{auto} controla si el juego se ejecuta en modo manual (jugador) o automático (ML).
+
+\begin{itemize}\item Modo Manual ($\texttt{auto=False}$):\begin{itemize}\item Se habilita el jumpscare (\texttt{enable_jumpscare}).\item Se asegura que el juego no esté en estado Game Over o iniciado.\end{itemize}\item Modo Automático ($\texttt{auto=True}$):\begin{itemize}\item Se deshabilita el jumpscare.\item Se crea o asigna la política de decisión (\texttt{decidir}) basada en los \texttt{pesos} de la red neuronal.
+
+\begin{itemize}
+\item Modo Manual ($\texttt{auto=False}$):
+\begin{itemize}
+\item Se habilita el jumpscare (\texttt{enable_jumpscare}).
+\item Se asegura que el juego no esté en estado Game Over o iniciado.
+\end{itemize}
+\item Modo Automático ($\texttt{auto=True}$):
+\begin{itemize}
+\item Se deshabilita el jumpscare.
+\item Se crea o asigna la política de decisión (\texttt{decidir}) basada en los \texttt{pesos} de la red neuronal.
+
+\item El juego se inicia inmediatamente y se reproduce la música.
+    \end{itemize}
+
+\end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} def swim(self, auto: bool = False, pesos=None): self.running_game = True self.enable_jumpscare = not auto
+decidir = None
+    if auto:
+        if pesos is None:
+            pesos = random_vector()
+        decidir, pesos_usados = crear_politica(pesos)
+        self.pesos_actuales = pesos_usados
+        self.juego_iniciado = True
+        pygame.mixer.music.play(-1)
+    else:
+        self.game_over = False
+        self.juego_iniciado = False
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Bucle Principal \texttt{swim()} (II)}
+
+El bucle \texttt{while self.running_game} es el corazón del juego.
+
+\begin{itemize} \item Control de FPS y Delta Time: Se mide el tiempo transcurrido desde el último frame (\texttt{delta_time}) para garantizar un movimiento independiente de la tasa de frames. \item Animación de Fondo: Se utiliza \texttt{delta_time} para controlar la velocidad de los fotogramas del fondo animado. \item Reinicio Automático (ML): Si está en modo \texttt{auto} y el juego ha terminado, se reinicia inmediatamente para continuar el entrenamiento. \item Actualización de Jumpscare: Se actualiza la lógica interna del jumpscare. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} while self.running_game: delta_time = self.clock.tick(self.FPS) / 1000.0 self.frame_timer += delta_time if self.frame_timer >= 1.0 / self.frame_rate: self.frame_index = (self.frame_index + 1) % len(self.background_frames) self.frame_timer = 0
+    if auto and self.game_over:
+            self.reiniciar_juego()
+            self.juego_iniciado = True
+
+        if self.enable_jumpscare:
+            self.jumpscare.actualizar_jumpscare()
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Manejo de Eventos (III)}
+
+Se procesan todos los eventos de Pygame (\texttt{eventos}).
+
+\begin{itemize} \item Salir del Juego (\texttt{QUIT}): Cierra la ventana y detiene el bucle. \item Control en Game Over (Solo Manual): Permite reiniciar (R) o volver al menú (M) si la partida terminó y no está en modo \texttt{auto}. \item Generación de Tuberías: Si ocurre el evento temporizado \texttt{evento_nueva_tuberia} y el juego ha comenzado, se crea y añade una nueva tubería. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} for event in pygame.event.get(): if event.type == pygame.QUIT: # ... lógica de salida ...
+    if self.game_over:
+                if (not auto) and event.type == pygame.KEYDOWN:
+                    # ... lógica de reiniciar (K_r) o menú (K_m) ...
+                continue
+
+            if event.type == self.evento_nueva_tuberia and self.juego_iniciado:
+                nueva_tuberia = tuberias(
+                    self.screen_w, self.hueco_entre_tuberias, self.imagen_tuberia
+                )
+                self.lista_tuberias.append(nueva_tuberia)
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Interacción del Jugador y la IA (IV)}
+
+Se maneja la interacción directa (pulsación de teclas) y la decisión del agente de ML.
+
+\begin{itemize} \item Jugador Manual (\texttt{not auto}): \begin{itemize} \item ESPACIO: Inicia el juego si no está iniciado, y realiza el aleteo (\texttt{flap()}) y reproduce el sonido de salto. \item DERECHA/IZQUIERDA: Control de movimiento horizontal (si estuviera implementado en \texttt{fish.py}). \end{itemize} \item Decisión de la IA (\texttt{auto}): Si está en modo automático y el juego está activo, se calcula el estado del pez (\texttt{dy, dx, vy}) y se le pide a la política de ML (\texttt{decidir}) si debe aletear. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} if (not auto) and event.type == pygame.KEYDOWN: if event.key == pygame.K_SPACE: # ... lógica de inicio y flap del pez ... elif event.key == pygame.K_RIGHT: self.fish.right() elif event.key == pygame.K_LEFT: self.fish.left()
+
+        if not self.game_over and self.juego_iniciado:
+            if auto and decidir is not None:
+                dy, dx, vy = self._calcular_estado_completo(self.fish)
+                if decidir(dy, dx, vy):
+                    self.fish.flap()
+                    self.sonido_salto.play()
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Lógica y Actualización (V)}
+
+Esta es la fase de actualización del estado del juego si no ha terminado.
+
+\begin{itemize} \item Física del Pez: Se actualiza la velocidad y posición del pez (\texttt{self.fish.update()}). \item Movimiento de Tuberías: Se mueven todas las tuberías de la lista. \item Colisión con Límites: Se comprueba si el pez ha chocado con el techo o el suelo. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} self.fish.update()
+    for t in self.lista_tuberias:
+                t.mover_tuberias()
+
+            fish_rect = self.fish.get_rect()
+
+            if fish_rect.top <= 0 or fish_rect.bottom >= self.screen_h:
+                self.game_over = True
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]\frametitle{Módulo \texttt{swimfish.py}: Puntuación y Detección de Colisiones (VI)}\begin{itemize}\item Puntuación: Para cada tubería, si su borde derecho está detrás del pez y no ha sido marcada como 'pasada', se incrementa la puntuación.\item Detección de Colisión (Bounding Box): Se itera sobre las partes de la tubería para la detección de colisiones inicial (\texttt{colliderect}).\item Colisión Pixel-Perfect (Mask): Si hay una superposición inicial, se calcula el offset y se utiliza el método \texttt{mask.overlap()} para una colisión precisa basada en píxeles.\item Efecto Jumpscare: Si ocurre una colisión y el jumpscare está habilitado, se activa con una probabilidad de $5/11$ (dado que $\texttt{i} \le 4$).\end{itemize}\vspace{4pt}{\scriptsize\begin{verbatim}for tuberia in self.lista_tuberias:# ... Lógica de Puntuación ...
+    for tuberia_rect in tuberia.get_rects():
+                    if not fish_rect.colliderect(tuberia_rect):
+                        continue
+
+                    offset_x = tuberia_rect.left - fish_rect.left
+                    offset_y = tuberia_rect.top - fish_rect.top
+
+                    if self.fish.mask.overlap(self.tuberia_mask, (offset_x, offset_y)):
+                        self.game_over = True
+                        if self.enable_jumpscare:
+                            i = random.randint(0, 10)
+                            if i <= 4:
+                                self.jumpscare.asustar()
+                        break
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile] \frametitle{Módulo \texttt{swimfish.py}: Limpieza y Renderizado (VII)}
+
+La última parte del bucle se encarga de dibujar el juego en la pantalla.
+
+\begin{itemize} \item Limpieza de Tuberías: Se eliminan las tuberías que han salido completamente de la pantalla por la izquierda para optimizar la memoria. \item Dibujado de Fondo: Se dibuja el frame animado actual y la imagen estática del fondo marino. \item Dibujado de Objetos: Se dibujan las tuberías y el pez. \item HUD e Interfaz: Se dibuja la puntuación si el juego está activo, o el mensaje de inicio si no ha comenzado. Si el juego ha terminado, se llama a \texttt{_dibujar_game_over()} (solo en modo manual). \item Dibujado de Jumpscare: Si está activo, se dibuja la superposición del jumpscare. \item Actualización de Pantalla: \texttt{pygame.display.flip()} actualiza todo lo dibujado para mostrarlo al usuario. \end{itemize}
+
+\vspace{4pt} {\scriptsize \begin{verbatim} # ... Limpieza de tuberías ...
+    current_frame = self.background_frames[self.frame_index]
+        self.screen.blit(current_frame, (0, 0))
+        # ... Dibujado de fondo marino, tuberías, pez ...
+
+        if not self.game_over:
+            # ... Lógica de dibujar puntuación o texto de inicio ...
+        else:
+            if not auto:
+                self._dibujar_game_over()
+
+        if self.enable_jumpscare:
+            self.jumpscare.dibujar_jumpscare()
+
+        pygame.display.flip()
+\end{verbatim} } \end{frame}
+
+%------------------------------------------------
+
+\subsection{Módulo main.py}
+
+%------------------------------------------------
+
+
+
+
+%------------------------------------------------
+
+\section{Agente evolutivo y Algoritmo Genético}
+
+%------------------------------------------------
+
+\subsection{Idea general del modo evolutivo}
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Dos modos de juego: Manual vs. Simulación}
+
+En Flappy Fish tenemos dos modos de juego:
+
+\vspace{8pt}
+
+\begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+        \centering{Single Player (Juego Manual)}\\[6pt]
+        \raggedright
+        \begin{itemize}
+            \item El usuario controla un único pez con el teclado.
+            \item Cada salto se produce cuando el jugador presiona \texttt{ESPACIO}.
+            \item El bucle principal del juego lee los eventos de teclado
+                  y decide si llamar a \texttt{fish.flap()}.
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \centering{Simulación (Algoritmo Evolutivo)}\\[6pt]
+        \raggedright
+        \begin{itemize}
+            \item No se usan teclas para controlar el pez.
+            \item Una población de agentes decide cuándo saltar.
+            \item Cada agente tiene su propia política de salto,
+                  parametrizada por un vector de pesos.
+        \end{itemize}
+    \end{column}
+\end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Intuición del modo evolutivo}
+
+\begin{columns}[T]
+    \begin{column}{0.35\textwidth}
+        La idea intuitiva es sustituir al humano por una colección de “jugadores artificiales”,
+        donde cada uno aprende a jugar gracias las generaciones pasadas.
+    \end{column}
+
+    \begin{column}{0.65\textwidth}
+       \includegraphics[width=0.8\textwidth]{img_6.png}
+    \end{column}
+\end{columns}
+
+\vspace{12pt}
+
+Tras varias generaciones, el juego “descubre” políticas que controlan mejor al pez que el azar.
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Arquitectura de la parte AG}
+
+%------------------------------------------------
+
+\begin{frame}
+    \frametitle{Arquitectura de la parte AG}
+
+    El proyecto se estructura en los siguientes módulos: \\[6pt]
+
+    \begin{itemize}
+        \item \textbf{ml/vector\_w.py} — generación de vectores de pesos iniciales.
+        \item \textbf{ml/policy.py} — definición de la política \texttt{decidir(dy,dx,vy)}.
+        \item \textbf{ml/calcular\_estado.py} — construcción del estado $(dy,dx)$ a partir de la próxima tubería.
+        \item \textbf{ml/genetics.py} — selección proporcional, cruza, mutación y nueva generación.
+    \end{itemize}
+    
+\vspace{6pt}    
+El archivo \texttt{swim\_fish.py} conecta estos módulos con la lógica del juego.
+\end{frame}
+
+
+%------------------------------------------------
+
+\subsubsection{Módulo ml/calcular\_estado.py}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/calcular\_estado.py (I)}
+
+La función \texttt{calcular\_estado} resume la geometría del juego
+en dos números: \texttt{dy} y \texttt{dx}.
+
+
+\begin{itemize}
+    \item \texttt{rect\_jugador}: es el \texttt{pygame.Rect} del pez (su posición en pantalla).
+    \item \texttt{proxima\_pipe}: es el objeto tubería que el pez tiene inmediatamente por delante.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    def calcular_estado(rect_jugador, proxima_pipe):
+        ...
+    return dy, dx
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/calcular\_estado.py (II)}
+
+\begin{itemize}
+    \item \texttt{dy}:
+    \begin{itemize}
+        \item \texttt{rect\_jugador.centery} = coordenada vertical del centro del pez.
+        \item \texttt{proxima\_pipe.gap\_y} = coordenada vertical del centro del hueco.
+        \item \texttt{dy = centery - gap\_y}: si \texttt{dy > 0}, el hueco está por encima del pez
+              (en el sistema de coordenadas de la pantalla, menor \texttt{y} implica más arriba),
+              es decir, “hay que subir”.
+    \end{itemize}
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+        dy = rect_jugador.centery - proxima_pipe.gap_y
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/calcular\_estado.py (III)}
+
+\begin{itemize}
+    \item \texttt{dx}:
+    \begin{itemize}
+        \item \texttt{proxima\_pipe.top\_rect().left} = borde izquierdo de la tubería superior.
+        \item \texttt{rect\_jugador.right} = borde derecho del pez.
+        \item \texttt{dx = left\_tubo - right\_pez}: distancia horizontal hasta la tubería.
+    \end{itemize}
+    \item \texttt{vy} no se calcula aquí: se toma directamente de \texttt{fish.velocity}.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+        dx = proxima_pipe.top_rect().left - rect_jugador.right
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{¿Por qué calcular\_estado() no usa directamente el objeto Fish?}
+
+El estado del agente usa variables relativas:
+    \[
+        dy = y_{\text{pez}} - y_{\text{hueco}}, \qquad
+        dx = x_{\text{tubería}} - x_{\text{pez}}.
+    \]
+El objeto \texttt{Fish} sólo conoce su propia posición
+          (\texttt{fish.rect}) y su velocidad (\texttt{fish.velocity}),
+          pero no sabe nada sobre la próxima tubería ni sobre el hueco.
+
+Por eso \texttt{calcular\_estado(rect\_jugador, proxima\_pipe)} recibe:
+    \begin{itemize}
+        \item la geometría del pez (\texttt{rect\_jugador}),
+        \item la tubería más cercana (\texttt{proxima\_pipe}),
+        \item y a partir de ambos calcula \texttt{dy} y \texttt{dx}.
+    \end{itemize}
+
+La velocidad \texttt{vy} se toma directamente de \texttt{fish.velocity}
+fuera de esta función, para que el módulo no dependa del tipo concreto \texttt{Fish} y se mantenga más modular.
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsubsection{Módulo ml/policy.py}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Módulo policy.py (I)}
+
+\vspace{3pt}
+
+En nuestro proyecto llamamos \textbf{política} a una función que definimos como
+
+\[
+\gamma : \mathbb{R}^3 \to \{\text{True}, \text{False}\},
+\qquad (dy, dx, vy) \mapsto \gamma(dy, dx, vy).
+\]
+
+El valor booleano que devuelve la política determina si el pez debe saltar
+en ese instante o no.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo politica.py (II): creación de la política}
+
+La función $\gamma$ está implementada en \texttt{policy.py} mediante
+\texttt{crear\_politica}, que construye una política parametrizada por un vector
+de 6 pesos:
+
+\[
+w = [w_0, w_1, w_2, w_3, w_4, w_5].
+\]
+
+Si \texttt{pesos} es \texttt{None}, se genera un vector aleatorio con \texttt{random\_vector(low, high)}.
+
+Si \texttt{pesos} contiene 6 números, se usan como pesos ya definidos
+(por ejemplo, provenientes de la generación anterior).
+
+\vspace{4pt}
+
+{\scriptsize
+\begin{verbatim}
+def crear_politica(pesos=None, low=-0.5, high=0.5):
+    if pesos is None:
+        pesos = random_vector(low, high)
+
+    w = list(pesos)
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Detalle de diseño: parámetros \texttt{low} y \texttt{high}}
+
+En la función \texttt{crear\_politica} los parámetros \texttt{low} y \texttt{high}
+aparecen dos veces:
+
+\begin{itemize}
+    \item La función \texttt{random\_vector} ya define sus propios valores
+          por defecto \texttt{low=-0.5} y \texttt{high=0.5}.
+    \item \texttt{crear\_politica} vuelve a declarar \texttt{low=-0.5} y
+          \texttt{high=0.5}, pero en nuestro código nunca llamamos a
+          \texttt{crear\_politica} con otros valores.
+\end{itemize}
+
+Por lo tanto, en la próxima versión del juego se podría simplificar la función a:
+
+\begin{itemize}
+    \item eliminar \texttt{low} y \texttt{high} de la firma de
+          \texttt{crear\_politica},
+    \item y llamar simplemente \texttt{random\_vector()} sin argumentos.
+\end{itemize}
+
+Este sería un ejemplo de pequeña refactorización posible para reducir
+duplicación y mantener la interfaz más limpia.
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo policy.py (IV): función interna decidir}
+
+Dentro de \texttt{crear\_politica} se define la función interna
+\texttt{decidir(dy, dx, vy)}, que implementa la política del agente:
+
+\begin{itemize}
+    \item Normaliza el estado: $dy$, $dx$, $vy$.
+    \item Calcula un valor usando los pesos $w$.
+    \item Devuelve \texttt{True} si el pez debe saltar.
+\end{itemize}
+
+\vspace{4pt}
+
+{\scriptsize
+\begin{verbatim}
+    def decidir(dy, dx, vy):
+        dy_n = dy / 400.0
+        dx_n = dx / 400.0
+        vy_n = vy / 300.0
+
+        valor = (w[0] +
+                 w[1] * dy_n +
+                 w[2] * (dy_n * dy_n) +
+                 w[3] * dx_n +
+                 w[4] * (dx_n * dx_n) +
+                 w[5] * vy_n)
+        return valor > 0
+    return decidir, pesos
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Normalización del vector}
+
+En todo el juego trabajamos con números en píxeles.
+
+\vspace{6pt}
+
+$dy \in [-400,\, 400]$ \; diferencia vertical entre el pez y el centro del hueco.\\
+$dx \in [0,\, 400]$ \; distancia horizontal hasta la próxima tubería.\\
+$vy \in [-10,\, 10]$ \; velocidad vertical típica del pez.\\
+
+\vspace{6pt}
+
+Para la política es más cómodo usar números pequeños, del orden de $-1$ a $1$.
+Por eso hacemos:
+
+\[
+dy_n = \frac{dy}{400}, \quad
+dx_n = \frac{dx}{400}, \quad
+vy_n = \frac{vy}{300}.
+\]
+
+Así todos los valores están en un rango parecido.
+Ninguna variable tiene números “gigantes” que tapen a las demás.
+Con números pequeños, los pesos \texttt{w0,...,w5} pueden ser simples
+(por ejemplo entre \texttt{-0.5} y \texttt{0.5}) y el algoritmo evolutivo puede buscar buenas combinaciones de pesos
+de manera más estable.
+
+\end{frame}
+
+
+
+
+%------------------------------------------------
+
+\subsubsection{Módulo ml/genetics.py}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/genetics.py: selección proporcional (I)}
+
+Queremos elegir padres de la población de forma que:
+
+\begin{itemize}
+    \item Cada individuo tiene un \texttt{fitness} (un número que mide qué tan bien jugó).
+    \item Cuanto más alto es el fitness, más probabilidad queremos darle de ser elegido.
+    \item Pero los individuos con fitness bajo todavía deben tener una pequeña oportunidad.
+\end{itemize}
+
+Esto se conoce como método de la ruleta:
+
+\begin{itemize}
+    \item Imaginamos una ruleta donde cada individuo ocupa un sector.
+    \item El tamaño de cada sector es proporcional a su fitness.
+    \item Giramos la ruleta (elegimos un número aleatorio) y vemos en qué sector cae.
+    \item El individuo de ese sector es el padre seleccionado.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/genetics.py: selección proporcional - preparación de los datos (II)}
+
+\begin{columns}[T,onlytextwidth]
+    \begin{column}{0.19\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fish1.png}
+    \end{column}
+    \begin{column}{0.19\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fish1.png}
+    \end{column}
+    \begin{column}{0.19\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fish1.png}
+    \end{column}
+    \begin{column}{0.19\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fish1.png}
+    \end{column}
+    \begin{column}{0.19\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fish1.png}
+    \end{column}
+\end{columns}
+
+\vspace{8pt}
+
+La función \texttt{seleccionar\_proporcional} toma:
+
+\begin{itemize}
+    \item \texttt{pesos\_poblacion}: lista de vectores de pesos (individuos).
+    \item \texttt{fitnesses}: lista de fitness (uno por individuo).
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+import random
+import math
+def seleccionar_proporcional(pesos_poblacion, fitnesses):
+    #...
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/genetics.py: selección proporcional - preparación de los datos (III)}
+
+\begin{itemize}
+    \item \texttt{fitness\_pos}:
+        Para cada fitness \texttt{f}, calculamos \texttt{max(f, 0.0)}:
+            si algún fitness fuera negativo, lo reemplazamos por 0.
+        Luego elevamos al cuadrado: \texttt{(max(f, 0.0))** 2} para aumentar
+            la diferencia entre individuos “buenos” y “regulares”.
+    \item \texttt{total = sum(fitness\_pos)}: \texttt{total} es la suma de todas las “porciones” de la ruleta.
+    \item \texttt{if total == 0}: Si todos los fitness son 0, la ruleta no tiene sectores,
+        así que simplemente elegimos un individuo al azar.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    fitness_pos = [max(f, 0.0) ** 2 for f in fitnesses]
+    total = sum(fitness_pos)
+    if total == 0:
+        return random.choice(pesos_poblacion)
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/genetics.py: selección proporcional - sorteo en la ruleta (IV)}
+
+\begin{itemize}
+    \item \texttt{r = random.uniform(0, total)}:
+        Elegimos un número aleatorio entre 0 y \texttt{total}.
+        Es tipo “parar la ruleta” en un punto al azar del círculo.
+
+    \item \texttt{acum = 0.0}: será la “suma acumulada” de los sectores
+              mientras recorremos la población.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    r = random.uniform(0, total)
+    acum = 0.0
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Módulo ml/genetics.py: selección proporcional - sorteo en la ruleta (V)}
+
+\begin{itemize}
+    \item \texttt{for w, fit in zip(...)}:
+    \begin{itemize}
+        \item Recorremos, en paralelo, cada vector de pesos \texttt{w}
+              y su fitness positivo \texttt{fit}.
+        \item En cada paso sumamos: \texttt{acum += fit}.
+        \item Cuando \texttt{acum} supera o iguala a \texttt{r},
+              devolvemos \texttt{w}: ese individuo ha sido seleccionado.
+    \end{itemize}
+    \item \texttt{return pesos\_poblacion[-1]}:
+    \begin{itemize}
+        \item Es un caso de seguridad: si por redondeos no hemos devuelto antes,
+              elegimos el último individuo.
+    \end{itemize}
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+    for w, fit in zip(pesos_poblacion, fitness_pos):
+        acum += fit
+        if acum >= r:
+            return w
+    return pesos_poblacion[-1]
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Probabilidad de ser elegido como padre}
+
+%\begin{columns}[T]
+
+%  \begin{column}{0.53\textwidth}
+%    \small
+    En la función \texttt{seleccionar\_proporcional} primero transformamos
+    los valores de fitness:
+
+    \[
+      \texttt{fitness\_pos}[i] = \max(f_i, 0)^2,
+    \]
+    \[
+      \texttt{total} = \sum_j \texttt{fitness\_pos}[j].
+    \]
+
+    \vspace{0.3cm}
+
+    La probabilidad de que el individuo $i$ sea elegido como padre es:
+
+    \[
+      P(\text{individuo } i) =
+      \frac{\texttt{fitness\_pos}[i]}{\texttt{total}} =
+      \frac{\max(f_i, 0)^2}{\sum_j \max(f_j, 0)^2}.
+    \]
+
+%  \end{column}
+
+%  \begin{column}{0.45\textwidth}
+%    \small
+%    \begin{itemize}
+%        \item $f_i$ es el fitness original del individuo $i$.
+%        \item $\max(f_i, 0)$ hace que los fitness negativos cuenten como $0$.
+%        \item El cuadrado $(\cdot)^2$ amplifica las diferencias:
+%        \begin{itemize}
+%            \item un individuo bueno se vuelve todavía más probable,
+%            \item uno mediocre sigue teniendo una probabilidad pequeña, pero no nula.
+%        \end{itemize}
+%        \item La fracción
+%        \[
+%          \frac{\texttt{fitness\_pos}[i]}{\texttt{total}}
+%        \]
+%        se puede leer como:
+%        \begin{itemize}
+%            \item «peso» del individuo $i$
+%            \item dividido por «suma de los pesos de todos».
+%        \end{itemize}
+%        \item En la metáfora de la ruleta: es el tamaño del sector del individuo $i$
+%              dividido por el tamaño total de la ruleta.
+%    \end{itemize}
+%  \end{column}
+
+%\end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Módulo ml/genetics.py: selección proporcional - sorteo en la ruleta (IV)}
+
+Imaginemos una población de 3 individuos:
+
+\[
+f_1=1,\ f_2=2,\ f_3=3.
+\]
+
+Tras aplicar \texttt{max(f,0)\(^2\)}:
+\[
+[1,\ 4,\ 9],\qquad total = 14.
+\]
+
+Elegimos \(r=5.3\).
+
+\vspace{5pt}
+
+Acumulación:
+\begin{itemize}
+    \item acum = 1  \(\rightarrow\) sigue
+    \item acum = 5  \(\rightarrow\) sigue
+    \item acum = 14 \(\rightarrow\) \(14 \ge 5.3\): seleccionado el 3º
+\end{itemize}
+
+Mayor fitness = mayor tramo de “ruleta”.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Cruce uniforme()}
+
+La función \texttt{cruce\_uniforme()} mezcla los genes (pesos) de dos padres para
+producir un hijo.
+
+\begin{itemize}
+    \item \texttt{p1}, \texttt{p2}: vectores de pesos.
+    \item \texttt{largo}: longitud mínima entre ambos.
+    \item Para cada índice:
+    \begin{itemize}
+        \item con probabilidad 0.5 se toma \texttt{p1[i]},
+        \item con probabilidad 0.5 se toma \texttt{p2[i]}.
+    \end{itemize}
+    \item El hijo es una combinación gen a gen de ambos padres.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+def cruce_uniforme(p1, p2):
+    largo = min(len(p1), len(p2))
+    hijo = []
+    for i in range(largo):
+        if random.random() < 0.5:
+            hijo.append(p1[i])
+        else:
+            hijo.append(p2[i])
+    return hijo
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Mutación de pesos: mutar()}
+
+La función \texttt{mutar} introduce pequeñas perturbaciones aleatorias en los
+pesos de un individuo.
+
+\begin{itemize}
+    \item \texttt{pesos}: vector original.
+    \item \texttt{prob\_gen}: probabilidad de mutar cada gen (0.1 por defecto).
+    \item \texttt{sigma}: desviación estándar del ruido gaussiano.
+    \item Para cada gen:
+        con probabilidad \texttt{prob\_gen} se añade ruido \(\mathcal{N}(0,\sigma^2)\).
+    \item El resultado es un vector cercano al original pero con variación
+          suficiente para explorar nuevas soluciones.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+def mutar(pesos, prob_gen=0.1, sigma=0.05):
+    hijo = list(pesos)
+    for i in range(len(hijo)):
+        if random.random() < prob_gen:
+            hijo[i] += random.gauss(0.0, sigma)
+    return hijo
+\end{verbatim}
+}
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Generación de nueva\_generacion() (I)}
+
+La función \texttt{nueva\_generacion} crea la siguiente población de pesos
+usando los fitness de la generación actual.
+
+\begin{itemize}
+    \item \texttt{pesos\_poblacion}: vectores de pesos actuales.
+    \item \texttt{fitnesses}: fitness correspondiente.
+    \item \texttt{prob\_mut}: probabilidad de mutación por gen.
+    \item \texttt{elitismo}: número de mejores individuos copiados sin cambio.
+    \item Proceso inicial:
+    \begin{itemize}
+        \item \texttt{zip} junta pesos y fitness,
+        \item \texttt{sort(reverse=True)} ordena por fitness descendente,
+        \item los mejores \texttt{elitismo} pasan directamente a la nueva población.
+    \end{itemize}
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+def nueva_generacion(pesos_poblacion, fitnesses,
+                     prob_mut=0.1, elitismo=2):
+    combinados = list(zip(pesos_poblacion, fitnesses))
+    combinados.sort(key=lambda x: x[1], reverse=True)
+    nuevos = [w for w, f in combinados[:elitismo]]
+\end{verbatim}
+}
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Generación de nueva\_generacion() (II)}
+
+\begin{itemize}
+    \item \texttt{n}: tamaño de la población.
+    \item Mientras \texttt{nuevos} tenga menos de \texttt{n} individuos:
+    \item En cada iteración: seleccionar dos padres, generar un hijo mediante cruce,
+mutarlo si corresponde y añadirlo a \texttt{nuevos}.
+
+    \item Al finalizar, \texttt{nuevos} es la nueva generación lista para la siguiente época.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+n = len(pesos_poblacion)
+while len(nuevos) < n:
+    p1 = seleccionar_proporcional(pesos_poblacion, fitnesses)
+    p2 = seleccionar_proporcional(pesos_poblacion, fitnesses)
+    hijo = cruce_uniforme(p1, p2)
+    hijo = mutar(hijo, prob_gen=prob_mut)
+    nuevos.append(hijo)
+
+return nuevos
+\end{verbatim}
+}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Quién llama a quién (visión general) (I)}
+
+El flujo de llamadas en modo evolutivo es:
+
+\vspace{6pt}
+
+\begin{enumerate}
+    \item \texttt{main.py}
+    \begin{itemize}
+        \item crea la población inicial de pesos con \texttt{random\_vector()},
+        \item llama a \texttt{SwimFish.swim\_population(...)}.
+    \end{itemize}
+    \item \texttt{SwimFish.swim\_population}
+    \begin{itemize}
+        \item para cada vector de pesos, llama a \texttt{crear\_politica},
+        \item dentro del bucle de juego llama a \texttt{calcular\_estado}
+              y luego a \texttt{decidir(dy,dx,vy)}.
+    \end{itemize}
+    \item Al final de la generación:
+    \begin{itemize}
+        \item \texttt{swim\_population} devuelve fitness por individuo,
+        \item \texttt{main.py} llama a \texttt{nueva\_generacion} de \texttt{ml/genetics.py}.
+    \end{itemize}
+\end{enumerate}
+
+\vspace{6pt}
+
+Así se cierran las generaciones: juego $\Rightarrow$ fitness $\Rightarrow$ genética $\Rightarrow$ nuevos pesos.
+
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Quién llama a quién (visión general) (II)}
+
+\centering
+    \includegraphics[width=1\textwidth]{diagram-algorythm.png}
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Ciclo de entrenamiento por generaciones}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Parámetros clave del entrenamiento}
+
+Algunos parámetros importantes:
+
+\begin{itemize}
+    \item \texttt{tam\_poblacion}:
+    \begin{itemize}
+        \item número de agentes por generación (por ejemplo, 100).
+    \end{itemize}
+
+    \item \texttt{num\_epocas}:
+    \begin{itemize}
+        \item número máximo de generaciones (por ejemplo, 50).
+    \end{itemize}
+
+    \item \texttt{tiempo\_max}:
+    \begin{itemize}
+        \item límite de pasos por generación en \texttt{swim\_population}.
+    \end{itemize}
+
+    \item \texttt{umbral\_distancia}:
+    \begin{itemize}
+        \item número de tuberías superadas que consideramos ``suficiente'' para un pez.
+    \end{itemize}
+
+    \item \texttt{elitismo}:
+    \begin{itemize}
+        \item cantidad de mejores individuos copiados sin cambios a la nueva generación.
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Construcción de la población inicial en main.py}
+
+En \texttt{main.py} (modo evolutivo), la población inicial se genera así:
+
+{\scriptsize
+\begin{verbatim}
+from ml.vector_w import random_vector
+
+tam_poblacion = 100
+
+# Generar lista de vectores de pesos aleatorios
+pesos_poblacion = [random_vector() for _ in range(tam_poblacion)]
+\end{verbatim}
+}
+
+\begin{itemize}
+    \item Cada elemento de \texttt{pesos\_poblacion} es un vector de pesos.
+    \item Esta lista se pasa a \texttt{SwimFish.swim\_population(...)}
+          para evaluar el desempeño de cada individuo en el juego.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Bucle de entrenamiento en main.py (I)}
+
+El núcleo del entrenamiento en modo evolutivo es un bucle de generaciones:
+
+\begin{itemize}
+    \item \texttt{num\_epocas} fija el número máximo de generaciones
+          que queremos simular (por ejemplo, 50).
+    \item \texttt{juego\_auto.generacion = generacion} guarda el número
+          de generación actual, que se muestra en el panel de estadísticas.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+num_epocas = 50   # número máximo de generaciones
+for generacion in range(num_epocas):
+    juego_auto.generacion = generacion
+    #...
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{Bucle de entrenamiento en main.py (II)}
+
+\begin{itemize}
+    \item El bucle \texttt{for generacion in range(num\_epocas)} recorre
+          las generaciones 0, 1, 2, \dots\ hasta que se cumpla un criterio
+          de parada.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+for generacion in range(num_epocas):
+    juego_auto.generacion = generacion
+    # Simular toda la población en el juego
+    pesos_poblacion, fitness_poblacion, estado = \
+        juego_auto.swim_population(pesos_poblacion,
+                                   tiempo_max=400,
+                                   umbral_distancia=50)
+    if estado in ('MENU', 'QUIT'):
+        break  # el usuario interrumpió la simulación
+    # Crear nueva generación de pesos a partir de fitness
+    pesos_poblacion = nueva_generacion(pesos_poblacion,
+                                       fitness_poblacion,
+                                       elitismo=5)
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Bucle de entrenamiento en main.py (III)}
+
+Dentro de cada iteración del bucle de generaciones suceden dos pasos:
+
+\vspace{6pt}
+1. Simulación de la generación actual
+
+\begin{itemize}
+    \item \texttt{swim\_population} hace volar a todos los peces de la
+          población con sus políticas respectivas.
+    \item Calcula el \texttt{fitness} de cada individuo.
+    \item Devuelve:
+        \texttt{pesos\_poblacion}: la lista de pesos de la generación,
+        \texttt{fitness\_poblacion}: lista de fitness,
+        \texttt{estado}: indica si el usuario volvió al menú
+              o cerró el juego.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+pesos_poblacion, fitness_poblacion, estado = \
+    juego_auto.swim_population(pesos_poblacion,
+                               tiempo_max=400,
+                               umbral_distancia=50)
+\end{verbatim}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{Bucle de entrenamiento en main.py (IV)}
+
+\vspace{6pt}
+2. Creación de la nueva generación
+
+\begin{itemize}
+    \item \texttt{nueva\_generacion} usa los \texttt{fitness} para:
+        copiar los 5 mejores individuos (elitismo),
+        generar el resto mediante selección, cruce y mutación.
+    \item La nueva \texttt{pesos\_poblacion} será la entrada
+          para la siguiente generación del bucle.
+\end{itemize}
+
+{\scriptsize
+\begin{verbatim}
+pesos_poblacion = nueva_generacion(pesos_poblacion,
+                                   fitness_poblacion,
+                                   elitismo=5)
+\end{verbatim}
+}
+
+\vspace{4pt}
+Así se encadenan juego y genética generación tras generación:
+\[
+\text{pesos} \;\Rightarrow\; \text{juego} \;\Rightarrow\; \text{fitness}
+\;\Rightarrow\; \text{nuevos pesos}.
+\]
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Detalle de swim\_population()}
+
+%------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{swim\_population(): inicialización (I)}
+
+Al entrar en \texttt{swim\_population} se preparan
+las estructuras de la generación:
+
+{\scriptsize
+\begin{verbatim}
+def swim_population(self, pesos_poblacion, tiempo_max,
+    umbral_distancia):
+    num_agentes = len(pesos_poblacion)
+
+    peces = []
+    politicas = []
+    vivos = [True] * num_agentes
+    scores = [0] * num_agentes
+    time_alive = [0] * num_agentes
+\end{verbatim}
+}
+
+\begin{itemize}
+    \item \texttt{num\_agentes}: cantidad de peces en la población.
+    \item \texttt{peces}, \texttt{politicas}: listas de objetos \texttt{Fish}
+          y funciones \texttt{decidir}.
+    \item \texttt{vivos}, \texttt{scores}, \texttt{time\_alive}: estado,
+          tuberías superadas y tiempo de vida de cada pez.
+\end{itemize}
+
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{swim\_population(): creación de peces y políticas (II)}
+
+Luego se instancia un pez y una política por cada vector de pesos:
+
+{\scriptsize
+\begin{verbatim}
+    for pesos in pesos_poblacion:
+        fish = Fish(self.screen_w // 4,
+                    self.screen_h // 2,
+                    (50, 35),
+                    "../data/img/fish.png")
+        decidir, _ = crear_politica(pesos)
+
+        peces.append(fish)
+        politicas.append(decidir)
+
+    # Inicializar tuberías y mundo común...
+\end{verbatim}
+}
+
+\begin{itemize}
+    \item Para cada \texttt{pesos} se crea un \texttt{Fish} en una
+          posición inicial fija.
+    \item \texttt{crear\_politica(pesos)} devuelve la función
+          \texttt{decidir(dy,dx,vy)} para ese agente.
+    \item Todos los peces comparten el mismo “mundo” (tuberías, fondo, tiempo).
+\end{itemize}
+
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}[fragile]
+\frametitle{swim\_population(): bucle principal (III)}
+
+Dentro de \texttt{swim\_population} se ejecuta el bucle principal de simulación:
+
+{\scriptsize
+\begin{verbatim}
+paso = 0
+running = True
+while running:
+    paso += 1
+    self._actualizar_fondo()
+    self._actualizar_tuberias()
+    for i, fish in enumerate(peces):
+        if not vivos[i]:
+            continue
+        dy, dx = calcular_estado(fish.rect,
+                                 self.proxima_tuberia())
+        vy = fish.velocity
+        if politicas[i](dy, dx, vy):
+            fish.flap()
+        fish.update()
+        self._actualizar_estado_del_pez(i, fish, scores, vivos)
+        time_alive[i] += 1
+\end{verbatim}
+}
+
+%\begin{itemize}
+%    \item En cada paso se actualiza el fondo y las tuberías.
+%    \item Para cada pez vivo:
+%    \begin{itemize}
+%        \item se calcula el estado \((dy, dx, vy)\),
+%        \item la política decide si llamar a \texttt{flap()},
+%        \item se aplica la física con \texttt{update()},
+%        \item se revisan colisiones y se actualizan \texttt{score} y \texttt{vivos},
+%        \item se incrementa \texttt{time\_alive}.
+%    \end{itemize}
+%\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{swim\_population(): qué pasa en cada paso (IV)}
+
+En cada iteración del bucle:
+
+\vspace{6pt}
+
+\begin{enumerate}
+    \item Se incrementa \texttt{paso} y se actualiza el mundo
+          (\texttt{\_actualizar\_fondo}, \texttt{\_actualizar\_tuberias}).
+    \vspace{3pt}
+    \item Para cada pez vivo:
+    \begin{itemize}
+        \item se calcula el estado relativo \((dy, dx, vy)\);
+        \item la política \texttt{politicas[i]} decide si hacer \texttt{flap()};
+        \item \texttt{fish.update()} aplica física (gravedad, movimiento);
+        \item \texttt{\_actualizar\_estado\_del\_pez} detecta choques
+              y suma puntos si pasa tuberías;
+        \item \texttt{time\_alive[i]} aumenta en 1.
+    \end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Condiciones de parada de la simulación}
+
+El bucle de \texttt{swim\_population} termina cuando:
+
+\vspace{6pt}
+
+\begin{itemize}
+    \item Todos los peces han muerto:
+        es decir, no queda ningún \texttt{vivo[i] == True}.
+    \item O bien se alcanza el tiempo máximo:
+        paso >= tiempo\_max
+    \item O bien una cantidad suficiente de peces ha alcanzado
+          \texttt{umbral\_distancia}:
+    \begin{itemize}
+        \item por ejemplo, \texttt{scores[i] >= umbral\_distancia}
+              para un cierto número de individuos.
+        \item en ese caso puede considerarse que la generación ya “aprendió lo suficiente”.
+    \end{itemize}
+\vspace{6pt}
+\end{itemize}
+
+Al parar, se calcula el fitness de cada agente.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame} \frametitle{Conclusiones: Un Proyecto de Arquitectura Completa}
+
+Este proyecto representa una implementación completa de un juego, abarcando tanto la interacción manual como la automatización algorítmica:
+
+\begin{itemize}
+\item Dualidad Operativa: El diseño modular (visto en \texttt{Game.py}, \texttt{Fish.py} y \texttt{SwimFish.py}) permitió integrar dos modos de juego:
+\begin{enumerate}
+\item Modo Manual: Enfocado en la jugabilidad y la experiencia del usuario (controles, audio, interfaz, jumpscare).
+\item Modo Algorítmico ($\texttt{auto}$): Enfocado en la simulación y el aprendizaje automático, donde la IA sustituye la entrada del jugador.
+\end{enumerate}
+
+\item **Ingeniería del Software:** El desarrollo requirió una arquitectura robusta, reflejando un proyecto de software completo:
+\begin{itemize}
+    \item **Diseño Modular:** Separación clara de responsabilidades (Ej: \texttt{Game} vs. \texttt{Fish}).
+    \item **Planificación y Rendimiento:** Implementación de *delta time* para FPS estables y optimización con colisiones *pixel-perfect* (máscaras).
+    \item **Experiencia de Usuario (UX):** Detalles como efectos de sombra en textos, animación de fondo y gestión de audio.
+    \item **Control y Extensión:** El código es fácilmente extensible para incorporar más agentes o diferentes algoritmos de ML.
+\end{itemize}
+
+\end{itemize}
+
+\vspace{5pt} En resumen, el trabajo fue un ejercicio integral en diseño de arquitectura, control de errores y optimización de rendimiento, logrando un producto funcional y un entorno para la experimentación algorítmica.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame} \frametitle{🐟 ¡Gracias por su Atención! 🐟}
+
+\begin{columns}[T]
+
+    \begin{column}{0.7\textwidth}
+    \raggedright
+    Ha sido un placer presentarles el proyecto \texttt{SwimFish}, un trabajo que integra:
+
+    \vspace{4pt}
+    \begin{itemize}
+        \item **Diseño de Juego:** Jugabilidad, arte y experiencia de usuario.
+        \item **Ingeniería de Software:** Arquitectura modular y control de rendimiento.
+        \item **Inteligencia Artificial:** Desarrollo de un entorno de simulación para algoritmos de Machine Learning.
+    \end{itemize}
+
+    \vspace{10pt}
+    \centering
+    \textbf{\Huge ¿Preguntas?}
+
+\end{column}
+
+\begin{column}{0.3\textwidth}
+    \centering
+    \textbf{Nuestro Héroe}\\[6pt]
+    \includegraphics[width=\textwidth]{pez_feliz.png}
+
+\end{column}
+\end{columns}
+
+\vfill \centering {\large ¡Gracias por acompañar a Fish en esta aventura!}
+
+\end{frame}
+
+%------------------------------------------------
+\end{document}
