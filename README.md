@@ -13,7 +13,7 @@ A Flappy Bird–inspired game built with Python + Pygame, featuring two operatio
 
 [Video example (YouTube)](https://www.youtube.com/watch?v=RNBFtw6mRU4)
 
-[//]: # (---)
+---
 
 ### Project Summary
 
@@ -22,7 +22,7 @@ When the program starts, a main menu is displayed to choose the game mode. The p
 1. Game development: a Flappy Bird–style videogame called Flappy Fish, implemented in Python with Pygame.
 2. Intelligent agent training: a Genetic Algorithm that trains a population of fish to play autonomously by evolving their decision parameters over generations.
 
-[//]: # (---)
+---
 
 ### Objectives
 
@@ -47,7 +47,7 @@ This project goes beyond a basic game implementation, focusing on a dual-mode ar
 | Modo automático | Game over |
 | ![Modo automático](data/readme/modoag.png) | ![Game over](data/readme/findeljuego.png) |
 
-[//]: # (---)
+---
 
 ### Methodology: Dual Operational Design
 
@@ -58,7 +58,7 @@ The implementation was designed to explore and compare two fundamental paradigms
 
 A modular design ensures that both modes can coexist cleanly, with the game loop and environment remaining stable while the control logic changes depending on the selected mode.
 
-[//]: # (---)
+---
 
 ### Architecture Overview
 
@@ -74,7 +74,7 @@ Main responsibilities typically include:
 
 ![Architecture flowchart](data/readme/diagramarq.png)
 
-[//]: # (---)
+---
 
 ### Genetic Algorithm: Mathematical & Algorithmic Foundation
 
@@ -115,7 +115,7 @@ Intuition:
 
 [//]: # (![Roulette visualization]&#40;data/readme/CHART.png&#41;)
 
-[//]: # (---)
+---
 
 ### How to Use
 
