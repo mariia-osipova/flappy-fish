@@ -29,7 +29,7 @@ class Menu:
         self.opcion_evolutivo_sombra = self.letra_opcion.render('2. Simulación (Algoritmo Evolutivo)', True, self.color_sombra)
 
         self.letra_grupo = pygame.font.Font(font_path, 30)
-        texto_a_mostrar = 'GRUPO 4: Osipova, Zanoni, Scofano y Roldan'
+        texto_a_mostrar = 'GRUPO 4: Osipova, Zanoni y Scofano'
         self.texto_grupo = self.letra_grupo.render(texto_a_mostrar, True, self.color_blanco)
         self.texto_grupo_sombra = self.letra_grupo.render(texto_a_mostrar, True, self.color_sombra)
         self.rect_grupo = self.texto_grupo.get_rect(center=(screen_w // 2, screen_h - 50))

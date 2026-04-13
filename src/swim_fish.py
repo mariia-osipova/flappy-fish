@@ -261,7 +261,7 @@ class SwimFish(Game):
                             self.game_over = True
                             if self.enable_jumpscare:
                                 i = random.randint(0, 10)
-                                if i <= 4:
+                                if i <= 7:
                                     self.jumpscare.asustar()
                             break
 
