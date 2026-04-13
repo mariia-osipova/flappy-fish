@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roulette-wheel selection</title>
+
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 18px; }
+    .wrap { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .card { border: 1px solid #e6e6e6; border-radius: 10px; padding: 14px; }
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px 10px; }
+    th { text-align: right; }
+    td { text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    caption { caption-side: top; text-align: left; font-weight: 600; margin-bottom: 10px; }
+    .sum { margin-top: 10px; font-weight: 600; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="card">
+      <table>
+        <caption>5 рыбок и их фитнес (рулетка)</caption>
+        <thead>
+          <tr>
+            <th>Рыбка</th>
+            <th>fᵢ</th>
+            <th>max(fᵢ,0)</th>
+            <th>wᵢ = max(fᵢ,0)²</th>
+            <th>pᵢ = wᵢ/Σw</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>🐟 1</td><td>3</td><td>3</td><td>9</td><td>0.3077</td></tr>
+          <tr><td>🐟 2</td><td>-1</td><td>0</td><td>0</td><td>0.0000</td></tr>
+          <tr><td>🐟 3</td><td>2</td><td>2</td><td>4</td><td>0.1368</td></tr>
+          <tr><td>🐟 4</td><td>0.5</td><td>0.5</td><td>0.25</td><td>0.0085</td></tr>
+          <tr><td>🐟 5</td><td>4</td><td>4</td><td>16</td><td>0.5470</td></tr>
+        </tbody>
+      </table>
+      <div class="sum">Σw = 29.25</div>
+    </div>
+
+    <div class="card">
+      <pre class="mermaid">
+pie showData
+  title Roulette-wheel selection (w_i = max(f_i,0)^2)
+  "🐟 1" : 9
+  "🐟 2" : 0
+  "🐟 3" : 4
+  "🐟 4" : 0.25
+  "🐟 5" : 16
+      </pre>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+\frametitle{swim\_population(): bucle principal (III)}
+
+Dentro de \texttt{swim\_population} se ejecuta el bucle principal de simulación:
+
+{\scriptsize
+\begin{verbatim}
+paso = 0
+running = True
+while running:
+    paso += 1
+    self._actualizar_fondo()
+    self._actualizar_tuberias()
+    for i, fish in enumerate(peces):
+        if not vivos[i]:
+            continue
+        dy, dx = calcular_estado(fish.rect,
+                                 self.proxima_tuberia())
+        vy = fish.velocity
+        if politicas[i](dy, dx, vy):
+            fish.flap()
+        fish.update()
+        self._actualizar_estado_del_pez(i, fish, scores, vivos)
+        time_alive[i] += 1
+\end{verbatim}
+}
+
+%\begin{itemize}
+%    \item En cada paso se actualiza el fondo y las tuberías.
+%    \item Para cada pez vivo:
+%    \begin{itemize}
+%        \item se calcula el estado \((dy, dx, vy)\),
+%        \item la política decide si llamar a \texttt{flap()},
+%        \item se aplica la física con \texttt{update()},
+%        \item se revisan colisiones y se actualizan \texttt{score} y \texttt{vivos},
+%        \item se incrementa \texttt{time\_alive}.
+%    \end{itemize}
+%\end{itemize}
+
