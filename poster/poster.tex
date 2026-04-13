@@ -21,8 +21,6 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.14}
 \usepackage{anyfontsize}
-
-
 \renewcommand{\figurename}{Figura}
 
 % ====================
@@ -43,8 +41,6 @@
 % ====================
 \definecolor{HeaderFg}{HTML}{0F2438}
 
-\setbeamercolor{normal text}{fg=black}
-
 % НЕ задаём bg для headline, иначе тема закрасит шапку поверх текстуры
 \setbeamercolor{headline}{bg=, fg=HeaderFg}
 \setbeamercolor{title in headline}{bg=, fg=HeaderFg}
@@ -54,6 +50,9 @@
 % --- СДЕЛАТЬ ШАПКУ КОРОЧЕ (это ключевой параметр) ---
 \newlength{\headerbgheight}
 \setlength{\headerbgheight}{0.15\paperheight} % было 0.22 -> стало короче
+
+\usepackage{amsmath}
+\usepackage{amssymb}
 
 
 \newlength{\footerbgheight}
@@ -190,13 +189,12 @@
 }
 
 \title{Flappy Fish: Juego con Algoritmo Inteligente}
+\subtitle{Pensamiento computacional (I100)}
 
 \author{%
-  \vspace{5pt}
-  {\usebeamerfont{author} Pensamiento computacional (I100)}\\
-  \vspace{11pt}
+  \vspace{19pt}
   Julieta Zanoni \and Mariia Osipova \\
-  Santino Scofano \and Morena Roldan
+  Santino Scofano
 }
 
 \institute[shortinst]{Universidad de San Andrés}
@@ -209,29 +207,30 @@
   \vspace*{0.1\footerbgheight}%
   \footnotesize
   % левая колонка
-  \begin{minipage}[c]{0.10\textwidth}
+  \begin{minipage}[c]{0.17\textwidth}
     \raggedright
     Universidad de San Andrés \\[4pt]
     \textit{%
       jzanoni@udesa.edu.ar \\[1.5pt]
       mosipova@udesa.edu.ar \\[1.5pt]
-      sscofano@udesa.edu.ar \\[1.5pt]
-      mroldan@udesa.edu.ar}
+      sscofano@udesa.edu.ar}
   \end{minipage}%
   \hfill
-  % центр: 3 рыбки без подбора ширин под каждую
-  \begin{minipage}[c]{0.60\textwidth}
+  \begin{minipage}[c]{0.59\textwidth}
     \centering
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}\hspace{6pt}%
-    \includegraphics[height=0.6\footerbgheight]{logos/fish-big.png}%
+    \includegraphics[height=0.65\footerbgheight]{logos/fish-big.png}%
+    \hspace*{8mm}%
+    \includegraphics[height=0.65\footerbgheight]{logos/fish-big.png}%
+    \hspace*{8mm}%
+    \includegraphics[height=0.65\footerbgheight]{logos/fish-big.png}%
+    \hspace*{8mm}%
+    \includegraphics[height=0.65\footerbgheight]{logos/fish-big.png}%
+    \hspace*{8mm}%
+    \includegraphics[height=0.65\footerbgheight]{logos/fish-big.png}%
   \end{minipage}%
   \hfill
   % правая колонка
-  \begin{minipage}[c]{0.20\textwidth}
+  \begin{minipage}[c]{0.17\textwidth}
     \raggedleft
     \includegraphics[height=0.6\footerbgheight]{logos/qr.png}\\[2pt]
     \footnotesize
@@ -353,11 +352,11 @@
 
   \begin{block}{Resumen del proyecto}
 
-    Lo primero, que se ve, cuando se ejecuta el codigo es el menu, donde se puede elegir el modo del juego.
-    Nuestro trabajo práctico se divide en dos partes: primero, el desarrollo
-    de un videojuego tipo Flappy Bird llamado Flappy Fish, implementado en Python con Pygame;
-    y segundo, la implementación de un Algoritmo Genético para entrenar una población
-    de peces que juegan de forma autónoma.
+    Lo primero, que se ve, cuando se ejecuta el codigo es el menu, donde se puede elegir el
+modo del juego. Nuestro trabajo práctico se divide en dos partes: primero, el desarrollo
+de un videojuego tipo Flappy Bird llamado Flappy Fish, implementado en Python con
+Pygame; y segundo, la implementación de un Algoritmo Genético para entrenar una
+población de peces que juegan de forma autónoma.
 
     \begin{figure}
       \centering
@@ -389,40 +388,49 @@
 
     \end{figure}
 
+    Nuestro trabajo práctico se divide en dos partes: primero, el desarrollo
+    de un videojuego tipo Flappy Bird llamado Flappy Fish, implementado en Python con Pygame;
+    y segundo, la implementación de un Algoritmo Genético para entrenar una población
+    de peces que juegan de forma autónoma.
+
   \end{block}
 
-  \vspace{25pt}
+%  \vspace{25pt}
 
   \begin{alertblock}{Objetivos}
 
-    El proyecto va más allá de la implementación básica de la simulación,
-    centrándose en el diseño de una plataforma operativa dual y el análisis
-    del rendimiento algorítmico.
+    El proyecto va más allá de la implementación básica de la simulación, centrándose en
+    el diseño de una plataforma operativa dual y el análisis del rendimiento algorítmico.
 
 
     \begin{itemize}
-      \item \textbf{Implementar una Arquitectura Modular de Dualidad Operativa:} Diseñar y construir una arquitectura completa y
-      modular capaz de integrar dos modos de juego distintos (Manual y Simulado). El objetivo es demostrar la separación
-      de responsabilidades (lógica de juego vs. lógica algorítmica), garantizando la funcionalidad completa y
-      optimizada de cada modo dentro de una misma base de código.
+      \item \textbf{Implementar una Arquitectura Modular de Dualidad Operativa:} Diseñar y
+      construir una arquitectura completa y modular capaz de integrar dos modos de
+      juego distintos (Manual y Simulado). El objetivo es demostrar la separación de
+      responsabilidades (lógica de juego vs. lógica algorítmica), garantizando la
+      funcionalidad completa y optimizada de cada modo dentro de una misma base de
+      código.
       \vspace{17pt}
-      \item \textbf{Optimizar el Comportamiento de Agentes mediante Aprendizaje Automático:}Capacitar a una población de agentes mediante mecanismos de evolución simulada (selección, cruce y mutación).
+      \item \textbf{Optimizar el Comportamiento de Agentes mediante Aprendizaje Automático:}Capacitar a una población de agentes mediante mecanismos de
+      evolución simulada (selección, cruce y mutación).
       \vspace{17pt}
-      \item \textbf{Visualizar y Analizar la Evolución de la Aptitud Algorítmica:} Desarrollar herramientas de visualización gráfica para monitorear y analizar la evolución del proceso de optimización. Esto incluye graficar la evolución de la aptitud de los agentes a lo largo de las generaciones y evaluar la influencia de los parámetros de política y los pesos en el rendimiento del modelo.
+      \item \textbf{Visualizar y Analizar la Evolución de la Aptitud Algorítmica:} Desarrollar
+      herramientas de visualización gráfica para monitorear y analizar la evolución del
+      proceso de optimización. Esto incluye graficar la evolución de la aptitud de los
+      agentes a lo largo de las generaciones y evaluar la influencia de los parámetros de
+      política y los pesos en el rendimiento del modelo.
 
     \end{itemize}
 
   \end{alertblock}
 
-  \vspace{17pt}
+%  \vspace{13pt}
 
   \begin{block}{Metodología y Dualidad Operativa}
 
-    Este proyecto de arquitectura completa se diseñó para explorar
-    y contrastar dos paradigmas fundamentales: la interacción manual directa con el usuario
-    y la automatización algorítmica mediante técnicas de aprendizaje automático.
-    La implementación se realizó bajo un diseño modular que garantiza la dualidad operativa,
-    permitiendo la integración fluida de ambos modos dentro de un marco unificado.
+    Este proyecto de arquitectura completa se diseñó para explorar y contrastar dos paradigmas fundamentales: la interacción manual directa con el usuario y la automatización algorítmica mediante técnicas de aprendizaje automático. La implementación se realizó
+    bajo un diseño modular que garantiza la dualidad operativa, permitiendo la integración
+    fluida de ambos modos dentro de un marco unificado.
 
 %    \vspace{17pt}
 %
@@ -457,16 +465,15 @@
 
   \begin{block}{Arquitectura general del juego}
 
-    La arquitectura del proyecto se diseñó de manera modular y orientada a objetos.
-    Este enfoque permitió establecer una estructura clara y organizada que facilita
-    la separación de responsabilidades: la lógica general del juego,
-    la física del agente (pez), la gestión de elementos visuales (tuberías, screamer) y,
-    fundamentalmente, la lógica de la automatización algorítmica (AG).
+    La arquitectura del proyecto se diseñó de manera modular y orientada a objetos. Este
+    enfoque permitió establecer una estructura clara y organizada que facilita la separación
+    de responsabilidades: la lógica general del juego, la física del agente (pez), la gestión de
+    elementos visuales (tuberías, screamer) y, fundamentalmente, la lógica de la automatización algorítmica (AG).
 
     \begin{figure}
       \centering
       \includegraphics[width=\linewidth]{logos/arq.png}\\[15pt]
-      \small Figura 5: Flowchart de la arquitectura del proyecto
+      Figura 5: Flowchart de la arquitectura del proyecto
     \end{figure}
 
 \end{block}
@@ -498,18 +505,16 @@
   \begin{exampleblock}{Diseño Algorítmico y Fundamento Matemático del AG}
 
     El núcleo de la simulación reside en una política de salto
-    $\gamma : \mathbb{R}^{3} \to \{\text{True}, \text{False}\}$,
-    que determina si el pez debe saltar basándose en el estado del juego:
-    la diferencia vertical $\mathrm{dy}$, la distancia horizontal $\mathrm{dx}$ a la próxima tubería
-    y la velocidad vertical $v_y$.
+    $\gamma : R^3 \to \{\mathrm{True}, \mathrm{False}\}$, que
+    determina si el pez debe saltar basándose en el estado del juego: la diferencia vertical
+    $dy$, la distancia horizontal $dx$ a la próxima tubería y la velocidad vertical $vy$.
 
-    La política se modela como una combinación lineal del estado normalizado,
-    ponderada por un vector de pesos
+    La política se modela como una combinación lineal del estado normalizado, ponderada
+    por un vector de pesos
     \[
-      \mathbf{w} = [w_0, w_1, \dots, w_5],
+      w = [w_0, w_1, \dots, w_5],
     \]
     de modo que el pez salta si una función lineal del estado supera cierto umbral.
-
 
     La clave del Algoritmo Genético (AG) es la selección proporcional
     (\emph{``método de la ruleta''}), que utiliza el \emph{fitness}
@@ -542,8 +547,8 @@
     \begin{minipage}[t]{0.48\textwidth}
       \vspace{0pt}%
       \centering
-      \includegraphics[width=\linewidth]{logos/CHART.png}\\[0.5em]
-      \small Figure 6: Visualizacion de la ruleta
+      \includegraphics[width=\linewidth]{logos/CHART_V2.png}\\[0.5em]
+      Figure 6: Visualizacion de la ruleta
   \end{minipage}
 
 
