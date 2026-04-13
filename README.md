@@ -7,7 +7,7 @@ The goal of this project is to build a pygame-based game inspired by Flappy Bird
 The GA optimizes the parameters of a quadratic decision policy, allowing the agent to learn when to flap based on the game state variables (dy, dx, vy).
 Over many generations, the population evolves toward more effective behavior, gradually improving survival time and the number of pipes successfully passed.
 
-![Screen Recording 2025-12-02 at 4.55.24 AM.gif](data/readme/Screen%20Recording%202025-12-02%20at%204.55.24%20AM.gif)
+![Screen Recording 2026-04-13 at 5.22.19 PM.gif](data/readme/Screen%20Recording%202026-04-13%20at%205.22.19%20PM.gif)
 [Video example (YouTube)](https://www.youtube.com/watch?v=RNBFtw6mRU4)
 
 ## Project Setup

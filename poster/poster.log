@@ -1,6 +1,6 @@
-This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2025.12.9)  12 DEC 2025 22:22
+This is LuaHBTeX, Version 1.21.0 (TeX Live 2025)  (format=lualatex 2025.12.9)  13 DEC 2025 06:22
  restricted system commands enabled.
-**poster.tex
+poster.tex
 (./poster.tex
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1304,42 +1304,54 @@ Package: anyfontsize 2007/11/22 anyfontsize.sty by pts
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\new@ifnextchar' on input line 194.
+(hyperref)                removing `\new@ifnextchar' on input line 200.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\\' on input line 194.
+(hyperref)                removing `\usebeamerfont' on input line 200.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\\' on input line 200.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\new@ifnextchar' on input line 200.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\\' on input line 200.
 
 \fishX=\skip92
 \algaOverlap=\skip93
 <logos/fish-big.png, id=10, 301.125pt x 301.125pt>
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 299.
+Package luatex.def Info: logos/fish-big.png  used on input line 306.
 (luatex.def)             Requested size: 199.17502pt x 199.16928pt.
 (./poster.aux)
 \openout1 = poster.aux
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 329.
-LaTeX Font Info:    ... okay on input line 329.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 336.
+LaTeX Font Info:    ... okay on input line 336.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: luatex
@@ -1397,7 +1409,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring OFF on input line 329.
+Package hyperref Info: Link coloring OFF on input line 336.
 
 (./poster.out) (./poster.out)
 \@outlinefile=\write5
@@ -1432,183 +1444,177 @@ Package pgfplots notification 'compat/show suggested version=true': you might b
 enefit from \pgfplotsset{compat=1.18} (current compat level: 1.14).
 
 (./poster.nav)
-LaTeX Font Info:    Calculating math sizes for size <10.02> on input line 329.
+LaTeX Font Info:    Calculating math sizes for size <10.02> on input line 336.
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 3
-29.
+36.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 3
-29.
+36.
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-329.
+336.
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `cmex7' loaded for size
-(Font)              <7.01396> on input line 329.
+(Font)              <7.01396> on input line 336.
 LaTeX Font Info:    External font `cmex7' loaded for size
-(Font)              <5.01> on input line 329.
+(Font)              <5.01> on input line 336.
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 329.
+Package luatex.def Info: logos/fish-big.png  used on input line 336.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 329--329
-
- []
-
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 329.
+Package luatex.def Info: logos/fish-big.png  used on input line 336.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 329--329
-
- []
-
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 329.
+Package luatex.def Info: logos/fish-big.png  used on input line 336.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 329--329
-
- []
-
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 336.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 336.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 336.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
 <logos/qr.png, id=14, 225.84375pt x 225.84375pt>
 File: logos/qr.png Graphic file (type png)
 <use logos/qr.png>
-Package luatex.def Info: logos/qr.png  used on input line 329.
+Package luatex.def Info: logos/qr.png  used on input line 336.
 (luatex.def)             Requested size: 111.55003pt x 111.54791pt.
 <logos/alga2.png, id=15, 70.2625pt x 150.5625pt>
 File: logos/alga2.png Graphic file (type png)
 <use logos/alga2.png>
-Package luatex.def Info: logos/alga2.png  used on input line 329.
+Package luatex.def Info: logos/alga2.png  used on input line 336.
 (luatex.def)             Requested size: 106.23401pt x 227.62204pt.
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 329.
+Package luatex.def Info: logos/fish-big.png  used on input line 336.
 (luatex.def)             Requested size: 199.17502pt x 199.16928pt.
-LaTeX Font Info:    Calculating math sizes for size <6.96> on input line 329.
+LaTeX Font Info:    Calculating math sizes for size <6.96> on input line 336.
 LaTeX Font Info:    External font `cmex7' loaded for size
-(Font)              <6.96> on input line 329.
+(Font)              <6.96> on input line 336.
 LaTeX Font Info:    External font `cmex7' loaded for size
-(Font)              <4.87198> on input line 329.
+(Font)              <4.87198> on input line 336.
 LaTeX Font Info:    External font `cmex7' loaded for size
-(Font)              <3.48> on input line 329.
+(Font)              <3.48> on input line 336.
 <logos/img.png, id=16, 552.0625pt x 100.375pt>
 File: logos/img.png Graphic file (type png)
 <use logos/img.png>
-Package luatex.def Info: logos/img.png  used on input line 329.
+Package luatex.def Info: logos/img.png  used on input line 336.
 (luatex.def)             Requested size: 281.69135pt x 51.21504pt.
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 563--563
-
- []
-
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 563--563
-
- []
-
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) in paragraph at lines 563--563
-
- []
-
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
 File: logos/qr.png Graphic file (type png)
 <use logos/qr.png>
-Package luatex.def Info: logos/qr.png  used on input line 563.
+Package luatex.def Info: logos/qr.png  used on input line 568.
 (luatex.def)             Requested size: 111.55003pt x 111.54791pt.
 File: logos/alga2.png Graphic file (type png)
 <use logos/alga2.png>
-Package luatex.def Info: logos/alga2.png  used on input line 563.
+Package luatex.def Info: logos/alga2.png  used on input line 568.
 (luatex.def)             Requested size: 106.23401pt x 227.62204pt.
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 199.17502pt x 199.16928pt.
 File: logos/img.png Graphic file (type png)
 <use logos/img.png>
-Package luatex.def Info: logos/img.png  used on input line 563.
+Package luatex.def Info: logos/img.png  used on input line 568.
 (luatex.def)             Requested size: 281.69135pt x 51.21504pt.
 <logos/menu.png, id=17, 999.735pt x 626.34pt>
 File: logos/menu.png Graphic file (type png)
 <use logos/menu.png>
-Package luatex.def Info: logos/menu.png  used on input line 563.
+Package luatex.def Info: logos/menu.png  used on input line 568.
 (luatex.def)             Requested size: 258.11934pt x 161.70724pt.
 <logos/fish-game.png, id=18, 953.5625pt x 598.235pt>
 File: logos/fish-game.png Graphic file (type png)
 <use logos/fish-game.png>
-Package luatex.def Info: logos/fish-game.png  used on input line 563.
+Package luatex.def Info: logos/fish-game.png  used on input line 568.
 (luatex.def)             Requested size: 258.11934pt x 161.93637pt.
 <logos/modoag.png, id=19, 995.72pt x 623.32875pt>
 File: logos/modoag.png Graphic file (type png)
 <use logos/modoag.png>
-Package luatex.def Info: logos/modoag.png  used on input line 563.
+Package luatex.def Info: logos/modoag.png  used on input line 568.
 (luatex.def)             Requested size: 258.11934pt x 161.58609pt.
 <logos/findeljuego.png, id=20, 996.72375pt x 625.33624pt>
 File: logos/findeljuego.png Graphic file (type png)
 <use logos/findeljuego.png>
-Package luatex.def Info: logos/findeljuego.png  used on input line 563.
+Package luatex.def Info: logos/findeljuego.png  used on input line 568.
 (luatex.def)             Requested size: 258.11934pt x 161.93474pt.
 <logos/arq.png, id=21, 3939.71875pt x 2579.6375pt>
 File: logos/arq.png Graphic file (type png)
 <use logos/arq.png>
-Package luatex.def Info: logos/arq.png  used on input line 563.
+Package luatex.def Info: logos/arq.png  used on input line 568.
 (luatex.def)             Requested size: 537.75343pt x 352.09352pt.
-LaTeX Font Info:    Calculating math sizes for size <14.43> on input line 563.
+LaTeX Font Info:    Calculating math sizes for size <14.43> on input line 568.
 LaTeX Font Info:    External font `cmex7' loaded for size
-(Font)              <7.215> on input line 563.
-<logos/CHART.png, id=22, 627.34375pt x 512.91624pt>
+(Font)              <7.215> on input line 568.
+<logos/CHART.png, id=22, 603.25375pt x 479.7925pt>
 File: logos/CHART.png Graphic file (type png)
 <use logos/CHART.png>
-Package luatex.def Info: logos/CHART.png  used on input line 563.
-(luatex.def)             Requested size: 258.11934pt x 211.04836pt.
+Package luatex.def Info: logos/CHART.png  used on input line 568.
+(luatex.def)             Requested size: 258.11934pt x 205.28911pt.
 
 
 <logos/background.png, id=23, 1003.75pt x 602.25pt>
 File: logos/background.png Graphic file (type png)
 <use logos/background.png>
-Package luatex.def Info: logos/background.png  used on input line 563.
+Package luatex.def Info: logos/background.png  used on input line 568.
 (luatex.def)             Requested size: 1195.15126pt x 255.50128pt.
 File: logos/background.png Graphic file (type png)
 <use logos/background.png>
-Package luatex.def Info: logos/background.png  used on input line 563.
+Package luatex.def Info: logos/background.png  used on input line 568.
 (luatex.def)             Requested size: 1195.15126pt x 187.90738pt.
 File: logos/background.png Graphic file (type png)
 <use logos/background.png>
-Package luatex.def Info: logos/background.png  used on input line 563.
+Package luatex.def Info: logos/background.png  used on input line 568.
 (luatex.def)             Requested size: 1195.15126pt x 187.90738pt.
 File: logos/alga2.png Graphic file (type png)
 <use logos/alga2.png>
-Package luatex.def Info: logos/alga2.png  used on input line 563.
+Package luatex.def Info: logos/alga2.png  used on input line 568.
 (luatex.def)             Requested size: 106.23401pt x 227.62204pt.
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 199.17502pt x 199.16928pt.
 File: logos/img.png Graphic file (type png)
 <use logos/img.png>
-Package luatex.def Info: logos/img.png  used on input line 563.
+Package luatex.def Info: logos/img.png  used on input line 568.
 (luatex.def)             Requested size: 281.69135pt x 51.21504pt.
 
 Overfull \hbox (1.1832pt too wide) has occurred while \output is active
@@ -1617,34 +1623,31 @@ Overfull \hbox (1.1832pt too wide) has occurred while \output is active
 
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) has occurred while \output is active
-
- []
-
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) has occurred while \output is active
-
- []
-
 File: logos/fish-big.png Graphic file (type png)
 <use logos/fish-big.png>
-Package luatex.def Info: logos/fish-big.png  used on input line 563.
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
 (luatex.def)             Requested size: 111.54774pt x 111.54791pt.
-
-Underfull \hbox (badness 10000) has occurred while \output is active
-
- []
-
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
+File: logos/fish-big.png Graphic file (type png)
+<use logos/fish-big.png>
+Package luatex.def Info: logos/fish-big.png  used on input line 568.
+(luatex.def)             Requested size: 111.54774pt x 111.54791pt.
 File: logos/qr.png Graphic file (type png)
 <use logos/qr.png>
-Package luatex.def Info: logos/qr.png  used on input line 563.
+Package luatex.def Info: logos/qr.png  used on input line 568.
 (luatex.def)             Requested size: 111.55003pt x 111.54791pt.
 [1{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
@@ -1670,16 +1673,16 @@ Package rerunfilecheck Info: File `poster.out' has not changed.
 )
 
 Here is how much of LuaTeX's memory you used:
- 39903 strings out of 475506
- 244175,1648299 words of node,token memory allocated
- 59296 words of node memory still in use:
-   410 hlist, 40 vlist, 47 rule, 452 disc, 70 local_par, 17 math, 1405 glue, 668
- kern, 193 penalty, 4265 glyph, 903 attribute, 87 glue_spec, 903 attribute_list,
+ 39931 strings out of 475506
+ 244178,1648299 words of node,token memory allocated
+ 57058 words of node memory still in use:
+   407 hlist, 40 vlist, 47 rule, 426 disc, 70 local_par, 15 math, 1369 glue, 625
+ kern, 190 penalty, 4060 glyph, 903 attribute, 87 glue_spec, 903 attribute_list,
  6 write, 2 save_pos, 191 pdf_literal, 228 pdf_colorstack, 9 pdf_setmatrix, 9 pd
 f_save, 9 pdf_restore nodes
-   avail lists: 2:1268,3:1962,4:855,5:2148,6:249,7:18214,8:27,9:1931,10:27,11:13
-92
- 61639 multiletter control sequences out of 65536+600000
+   avail lists: 2:1298,3:1959,4:855,5:2028,6:243,7:17476,8:27,9:1961,10:20,11:13
+14
+ 61640 multiletter control sequences out of 65536+600000
  119 fonts using 18689303 bytes
  128i,21n,116p,726b,1148s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/opentype/impallari/raleway/Raleway-Reg
@@ -1699,7 +1702,7 @@ st/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/typ
 e1/public/lm/lmr12.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm
 /lmsy10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symb
 ols/msbm10.pfb>
-Output written on poster.pdf (1 page, 1915327 bytes).
+Output written on poster.pdf (1 page, 1918425 bytes).
 
 PDF statistics: 127 PDF objects out of 1000 (max. 8388607)
  67 compressed objects within 1 object stream

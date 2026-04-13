@@ -391,6 +391,9 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm5
 INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
+INPUT ./logos/fish-big.png
+INPUT ./logos/fish-big.png
+INPUT ./logos/fish-big.png
 INPUT ./logos/qr.png
 INPUT ./logos/qr.png
 INPUT ./logos/alga2.png
@@ -413,6 +416,9 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm5
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm5.tfm
 INPUT ./logos/img.png
 INPUT ./logos/img.png
+INPUT ./logos/fish-big.png
+INPUT ./logos/fish-big.png
+INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
@@ -465,6 +471,9 @@ INPUT ./logos/img.png
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/rm-lmbx10.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/rm-lmbx7.tfm
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/rm-lmbx5.tfm
+INPUT ./logos/fish-big.png
+INPUT ./logos/fish-big.png
+INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
 INPUT ./logos/fish-big.png
