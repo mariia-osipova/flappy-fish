@@ -12,6 +12,7 @@ const EPOCH_SECONDS = 400;
 const SUCCESS_SCORE = 50;
 const REQUIRED_FISH = 50;
 const SCREAMER_DURATION = 1200;
+const SCREAMER_CHANCE = 0.25;
 const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
@@ -653,8 +654,10 @@ function updateSingle(delta, now) {
     state.gameOver = true;
     recordGameResult(state.score);
     stopMusic();
-    state.jumpScareUntil = now + SCREAMER_DURATION;
-    playSound(audio.scream);
+    if (Math.random() < SCREAMER_CHANCE) {
+      state.jumpScareUntil = now + SCREAMER_DURATION;
+      playSound(audio.scream);
+    }
   }
 }
 
