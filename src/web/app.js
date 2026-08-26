@@ -112,7 +112,7 @@ function googleScoreEndpoint() {
 }
 
 function mergeRemoteBest(name, bestScore) {
-  const remoteBest = Math.max(0, Math.floor(Number(bestScore || 0)));
+  const remoteBest = Math.max(0, Math.floor(Number(bestScore ?? 0)));
   if (remoteBest <= getBestScore(name)) return;
 
   const scores = readScores();
@@ -131,7 +131,7 @@ function bestRemoteScoreForName(scores, playerName) {
   return scores.reduce((bestScore, score) => {
     const name = String(score.name || "").trim().toLowerCase();
     if (name !== key) return bestScore;
-    const value = Math.max(0, Math.floor(Number(score.bestScore || score.score || 0)));
+    const value = Math.max(0, Math.floor(Number(score.bestScore ?? score.score ?? 0)));
     return Math.max(bestScore, value);
   }, 0);
 }

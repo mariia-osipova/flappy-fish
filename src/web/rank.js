@@ -30,12 +30,16 @@ function localScores() {
   return Object.entries(readScores()).map(([name, bestScore]) => ({ name, bestScore }));
 }
 
+function scoreValue(score) {
+  return Math.max(0, Math.floor(Number(score.bestScore ?? score.score ?? 0)));
+}
+
 function normalizeScores(scores) {
   const bestByName = new Map();
 
   for (const score of scores) {
     const name = String(score.name || "").trim();
-    const bestScore = Math.max(0, Math.floor(Number(score.bestScore || score.score || 0)));
+    const bestScore = scoreValue(score);
     if (!name) continue;
 
     const key = name.toLowerCase();
