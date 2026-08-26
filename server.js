@@ -59,14 +59,13 @@ app.post("/api/scores", async (req, res) => {
     }
     if (body && body.name) {
       const name = String(body.name).trim().slice(0, 24);
-      const score = Math.max(0, Math.floor(Number(body.bestScore || body.score || 0)));
+      const score = Math.max(0, Math.floor(Number(body.bestScore ?? body.score ?? 0)));
       const existing = scoresMap.get(name) || 0;
       if (score >= existing) {
         scoresMap.set(name, score);
       }
 
-      // 1. Send GET to Apps Script (which triggers doGet save)
-      const updatedAt = new Date().toISOString();
+      const updatedAt = String(body.updatedAt || new Date().toISOString());
       const query = new URLSearchParams({
         action: "save",
         name,
@@ -79,14 +78,6 @@ app.post("/api/scores", async (req, res) => {
       fetch(`${GOOGLE_APPS_SCRIPT_URL}?${query.toString()}`, {
         redirect: "follow",
       }).catch((e) => console.error("Error forwarding GET to Apps Script:", e.message));
-
-      // 2. Send POST to Apps Script (which triggers doPost save)
-      fetch(GOOGLE_APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ name, bestScore: score, score, updatedAt }),
-        redirect: "follow",
-      }).catch((e) => console.error("Error forwarding POST to Apps Script:", e.message));
     }
     res.json({ ok: true });
   } catch (err) {

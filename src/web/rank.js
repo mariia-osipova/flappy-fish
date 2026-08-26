@@ -31,12 +31,21 @@ function localScores() {
 }
 
 function normalizeScores(scores) {
-  return scores
-    .map((score) => ({
-      name: String(score.name || "").trim(),
-      bestScore: Math.max(0, Math.floor(Number(score.bestScore || score.score || 0))),
-    }))
-    .filter((score) => score.name)
+  const bestByName = new Map();
+
+  for (const score of scores) {
+    const name = String(score.name || "").trim();
+    const bestScore = Math.max(0, Math.floor(Number(score.bestScore || score.score || 0)));
+    if (!name) continue;
+
+    const key = name.toLowerCase();
+    const current = bestByName.get(key);
+    if (!current || bestScore > current.bestScore) {
+      bestByName.set(key, { name, bestScore });
+    }
+  }
+
+  return Array.from(bestByName.values())
     .sort((a, b) => b.bestScore - a.bestScore || a.name.localeCompare(b.name));
 }
 

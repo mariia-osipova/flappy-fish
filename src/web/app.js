@@ -126,6 +126,16 @@ function mergeRemoteBest(name, bestScore) {
   }
 }
 
+function bestRemoteScoreForName(scores, playerName) {
+  const key = playerName.toLowerCase();
+  return scores.reduce((bestScore, score) => {
+    const name = String(score.name || "").trim().toLowerCase();
+    if (name !== key) return bestScore;
+    const value = Math.max(0, Math.floor(Number(score.bestScore || score.score || 0)));
+    return Math.max(bestScore, value);
+  }, 0);
+}
+
 function loadJsonpScores(endpoint) {
   if (!endpoint) return Promise.resolve([]);
 
@@ -166,12 +176,7 @@ async function refreshPlayerBestFromRemote(name) {
       const scores = endpoint === "/api/scores"
         ? await fetch(endpoint).then((response) => response.json()).then((data) => data?.scores || [])
         : await loadJsonpScores(endpoint);
-      const remoteScore = scores.find((score) => {
-        return String(score.name || "").trim().toLowerCase() === name.toLowerCase();
-      });
-      if (remoteScore) {
-        mergeRemoteBest(name, remoteScore.bestScore || remoteScore.score);
-      }
+      mergeRemoteBest(name, bestRemoteScoreForName(scores, name));
     } catch {
       /* Remote scores are optional. */
     }
@@ -189,18 +194,9 @@ function syncScoreToGoogleSheet(name, bestScore, lastScore) {
     updatedAt: new Date().toISOString(),
   };
 
-  // 1. Send to local server proxy which directly forwards to Google Apps Script
-  try {
-    fetch("/api/scores", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      keepalive: true,
-    }).catch(() => {});
-  } catch {}
+  const sendDirectToSheet = () => {
+    if (!endpoint) return;
 
-  // 2. Direct browser GET query to Google Apps Script
-  if (endpoint) {
     try {
       const query = new URLSearchParams({
         action: "save",
@@ -214,17 +210,19 @@ function syncScoreToGoogleSheet(name, bestScore, lastScore) {
       const img = new Image();
       img.src = queryUrl;
     } catch {}
+  };
 
-    // 3. Direct browser POST (no-cors)
-    try {
-      fetch(endpoint, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload),
-        keepalive: true,
-      }).catch(() => {});
-    } catch {}
+  try {
+    fetch("/api/scores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).then((response) => {
+      if (!response.ok) sendDirectToSheet();
+    }).catch(sendDirectToSheet);
+  } catch {
+    sendDirectToSheet();
   }
 }
 
@@ -238,7 +236,6 @@ function savePlayerScore(score) {
     state.highScore = score;
     updateNameBest(score);
     updateBestScoreDisplay(score);
-    syncScoreToGoogleSheet(state.playerName, score, score);
   }
 }
 
@@ -247,14 +244,16 @@ function recordGameResult(score) {
   const scores = readScores();
   const previousBest = scores[state.playerName] || 0;
   const best = Math.max(previousBest, score);
-  if (best <= previousBest) return;
 
-  scores[state.playerName] = best;
-  writeScores(scores);
-  state.highScore = best;
-  updateNameBest(best);
-  updateBestScoreDisplay(best);
-  syncScoreToGoogleSheet(state.playerName, best, score);
+  if (best > previousBest) {
+    scores[state.playerName] = best;
+    writeScores(scores);
+    state.highScore = best;
+    updateNameBest(best);
+    updateBestScoreDisplay(best);
+  }
+
+  syncScoreToGoogleSheet(state.playerName, score, score);
 }
 
 function setPlayerName(name) {
