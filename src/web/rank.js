@@ -1,7 +1,7 @@
 const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
-const DEFAULT_GOOGLE_SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbyO3LwdrpR1Z4eSspiR-eiliyCS40fvxgAvO5dIh9_oaj9jvMGfmxaIEaZoX7mfVws0Fw/exec";
+const DEFAULT_GOOGLE_SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbx61g7C95a55gBJ63r1h58F2oeupmO54ommLPoIoc2vgQaMuq7B8r64q_hrYxXNxh4a7w/exec";
 
 const rankList = document.getElementById("rank-list");
 
