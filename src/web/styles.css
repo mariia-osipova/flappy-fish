@@ -242,6 +242,7 @@ a {
 .leaderboard-page .rank-list {
   max-height: none;
   margin-top: 24px;
+  padding-left: 0;
+  list-style-position: inside;
   font-size: clamp(30px, 5vw, 44px);
 }
-
