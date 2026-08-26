@@ -212,18 +212,16 @@ function syncScoreToGoogleSheet(name, bestScore, lastScore) {
     } catch {}
   };
 
+  sendDirectToSheet();
+
   try {
     fetch("/api/scores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       keepalive: true,
-    }).then((response) => {
-      if (!response.ok) sendDirectToSheet();
-    }).catch(sendDirectToSheet);
-  } catch {
-    sendDirectToSheet();
-  }
+    }).catch(() => {});
+  } catch {}
 }
 
 function savePlayerScore(score) {

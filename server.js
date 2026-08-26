@@ -9,8 +9,6 @@ const app = express();
 const PORT = 3000;
 const HOST = "0.0.0.0";
 
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyO3LwdrpR1Z4eSspiR-eiliyCS40fvxgAvO5dIh9_oaj9jvMGfmxaIEaZoX7mfVws0Fw/exec";
-
 // In-memory scores store for session leaderboard
 const scoresMap = new Map();
 
@@ -32,6 +30,10 @@ app.use((req, res, next) => {
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
+});
+
+app.get("/favicon.ico", (req, res) => {
+  res.type("png").sendFile(path.join(__dirname, "data/img/fish1.png"));
 });
 
 // Leaderboard API
@@ -64,20 +66,6 @@ app.post("/api/scores", async (req, res) => {
       if (score >= existing) {
         scoresMap.set(name, score);
       }
-
-      const updatedAt = String(body.updatedAt || new Date().toISOString());
-      const query = new URLSearchParams({
-        action: "save",
-        name,
-        bestScore: String(score),
-        score: String(score),
-        updatedAt,
-        t: String(Date.now()),
-      });
-
-      fetch(`${GOOGLE_APPS_SCRIPT_URL}?${query.toString()}`, {
-        redirect: "follow",
-      }).catch((e) => console.error("Error forwarding GET to Apps Script:", e.message));
     }
     res.json({ ok: true });
   } catch (err) {
