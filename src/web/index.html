@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flappy Fish</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="rank-button" href="rank.html">Rank</a>
+
+    <main class="app-shell" aria-label="Flappy Fish web app">
+      <p class="best-score-strip" id="best-score-display">Best score: 0</p>
+      <section class="game-frame" aria-label="Game">
+        <canvas id="game-canvas" width="1000" height="600" tabindex="-1" aria-label="Flappy Fish game canvas"></canvas>
+        <div class="loading" id="loading">Loading reef...</div>
+      </section>
+    </main>
+
+    <section class="name-gate" id="name-gate" role="dialog" aria-modal="true" aria-labelledby="name-title">
+      <form class="shell-panel name-panel" id="name-form">
+        <h2 id="name-title">Your Name</h2>
+        <label for="player-name">Name</label>
+        <input id="player-name" name="player-name" type="text" maxlength="24" autocomplete="nickname" required>
+        <p id="name-best">Best score: 0</p>
+        <button type="submit">Enter</button>
+      </form>
+    </section>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
