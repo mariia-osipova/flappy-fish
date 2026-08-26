@@ -53,6 +53,7 @@ audio.scream.volume = 0.72;
 
 const keys = new Set();
 const images = {};
+const pendingScorePings = new Set();
 let audioUnlocked = false;
 
 function gameFont(size) {
@@ -186,12 +187,15 @@ async function refreshPlayerBestFromRemote(name) {
 function syncScoreToGoogleSheet(name, bestScore, lastScore) {
   if (!name) return;
   const endpoint = googleScoreEndpoint();
+  const updatedAt = new Date().toISOString();
+  const attemptId = `${updatedAt}-${Math.random().toString(36).slice(2, 10)}`;
 
   const payload = {
     name,
     bestScore,
     score: lastScore,
-    updatedAt: new Date().toISOString(),
+    updatedAt,
+    attemptId,
   };
 
   const sendDirectToSheet = () => {
@@ -203,11 +207,14 @@ function syncScoreToGoogleSheet(name, bestScore, lastScore) {
         name,
         bestScore: String(bestScore),
         score: String(lastScore),
-        updatedAt: payload.updatedAt,
-        t: String(Date.now()),
+        updatedAt,
+        attemptId,
+        t: attemptId,
       });
       const queryUrl = `${endpoint}${endpoint.includes("?") ? "&" : "?"}${query.toString()}`;
       const img = new Image();
+      pendingScorePings.add(img);
+      img.onload = img.onerror = () => pendingScorePings.delete(img);
       img.src = queryUrl;
     } catch {}
   };
@@ -251,7 +258,7 @@ function recordGameResult(score) {
     updateBestScoreDisplay(best);
   }
 
-  syncScoreToGoogleSheet(state.playerName, score, score);
+  syncScoreToGoogleSheet(state.playerName, best, score);
 }
 
 function setPlayerName(name) {

@@ -33,7 +33,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get("/favicon.ico", (req, res) => {
-  res.type("png").sendFile(path.join(__dirname, "data/img/fish1.png"));
+  res.type("png").sendFile(path.join(__dirname, "src/web/favicon.png"));
 });
 
 // Leaderboard API
