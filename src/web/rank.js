@@ -59,6 +59,7 @@ function renderRanking(scores) {
 
   if (!ranked.length) {
     const item = document.createElement("li");
+    item.className = "rank-list__empty";
     item.textContent = "No scores yet";
     rankList.append(item);
     return;
@@ -66,9 +67,13 @@ function renderRanking(scores) {
 
   for (const { name, bestScore } of ranked) {
     const item = document.createElement("li");
+    const entry = document.createElement("span");
+    entry.className = "rank-entry";
     const label = document.createElement("span");
+    label.className = "rank-name";
     label.textContent = `${name}: `;
-    item.append(label, document.createTextNode(String(bestScore)));
+    entry.append(label, document.createTextNode(String(bestScore)));
+    item.append(entry);
     rankList.append(item);
   }
 }

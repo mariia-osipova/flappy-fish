@@ -1177,8 +1177,6 @@ nameForm.addEventListener("submit", (event) => {
   setPlayerName(name);
   nameGate.hidden = true;
   canvas.focus();
-  // Sync current best score immediately when name is submitted
-  syncScoreToGoogleSheet(name, state.highScore || 0, 0);
 });
 
 Promise.all([loadAssets(), loadGameFont()]).then(() => {

@@ -205,16 +205,44 @@ a {
 .rank-list {
   max-height: min(60svh, 360px);
   margin: 16px 0 0;
-  padding-left: 34px;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: rank;
   overflow: auto;
   font-size: 27px;
 }
 
 .rank-list li {
+  counter-increment: rank;
+  display: grid;
+  grid-template-columns: minmax(2.4ch, max-content) minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: baseline;
   padding: 6px 0;
 }
 
-.rank-list span {
+.rank-list li::before {
+  content: counter(rank) ".";
+  color: white;
+  text-align: right;
+}
+
+.rank-list__empty {
+  counter-increment: none;
+  display: block;
+}
+
+.rank-list__empty::before {
+  content: none;
+}
+
+.rank-entry {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: white;
+}
+
+.rank-name {
   color: var(--sun);
 }
 
@@ -242,7 +270,5 @@ a {
 .leaderboard-page .rank-list {
   max-height: none;
   margin-top: 24px;
-  padding-left: 0;
-  list-style-position: inside;
   font-size: clamp(30px, 5vw, 44px);
 }
