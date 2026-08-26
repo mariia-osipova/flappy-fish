@@ -1,0 +1,100 @@
+const SCORES_KEY = "flappy-fish-scores-by-name";
+const LAST_PLAYER_KEY = "flappy-fish-last-player";
+const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
+const rankList = document.getElementById("rank-list");
+
+function resetLocalRankOnce() {
+  if (localStorage.getItem(SCORE_RESET_KEY) === "done") return;
+  localStorage.removeItem(SCORES_KEY);
+  localStorage.removeItem(LAST_PLAYER_KEY);
+  localStorage.setItem(SCORE_RESET_KEY, "done");
+}
+
+function readScores() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SCORES_KEY) || "{}");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed)
+        .filter(([, score]) => Number.isFinite(Number(score)))
+        .map(([name, score]) => [name, Math.max(0, Math.floor(Number(score)))])
+    );
+  } catch {
+    return {};
+  }
+}
+
+function localScores() {
+  return Object.entries(readScores()).map(([name, bestScore]) => ({ name, bestScore }));
+}
+
+function normalizeScores(scores) {
+  return scores
+    .map((score) => ({
+      name: String(score.name || "").trim(),
+      bestScore: Math.max(0, Math.floor(Number(score.bestScore || score.score || 0))),
+    }))
+    .filter((score) => score.name)
+    .sort((a, b) => b.bestScore - a.bestScore || a.name.localeCompare(b.name));
+}
+
+function renderRanking(scores) {
+  const ranked = normalizeScores(scores);
+  rankList.replaceChildren();
+
+  if (!ranked.length) {
+    const item = document.createElement("li");
+    item.textContent = "No scores yet";
+    rankList.append(item);
+    return;
+  }
+
+  for (const { name, bestScore } of ranked) {
+    const item = document.createElement("li");
+    const label = document.createElement("span");
+    label.textContent = `${name}: `;
+    item.append(label, document.createTextNode(String(bestScore)));
+    rankList.append(item);
+  }
+}
+
+function scoreEndpoint() {
+  return String(window.FLAPPY_FISH_CONFIG?.scoreEndpoint || "").trim();
+}
+
+function loadRemoteRanking() {
+  const endpoint = scoreEndpoint();
+  if (!endpoint) {
+    renderRanking(localScores());
+    return;
+  }
+
+  const callbackName = `flappyFishRank${Date.now()}`;
+  const script = document.createElement("script");
+  const separator = endpoint.includes("?") ? "&" : "?";
+  const cleanup = () => {
+    window.clearTimeout(timeout);
+    script.remove();
+    delete window[callbackName];
+  };
+  const timeout = window.setTimeout(() => {
+    cleanup();
+    renderRanking(localScores());
+  }, 5000);
+
+  window[callbackName] = (data) => {
+    cleanup();
+    renderRanking(Array.isArray(data?.scores) ? data.scores : localScores());
+  };
+
+  script.onerror = () => {
+    cleanup();
+    renderRanking(localScores());
+  };
+
+  script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+  document.head.append(script);
+}
+
+resetLocalRankOnce();
+loadRemoteRanking();
