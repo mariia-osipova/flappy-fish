@@ -3,8 +3,10 @@ const SHEET_NAME = "Scores";
 
 function doPost(event) {
   try {
-    const payload = JSON.parse(event.postData.contents || "{}");
-    const result = saveScore(payload);
+    const payload = JSON.parse((event && event.postData && event.postData.contents) || "{}");
+    const result = withScoreLock(function () {
+      return saveScore(payload);
+    });
     return respond({ ok: true, score: result });
   } catch (error) {
     return respond({ ok: false, error: String(error) });
@@ -12,8 +14,36 @@ function doPost(event) {
 }
 
 function doGet(event) {
-  const callback = event.parameter.callback || "";
-  return respond({ ok: true, scores: getScores() }, callback);
+  const parameter = (event && event.parameter) || {};
+  const callback = parameter.callback || "";
+
+  try {
+    if (parameter.action === "save") {
+      const result = withScoreLock(function () {
+        return saveScore(parameter);
+      });
+      return respond({ ok: true, score: result }, callback);
+    }
+
+    return respond({ ok: true, scores: getScores() }, callback);
+  } catch (error) {
+    return respond({ ok: false, error: String(error) }, callback);
+  }
+}
+
+function withScoreLock(callback) {
+  const lock = LockService.getScriptLock();
+  let hasLock = false;
+
+  try {
+    lock.waitLock(3000);
+    hasLock = true;
+    return callback();
+  } finally {
+    if (hasLock) {
+      lock.releaseLock();
+    }
+  }
 }
 
 function saveScore(payload) {
@@ -81,8 +111,15 @@ function cleanName(value) {
 }
 
 function respond(data, callback) {
-  const body = callback ? `${callback}(${JSON.stringify(data)});` : JSON.stringify(data);
+  const callbackName = cleanCallbackName(callback);
+  const body = callbackName ? `${callbackName}(${JSON.stringify(data)});` : JSON.stringify(data);
   return ContentService
     .createTextOutput(body)
-    .setMimeType(callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
+    .setMimeType(callbackName ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON);
+}
+
+function cleanCallbackName(value) {
+  const callback = String(value || "").trim();
+  const pattern = /^[A-Za-z_$][0-9A-Za-z_$]*(\.[A-Za-z_$][0-9A-Za-z_$]*)*$/;
+  return pattern.test(callback) ? callback : "";
 }

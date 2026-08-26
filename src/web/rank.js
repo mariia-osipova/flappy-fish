@@ -72,20 +72,27 @@ function loadRemoteRanking() {
   const callbackName = `flappyFishRank${Date.now()}`;
   const script = document.createElement("script");
   const separator = endpoint.includes("?") ? "&" : "?";
-
-  window[callbackName] = (data) => {
+  const cleanup = () => {
+    window.clearTimeout(timeout);
     script.remove();
     delete window[callbackName];
+  };
+  const timeout = window.setTimeout(() => {
+    cleanup();
+    renderRanking(localScores());
+  }, 5000);
+
+  window[callbackName] = (data) => {
+    cleanup();
     renderRanking(Array.isArray(data?.scores) ? data.scores : localScores());
   };
 
   script.onerror = () => {
-    script.remove();
-    delete window[callbackName];
+    cleanup();
     renderRanking(localScores());
   };
 
-  script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}`;
+  script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
   document.head.append(script);
 }
 
