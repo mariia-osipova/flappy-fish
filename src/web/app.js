@@ -12,9 +12,11 @@ const EPOCH_SECONDS = 400;
 const SUCCESS_SCORE = 50;
 const REQUIRED_FISH = 50;
 const SCREAMER_DURATION = 1200;
+const SCREAMER_CHANCE = 0.25;
 const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
+const DEFAULT_GOOGLE_SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbyO3LwdrpR1Z4eSspiR-eiliyCS40fvxgAvO5dIh9_oaj9jvMGfmxaIEaZoX7mfVws0Fw/exec";
 
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
@@ -95,9 +97,90 @@ function scoreEndpoint() {
   return String(window.FLAPPY_FISH_CONFIG?.scoreEndpoint || "").trim();
 }
 
+function isGoogleScoreEndpoint(endpoint) {
+  return endpoint.includes("script.google.com/macros/s/");
+}
+
+function googleScoreEndpoint() {
+  const config = window.FLAPPY_FISH_CONFIG || {};
+  const explicitEndpoint = String(config.googleScoreEndpoint || "").trim();
+  const configuredEndpoint = scoreEndpoint();
+
+  if (explicitEndpoint) return explicitEndpoint;
+  if (isGoogleScoreEndpoint(configuredEndpoint)) return configuredEndpoint;
+  return DEFAULT_GOOGLE_SCORE_ENDPOINT;
+}
+
+function mergeRemoteBest(name, bestScore) {
+  const remoteBest = Math.max(0, Math.floor(Number(bestScore || 0)));
+  if (remoteBest <= getBestScore(name)) return;
+
+  const scores = readScores();
+  scores[name] = remoteBest;
+  writeScores(scores);
+
+  if (state.playerName === name) {
+    state.highScore = remoteBest;
+    updateNameBest(remoteBest);
+    updateBestScoreDisplay(remoteBest);
+  }
+}
+
+function loadJsonpScores(endpoint) {
+  if (!endpoint) return Promise.resolve([]);
+
+  return new Promise((resolve) => {
+    const callbackName = `flappyFishScores${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const script = document.createElement("script");
+    const separator = endpoint.includes("?") ? "&" : "?";
+    let finished = false;
+
+    const cleanup = () => {
+      window.clearTimeout(timeout);
+      script.remove();
+      delete window[callbackName];
+    };
+
+    const finish = (scores) => {
+      if (finished) return;
+      finished = true;
+      cleanup();
+      resolve(Array.isArray(scores) ? scores : []);
+    };
+
+    const timeout = window.setTimeout(() => finish([]), 5000);
+
+    window[callbackName] = (data) => finish(data?.scores);
+    script.onerror = () => finish([]);
+    script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}&t=${Date.now()}`;
+    document.head.append(script);
+  });
+}
+
+async function refreshPlayerBestFromRemote(name) {
+  if (!name) return;
+
+  const sources = ["/api/scores", googleScoreEndpoint()];
+  for (const endpoint of sources) {
+    try {
+      const scores = endpoint === "/api/scores"
+        ? await fetch(endpoint).then((response) => response.json()).then((data) => data?.scores || [])
+        : await loadJsonpScores(endpoint);
+      const remoteScore = scores.find((score) => {
+        return String(score.name || "").trim().toLowerCase() === name.toLowerCase();
+      });
+      if (remoteScore) {
+        mergeRemoteBest(name, remoteScore.bestScore || remoteScore.score);
+      }
+    } catch {
+      /* Remote scores are optional. */
+    }
+  }
+}
+
 function syncScoreToGoogleSheet(name, bestScore, lastScore) {
   if (!name) return;
-  const endpoint = scoreEndpoint();
+  const endpoint = googleScoreEndpoint();
 
   const payload = {
     name,
@@ -119,7 +202,15 @@ function syncScoreToGoogleSheet(name, bestScore, lastScore) {
   // 2. Direct browser GET query to Google Apps Script
   if (endpoint) {
     try {
-      const queryUrl = `${endpoint}${endpoint.includes("?") ? "&" : "?"}name=${encodeURIComponent(name)}&bestScore=${encodeURIComponent(bestScore)}&score=${encodeURIComponent(lastScore)}&t=${Date.now()}`;
+      const query = new URLSearchParams({
+        action: "save",
+        name,
+        bestScore: String(bestScore),
+        score: String(lastScore),
+        updatedAt: payload.updatedAt,
+        t: String(Date.now()),
+      });
+      const queryUrl = `${endpoint}${endpoint.includes("?") ? "&" : "?"}${query.toString()}`;
       const img = new Image();
       img.src = queryUrl;
     } catch {}
@@ -147,13 +238,17 @@ function savePlayerScore(score) {
     state.highScore = score;
     updateNameBest(score);
     updateBestScoreDisplay(score);
+    syncScoreToGoogleSheet(state.playerName, score, score);
   }
 }
 
 function recordGameResult(score) {
   if (!state.playerName) return;
   const scores = readScores();
-  const best = Math.max(scores[state.playerName] || 0, score);
+  const previousBest = scores[state.playerName] || 0;
+  const best = Math.max(previousBest, score);
+  if (best <= previousBest) return;
+
   scores[state.playerName] = best;
   writeScores(scores);
   state.highScore = best;
@@ -173,6 +268,7 @@ function setPlayerName(name) {
   localStorage.setItem(LAST_PLAYER_KEY, name);
   updateNameBest(state.highScore);
   updateBestScoreDisplay(state.highScore);
+  refreshPlayerBestFromRemote(name);
 }
 
 function updateNameBest(score = getBestScore(normalizePlayerName(playerNameInput.value))) {
@@ -673,8 +769,10 @@ function updateSingle(delta, now) {
     state.gameOver = true;
     recordGameResult(state.score);
     stopMusic();
-    state.jumpScareUntil = now + SCREAMER_DURATION;
-    playSound(audio.scream);
+    if (Math.random() < SCREAMER_CHANCE) {
+      state.jumpScareUntil = now + SCREAMER_DURATION;
+      playSound(audio.scream);
+    }
   }
 }
 

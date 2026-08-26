@@ -9,7 +9,7 @@ const app = express();
 const PORT = 3000;
 const HOST = "0.0.0.0";
 
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXpMNE7NNxZ5avz8GZzQYldIyszmpIiV11lq7gl3G3n0FeOh2wDPbr9vrn92X5tsvq_g/exec";
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyO3LwdrpR1Z4eSspiR-eiliyCS40fvxgAvO5dIh9_oaj9jvMGfmxaIEaZoX7mfVws0Fw/exec";
 
 // In-memory scores store for session leaderboard
 const scoresMap = new Map();
@@ -66,7 +66,17 @@ app.post("/api/scores", async (req, res) => {
       }
 
       // 1. Send GET to Apps Script (which triggers doGet save)
-      fetch(`${GOOGLE_APPS_SCRIPT_URL}?name=${encodeURIComponent(name)}&bestScore=${score}&score=${score}&t=${Date.now()}`, {
+      const updatedAt = new Date().toISOString();
+      const query = new URLSearchParams({
+        action: "save",
+        name,
+        bestScore: String(score),
+        score: String(score),
+        updatedAt,
+        t: String(Date.now()),
+      });
+
+      fetch(`${GOOGLE_APPS_SCRIPT_URL}?${query.toString()}`, {
         redirect: "follow",
       }).catch((e) => console.error("Error forwarding GET to Apps Script:", e.message));
 
@@ -74,7 +84,7 @@ app.post("/api/scores", async (req, res) => {
       fetch(GOOGLE_APPS_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ name, bestScore: score, score }),
+        body: JSON.stringify({ name, bestScore: score, score, updatedAt }),
         redirect: "follow",
       }).catch((e) => console.error("Error forwarding POST to Apps Script:", e.message));
     }
