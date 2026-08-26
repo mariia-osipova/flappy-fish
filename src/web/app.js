@@ -12,7 +12,6 @@ const EPOCH_SECONDS = 400;
 const SUCCESS_SCORE = 50;
 const REQUIRED_FISH = 50;
 const SCREAMER_DURATION = 1200;
-const SCREAMER_CHANCE = 0.25;
 const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
@@ -96,36 +95,9 @@ function scoreEndpoint() {
   return String(window.FLAPPY_FISH_CONFIG?.scoreEndpoint || "").trim();
 }
 
-function postScoreToGoogleSheet(endpoint, payload) {
-  fetch(endpoint, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify(payload),
-    keepalive: true,
-  }).catch(() => {});
-}
-
-function mergeRemoteBest(name, bestScore) {
-  const remoteBest = Math.max(0, Math.floor(Number(bestScore || 0)));
-  if (remoteBest <= getBestScore(name)) return;
-
-  const scores = readScores();
-  scores[name] = remoteBest;
-  writeScores(scores);
-
-  if (state.playerName === name) {
-    state.highScore = remoteBest;
-    updateNameBest(remoteBest);
-    updateBestScoreDisplay(remoteBest);
-  }
-}
-
 function syncScoreToGoogleSheet(name, bestScore, lastScore) {
+  if (!name) return;
   const endpoint = scoreEndpoint();
-  if (!endpoint || !name) return;
 
   const payload = {
     name,
@@ -133,95 +105,36 @@ function syncScoreToGoogleSheet(name, bestScore, lastScore) {
     score: lastScore,
     updatedAt: new Date().toISOString(),
   };
-  const callbackName = `flappyFishSave${Date.now()}${Math.floor(Math.random() * 1000)}`;
-  const script = document.createElement("script");
-  const separator = endpoint.includes("?") ? "&" : "?";
-  const params = new URLSearchParams({
-    action: "save",
-    name: payload.name,
-    bestScore: String(payload.bestScore),
-    score: String(payload.score),
-    updatedAt: payload.updatedAt,
-    callback: callbackName,
-    _: String(Date.now()),
-  });
-  let finished = false;
 
-  const cleanup = () => {
-    window.clearTimeout(timeout);
-    script.remove();
-    delete window[callbackName];
-  };
+  // 1. Send to local server proxy which directly forwards to Google Apps Script
+  try {
+    fetch("/api/scores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
 
-  const finish = (data) => {
-    if (finished) return;
-    finished = true;
+  // 2. Direct browser GET query to Google Apps Script
+  if (endpoint) {
+    try {
+      const queryUrl = `${endpoint}${endpoint.includes("?") ? "&" : "?"}name=${encodeURIComponent(name)}&bestScore=${encodeURIComponent(bestScore)}&score=${encodeURIComponent(lastScore)}&t=${Date.now()}`;
+      const img = new Image();
+      img.src = queryUrl;
+    } catch {}
 
-    if (data?.score) {
-      mergeRemoteBest(name, data.score.bestScore);
-    } else {
-      postScoreToGoogleSheet(endpoint, payload);
-    }
-
-    cleanup();
-  };
-
-  const timeout = window.setTimeout(() => finish(null), 5000);
-
-  window[callbackName] = finish;
-  script.onerror = () => finish(null);
-  script.src = `${endpoint}${separator}${params.toString()}`;
-  document.head.append(script);
-}
-
-function loadScoresFromGoogleSheet() {
-  const endpoint = scoreEndpoint();
-  if (!endpoint) return Promise.resolve([]);
-
-  return new Promise((resolve) => {
-    const callbackName = `flappyFishScores${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    const script = document.createElement("script");
-    const separator = endpoint.includes("?") ? "&" : "?";
-    const timeout = window.setTimeout(() => {
-      script.remove();
-      delete window[callbackName];
-      resolve([]);
-    }, 5000);
-
-    window[callbackName] = (data) => {
-      window.clearTimeout(timeout);
-      script.remove();
-      delete window[callbackName];
-      resolve(Array.isArray(data?.scores) ? data.scores : []);
-    };
-
-    script.onerror = () => {
-      window.clearTimeout(timeout);
-      script.remove();
-      delete window[callbackName];
-      resolve([]);
-    };
-
-    script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}`;
-    document.head.append(script);
-  });
-}
-
-async function refreshPlayerBestFromGoogleSheet(name) {
-  if (!name || !scoreEndpoint()) return;
-
-  const scores = await loadScoresFromGoogleSheet();
-  const remoteScore = scores.find((score) => {
-    return String(score.name || "").trim().toLowerCase() === name.toLowerCase();
-  });
-
-  if (!remoteScore) return;
-
-  const bestScore = Math.max(0, Math.floor(Number(remoteScore.bestScore || remoteScore.score || 0)));
-  mergeRemoteBest(name, bestScore);
-  state.highScore = Math.max(state.highScore, bestScore);
-  updateNameBest(state.highScore);
-  updateBestScoreDisplay(state.highScore);
+    // 3. Direct browser POST (no-cors)
+    try {
+      fetch(endpoint, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  }
 }
 
 function savePlayerScore(score) {
@@ -234,17 +147,13 @@ function savePlayerScore(score) {
     state.highScore = score;
     updateNameBest(score);
     updateBestScoreDisplay(score);
-    syncScoreToGoogleSheet(state.playerName, score, score);
   }
 }
 
 function recordGameResult(score) {
   if (!state.playerName) return;
   const scores = readScores();
-  const previousBest = scores[state.playerName] || 0;
-  const best = Math.max(previousBest, score);
-  if (best <= previousBest) return;
-
+  const best = Math.max(scores[state.playerName] || 0, score);
   scores[state.playerName] = best;
   writeScores(scores);
   state.highScore = best;
@@ -264,7 +173,6 @@ function setPlayerName(name) {
   localStorage.setItem(LAST_PLAYER_KEY, name);
   updateNameBest(state.highScore);
   updateBestScoreDisplay(state.highScore);
-  refreshPlayerBestFromGoogleSheet(name);
 }
 
 function updateNameBest(score = getBestScore(normalizePlayerName(playerNameInput.value))) {
@@ -765,10 +673,8 @@ function updateSingle(delta, now) {
     state.gameOver = true;
     recordGameResult(state.score);
     stopMusic();
-    if (Math.random() < SCREAMER_CHANCE) {
-      state.jumpScareUntil = now + SCREAMER_DURATION;
-      playSound(audio.scream);
-    }
+    state.jumpScareUntil = now + SCREAMER_DURATION;
+    playSound(audio.scream);
   }
 }
 
@@ -1176,6 +1082,8 @@ nameForm.addEventListener("submit", (event) => {
   setPlayerName(name);
   nameGate.hidden = true;
   canvas.focus();
+  // Sync current best score immediately when name is submitted
+  syncScoreToGoogleSheet(name, state.highScore || 0, 0);
 });
 
 Promise.all([loadAssets(), loadGameFont()]).then(() => {

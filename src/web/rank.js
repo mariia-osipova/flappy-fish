@@ -1,6 +1,7 @@
 const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
+
 const rankList = document.getElementById("rank-list");
 
 function resetLocalRankOnce() {
@@ -62,7 +63,17 @@ function scoreEndpoint() {
   return String(window.FLAPPY_FISH_CONFIG?.scoreEndpoint || "").trim();
 }
 
-function loadRemoteRanking() {
+async function loadScores() {
+  // Try direct fetch from server proxy
+  try {
+    const r = await fetch("/api/scores");
+    const data = await r.json();
+    if (Array.isArray(data?.scores) && data.scores.length > 0) {
+      renderRanking(data.scores);
+      return;
+    }
+  } catch {}
+
   const endpoint = scoreEndpoint();
   if (!endpoint) {
     renderRanking(localScores());
@@ -72,29 +83,24 @@ function loadRemoteRanking() {
   const callbackName = `flappyFishRank${Date.now()}`;
   const script = document.createElement("script");
   const separator = endpoint.includes("?") ? "&" : "?";
-  const cleanup = () => {
-    window.clearTimeout(timeout);
-    script.remove();
-    delete window[callbackName];
-  };
-  const timeout = window.setTimeout(() => {
-    cleanup();
-    renderRanking(localScores());
-  }, 5000);
 
   window[callbackName] = (data) => {
-    cleanup();
-    renderRanking(Array.isArray(data?.scores) ? data.scores : localScores());
+    script.remove();
+    delete window[callbackName];
+    if (Array.isArray(data?.scores)) {
+      renderRanking(data.scores);
+    }
   };
 
   script.onerror = () => {
-    cleanup();
+    script.remove();
+    try { delete window[callbackName]; } catch {}
     renderRanking(localScores());
   };
 
-  script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+  script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}&t=${Date.now()}`;
   document.head.append(script);
 }
 
 resetLocalRankOnce();
-loadRemoteRanking();
+loadScores();

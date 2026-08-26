@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flappy Fish Leaderboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+      // Global error shield to prevent third-party extensions (e.g. MetaMask, Web3 wallet injection) from breaking the page
+      window.addEventListener("error", function (e) {
+        if (e && (e.message?.includes("MetaMask") || e.message?.includes("ethereum") || e.filename?.includes("extension"))) {
+          e.preventDefault();
+          return true;
+        }
+      }, true);
+      window.addEventListener("unhandledrejection", function (e) {
+        const reason = e && (e.reason?.message || String(e.reason || ""));
+        if (reason.includes("MetaMask") || reason.includes("ethereum") || reason.includes("User rejected")) {
+          e.preventDefault();
+          return true;
+        }
+      });
+    </script>
   </head>
   <body>
     <a class="rank-button" href="index.html">Game</a>
@@ -12,6 +28,7 @@
     <main class="rank-page" aria-labelledby="rank-title">
       <section class="leaderboard-page">
         <h1 id="rank-title">Leaderboard</h1>
+
         <ol id="rank-list" class="rank-list"></ol>
       </section>
     </main>
