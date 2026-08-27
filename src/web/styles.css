@@ -203,9 +203,11 @@ a {
 }
 
 .rank-list {
+  width: 100%;
+  box-sizing: border-box;
   max-height: min(60svh, 360px);
   margin: 16px 0 0;
-  padding: 0 4px 0 16px;
+  padding: 0 4px;
   list-style: none;
   counter-reset: rank;
   overflow-y: auto;
@@ -216,8 +218,8 @@ a {
 .rank-list li {
   counter-increment: rank;
   display: grid;
-  grid-template-columns: 4.5ch minmax(0, 1fr);
-  column-gap: 14px;
+  grid-template-columns: minmax(56px, 5ch) minmax(0, 1fr);
+  column-gap: 10px;
   align-items: baseline;
   padding: 6px 0;
 }
@@ -271,7 +273,6 @@ a {
 .leaderboard-page .rank-list {
   max-height: none;
   margin-top: 24px;
-  padding-left: clamp(20px, 4vw, 34px);
-  padding-right: 10px;
+  padding-inline: 0;
   font-size: clamp(30px, 5vw, 44px);
 }
