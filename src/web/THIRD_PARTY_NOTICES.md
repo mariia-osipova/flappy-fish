@@ -27,3 +27,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## List of Dirty, Naughty, Obscene, and Otherwise Bad Words
+
+The Spanish and Portuguese profanity word data in `name-filter.js` is derived
+from the `es` and `pt` lists in LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words.
+
+Source: https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words
+
+License: Creative Commons Attribution 4.0 International.
