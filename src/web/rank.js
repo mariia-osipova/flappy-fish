@@ -2,6 +2,7 @@ const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
 const DEFAULT_GOOGLE_SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbx61g7C95a55gBJ63r1h58F2oeupmO54ommLPoIoc2vgQaMuq7B8r64q_hrYxXNxh4a7w/exec";
+const REMOTE_SCORE_TIMEOUT_MS = 20000;
 const LEGACY_GOOGLE_SCORE_ENDPOINTS = new Set([
   "https://script.google.com/macros/s/AKfycbyO3LwdrpR1Z4eSspiR-eiliyCS40fvxgAvO5dIh9_oaj9jvMGfmxaIEaZoX7mfVws0Fw/exec",
 ]);
@@ -81,6 +82,14 @@ function renderRanking(scores) {
   }
 }
 
+function renderStatus(message) {
+  rankList.replaceChildren();
+  const item = document.createElement("li");
+  item.className = "rank-list__empty";
+  item.textContent = message;
+  rankList.append(item);
+}
+
 function scoreEndpoint() {
   return String(window.FLAPPY_FISH_CONFIG?.scoreEndpoint || "").trim();
 }
@@ -135,7 +144,7 @@ function loadJsonpScores(endpoint) {
       resolve(Array.isArray(scores) ? scores : []);
     };
 
-    const timeout = window.setTimeout(() => finish([]), 5000);
+    const timeout = window.setTimeout(() => finish([]), REMOTE_SCORE_TIMEOUT_MS);
 
     window[callbackName] = (data) => finish(data?.scores);
     script.onerror = () => finish([]);
@@ -161,4 +170,5 @@ async function loadScores() {
 }
 
 resetLocalRankOnce();
+renderStatus("Loading leaderboard...");
 loadScores();
