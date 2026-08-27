@@ -38,13 +38,17 @@ function scoreValue(score) {
   return Math.max(0, Math.floor(Number(score.bestScore ?? score.score ?? 0)));
 }
 
+function isBlockedPlayerName(name) {
+  return Boolean(window.FLAPPY_FISH_NAME_FILTER?.containsProfanity?.(name));
+}
+
 function normalizeScores(scores) {
   const bestByName = new Map();
 
   for (const score of scores) {
     const name = String(score.name || "").trim();
     const bestScore = scoreValue(score);
-    if (!name) continue;
+    if (!name || isBlockedPlayerName(name)) continue;
 
     const key = name.toLowerCase();
     const current = bestByName.get(key);

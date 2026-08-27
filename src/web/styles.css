@@ -182,6 +182,14 @@ a {
   font-size: 26px;
 }
 
+.shell-panel p.is-error {
+  color: rgb(255, 111, 96);
+}
+
+.shell-panel input[aria-invalid="true"] {
+  border-color: rgb(255, 111, 96);
+}
+
 .shell-panel > button,
 .name-panel button {
   min-height: 44px;

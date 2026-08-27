@@ -70,6 +70,10 @@ function normalizePlayerName(value) {
   return value.trim().replace(/\s+/g, " ").slice(0, 24);
 }
 
+function isBlockedPlayerName(name) {
+  return Boolean(window.FLAPPY_FISH_NAME_FILTER?.containsProfanity?.(name));
+}
+
 function resetLocalRankOnce() {
   if (localStorage.getItem(SCORE_RESET_KEY) === "done") return;
   localStorage.removeItem(SCORES_KEY);
@@ -286,7 +290,15 @@ function setPlayerName(name) {
 }
 
 function updateNameBest(score = getBestScore(normalizePlayerName(playerNameInput.value))) {
+  nameBest.classList.remove("is-error");
+  playerNameInput.removeAttribute("aria-invalid");
   nameBest.textContent = `Best score: ${score}`;
+}
+
+function showNameError(message) {
+  nameBest.classList.add("is-error");
+  playerNameInput.setAttribute("aria-invalid", "true");
+  nameBest.textContent = message;
 }
 
 function updateBestScoreDisplay(score = state.highScore) {
@@ -1253,6 +1265,11 @@ nameForm.addEventListener("submit", (event) => {
   const name = normalizePlayerName(playerNameInput.value);
   if (!name) {
     playerNameInput.focus();
+    return;
+  }
+  if (isBlockedPlayerName(name)) {
+    showNameError("Please choose another name.");
+    playerNameInput.select();
     return;
   }
   setPlayerName(name);
