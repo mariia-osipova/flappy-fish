@@ -1,7 +1,7 @@
 @font-face {
   font-family: "Strange Fish";
   src: url("assets/font/StrangeFont-Regular.otf") format("opentype");
-  font-display: swap;
+  font-display: block;
 }
 
 :root {
