@@ -13,6 +13,7 @@ const SUCCESS_SCORE = 50;
 const REQUIRED_FISH = 50;
 const SCREAMER_DURATION = 1200;
 const SCREAMER_CHANCE = 0.25;
+const TOUCH_MENU_HOLD_MS = 650;
 const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
@@ -59,6 +60,7 @@ const keys = new Set();
 const images = {};
 const pendingScorePings = new Set();
 let audioUnlocked = false;
+let heldCanvasAction = null;
 
 function gameFont(size) {
   return `${size}px "Strange Fish", fantasy`;
@@ -737,6 +739,13 @@ function performFlap() {
   playSound(audio.flap);
 }
 
+function usesTouchControls() {
+  return Boolean(
+    navigator.maxTouchPoints > 0 ||
+    window.matchMedia?.("(pointer: coarse)")?.matches
+  );
+}
+
 function canvasPoint(event) {
   const rect = canvas.getBoundingClientRect();
   return {
@@ -745,9 +754,49 @@ function canvasPoint(event) {
   };
 }
 
-function handleCanvasPress(event) {
+function clearHeldCanvasAction() {
+  if (heldCanvasAction?.timer) {
+    window.clearTimeout(heldCanvasAction.timer);
+  }
+  heldCanvasAction = null;
+}
+
+function startHeldCanvasAction(event, action) {
+  clearHeldCanvasAction();
+  heldCanvasAction = {
+    action,
+    handled: false,
+    pointerId: event.pointerId,
+    timer: window.setTimeout(() => {
+      if (!heldCanvasAction || heldCanvasAction.pointerId !== event.pointerId) return;
+      heldCanvasAction.handled = true;
+      showMenu();
+    }, TOUCH_MENU_HOLD_MS),
+  };
+}
+
+function handleCanvasPointerDown(event) {
+  if (event.isPrimary === false) return;
   if (isNameGateOpen()) return;
+  event.preventDefault();
   unlockAudio();
+
+  canvas.setPointerCapture?.(event.pointerId);
+
+  if (state.mode === "single" && state.gameOver) {
+    startHeldCanvasAction(event, "restart");
+    return;
+  }
+
+  if (state.mode === "learned") {
+    showMenu();
+    return;
+  }
+
+  if (state.mode === "evolution") {
+    startHeldCanvasAction(event, "menu");
+    return;
+  }
 
   if (state.mode === "menu") {
     const point = canvasPoint(event);
@@ -762,6 +811,17 @@ function handleCanvasPress(event) {
   }
 
   performFlap();
+}
+
+function handleCanvasPointerUp(event) {
+  if (!heldCanvasAction || heldCanvasAction.pointerId !== event.pointerId) return;
+  const { action, handled } = heldCanvasAction;
+  clearHeldCanvasAction();
+
+  if (handled) return;
+  if (action === "restart" && state.mode === "single" && state.gameOver) {
+    restartSingle();
+  }
 }
 
 function updateSingle(delta, now) {
@@ -943,14 +1003,18 @@ function drawMenu() {
 }
 
 function drawStartPrompt() {
-  drawText("Press SPACE to begin!", WIDTH / 2, HEIGHT / 2, 36, "white", "center", 860);
+  const message = usesTouchControls() ? "Tap to begin!" : "Press SPACE to begin!";
+  drawText(message, WIDTH / 2, HEIGHT / 2, 36, "white", "center", 860);
 }
 
 function drawGameOver() {
   ctx.drawImage(images.deadBackground, 0, 0, WIDTH, HEIGHT);
   drawText("- GAME OVER -", WIDTH / 2, HEIGHT / 2 - 70, 80, "rgb(255, 61, 52)", "center", 900);
   drawText(`Total score: ${state.score}`, WIDTH / 2, HEIGHT / 2 + 10, 36, "white", "center", 850);
-  drawText("Press SPACE to restart or M to return to Menu!", WIDTH / 2, HEIGHT / 2 + 58, 36, "white", "center", 940);
+  const message = usesTouchControls()
+    ? "Tap to restart or hold to return to Menu!"
+    : "Press SPACE to restart or M to return to Menu!";
+  drawText(message, WIDTH / 2, HEIGHT / 2 + 58, 36, "white", "center", 940);
 }
 
 function drawStatsPanel() {
@@ -1044,7 +1108,7 @@ function drawLearned() {
     ? `Learning complete: ${state.learnedCount} fish scored ${SUCCESS_SCORE}+`
     : `Simulation complete after ${MAX_GENERATIONS} generations`;
   drawText(message, WIDTH / 2, HEIGHT / 2 + 140, 31);
-  drawText("Press M for Menu", WIDTH / 2, HEIGHT / 2 + 182, 29);
+  drawText(usesTouchControls() ? "Tap for Menu" : "Press M for Menu", WIDTH / 2, HEIGHT / 2 + 182, 29);
 }
 
 function drawJumpScare(now) {
@@ -1175,7 +1239,9 @@ window.addEventListener("keyup", (event) => {
 
 window.addEventListener("resize", configureCanvas);
 
-canvas.addEventListener("pointerdown", handleCanvasPress);
+canvas.addEventListener("pointerdown", handleCanvasPointerDown);
+canvas.addEventListener("pointerup", handleCanvasPointerUp);
+canvas.addEventListener("pointercancel", clearHeldCanvasAction);
 
 playerNameInput.addEventListener("input", () => {
   updateNameBest();
