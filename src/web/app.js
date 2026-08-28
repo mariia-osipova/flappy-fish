@@ -46,6 +46,10 @@ const assetPaths = {
 };
 
 const FISH_ALPHA_HIT_THRESHOLD = 32;
+const ASSET_RETRY_VERSION = "20260828-hitmask-loader";
+const optionalImageFallbacks = {
+  ghost: "fish",
+};
 const fishHitMask = {
   points: [],
   imageWidth: 1,
@@ -351,19 +355,42 @@ const state = {
   },
 };
 
-function loadImage(path) {
+function cacheBustedPath(path) {
+  return `${path}${path.includes("?") ? "&" : "?"}v=${ASSET_RETRY_VERSION}`;
+}
+
+function loadImage(path, retryCache = true) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`Could not load ${path}`));
+    img.onerror = () => {
+      if (retryCache) {
+        loadImage(cacheBustedPath(path), false).then(resolve, () => {
+          reject(new Error(`Could not load ${path}`));
+        });
+        return;
+      }
+      reject(new Error(`Could not load ${path}`));
+    };
     img.src = path;
   });
 }
 
 async function loadAssets() {
   const entries = Object.entries(assetPaths).filter(([key]) => key !== "frames");
-  await Promise.all(entries.map(async ([key, path]) => {
+  const requiredEntries = entries.filter(([key]) => !(key in optionalImageFallbacks));
+  const optionalEntries = entries.filter(([key]) => key in optionalImageFallbacks);
+
+  await Promise.all(requiredEntries.map(async ([key, path]) => {
     images[key] = await loadImage(path);
+  }));
+  await Promise.all(optionalEntries.map(async ([key, path]) => {
+    try {
+      images[key] = await loadImage(path);
+    } catch (error) {
+      console.warn(error.message);
+      images[key] = images[optionalImageFallbacks[key]];
+    }
   }));
   images.frames = await Promise.all(assetPaths.frames.map(loadImage));
 }
