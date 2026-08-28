@@ -45,6 +45,14 @@ const assetPaths = {
   }),
 };
 
+const FISH_ALPHA_HIT_THRESHOLD = 32;
+const fishHitMask = {
+  points: [],
+  imageWidth: 1,
+  imageHeight: 1,
+  localBounds: null,
+};
+
 const audio = {
   flap: new Audio("assets/audios/efecto bubble.ogg"),
   music: new Audio("assets/audios/linkin park fondo.ogg"),
@@ -516,12 +524,105 @@ function updateFish(fish) {
   fish.y += fish.velocity;
 }
 
-function fishRect(fish) {
+function fishRotation(fish) {
+  return -Math.max(-30, Math.min(90, fish.velocity * 3)) * Math.PI / 180;
+}
+
+function buildFishHitMask() {
+  const image = images.fish;
+  const imageWidth = image.naturalWidth || image.width;
+  const imageHeight = image.naturalHeight || image.height;
+  if (!imageWidth || !imageHeight) return;
+
+  const maskCanvas = document.createElement("canvas");
+  maskCanvas.width = imageWidth;
+  maskCanvas.height = imageHeight;
+  const maskCtx = maskCanvas.getContext("2d", { willReadFrequently: true });
+  if (!maskCtx) return;
+
+  try {
+    maskCtx.drawImage(image, 0, 0);
+    const { data } = maskCtx.getImageData(0, 0, imageWidth, imageHeight);
+    const points = [];
+    let left = Infinity;
+    let right = -Infinity;
+    let top = Infinity;
+    let bottom = -Infinity;
+
+    for (let y = 0; y < imageHeight; y += 1) {
+      for (let x = 0; x < imageWidth; x += 1) {
+        const alpha = data[(y * imageWidth + x) * 4 + 3];
+        if (alpha <= FISH_ALPHA_HIT_THRESHOLD) continue;
+
+        const localX = (x + 0.5) / imageWidth - 0.5;
+        const localY = (y + 0.5) / imageHeight - 0.5;
+        points.push({ x: localX, y: localY });
+        left = Math.min(left, localX);
+        right = Math.max(right, localX);
+        top = Math.min(top, localY);
+        bottom = Math.max(bottom, localY);
+      }
+    }
+
+    if (!points.length) return;
+
+    fishHitMask.points = points;
+    fishHitMask.imageWidth = imageWidth;
+    fishHitMask.imageHeight = imageHeight;
+    fishHitMask.localBounds = { left, right, top, bottom };
+  } catch {
+    fishHitMask.points = [];
+    fishHitMask.localBounds = null;
+  }
+}
+
+function fallbackFishRect(fish) {
   return {
     left: fish.x - fish.width / 2,
     right: fish.x + fish.width / 2,
     top: fish.y - fish.height / 2,
     bottom: fish.y + fish.height / 2,
+    centerX: fish.x,
+    centerY: fish.y,
+  };
+}
+
+function fishRect(fish) {
+  const bounds = fishHitMask.localBounds;
+  if (!bounds) return fallbackFishRect(fish);
+
+  const rotation = fishRotation(fish);
+  const cos = Math.cos(rotation);
+  const sin = Math.sin(rotation);
+  const padX = 0.5 / fishHitMask.imageWidth;
+  const padY = 0.5 / fishHitMask.imageHeight;
+  const corners = [
+    { x: bounds.left - padX, y: bounds.top - padY },
+    { x: bounds.right + padX, y: bounds.top - padY },
+    { x: bounds.right + padX, y: bounds.bottom + padY },
+    { x: bounds.left - padX, y: bounds.bottom + padY },
+  ];
+  let left = Infinity;
+  let right = -Infinity;
+  let top = Infinity;
+  let bottom = -Infinity;
+
+  for (const corner of corners) {
+    const localX = corner.x * fish.width;
+    const localY = corner.y * fish.height;
+    const worldX = fish.x + localX * cos - localY * sin;
+    const worldY = fish.y + localX * sin + localY * cos;
+    left = Math.min(left, worldX);
+    right = Math.max(right, worldX);
+    top = Math.min(top, worldY);
+    bottom = Math.max(bottom, worldY);
+  }
+
+  return {
+    left,
+    right,
+    top,
+    bottom,
     centerX: fish.x,
     centerY: fish.y,
   };
@@ -562,6 +663,54 @@ function intersects(a, b) {
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 }
 
+function fishSampleRadius(fish) {
+  return Math.max(fish.width / fishHitMask.imageWidth, fish.height / fishHitMask.imageHeight) / 2;
+}
+
+function forEachFishHitPoint(fish, callback) {
+  const points = fishHitMask.points;
+  if (!points.length) return false;
+
+  const rotation = fishRotation(fish);
+  const cos = Math.cos(rotation);
+  const sin = Math.sin(rotation);
+  const radius = fishSampleRadius(fish);
+
+  for (const point of points) {
+    const localX = point.x * fish.width;
+    const localY = point.y * fish.height;
+    const worldX = fish.x + localX * cos - localY * sin;
+    const worldY = fish.y + localX * sin + localY * cos;
+    if (callback(worldX, worldY, radius)) return true;
+  }
+
+  return false;
+}
+
+function fishTouchesBounds(fish) {
+  if (!fishHitMask.points.length) {
+    const rect = fallbackFishRect(fish);
+    return rect.top <= 0 || rect.bottom >= HEIGHT;
+  }
+
+  return forEachFishHitPoint(fish, (x, y, radius) => {
+    return y - radius <= 0 || y + radius >= HEIGHT;
+  });
+}
+
+function fishIntersectsRect(fish, rect) {
+  if (!fishHitMask.points.length) {
+    return intersects(fallbackFishRect(fish), rect);
+  }
+
+  return forEachFishHitPoint(fish, (x, y, radius) => {
+    return x + radius >= rect.left
+      && x - radius <= rect.right
+      && y + radius >= rect.top
+      && y - radius <= rect.bottom;
+  });
+}
+
 function nextPipeFor(fish) {
   const rect = fishRect(fish);
   return state.pipes.find((pipe) => pipe.x + PIPE_WIDTH / 2 >= rect.left);
@@ -586,12 +735,14 @@ function calculateState(fish) {
 
 function getFishDeathCause(fish) {
   const rect = fishRect(fish);
-  if (rect.top <= 0 || rect.bottom >= HEIGHT) {
+  if ((rect.top <= 0 || rect.bottom >= HEIGHT) && fishTouchesBounds(fish)) {
     return "bounds";
   }
 
   for (const pipe of state.pipes) {
-    if (pipeRects(pipe).some((pipeRect) => intersects(rect, pipeRect))) {
+    if (pipeRects(pipe).some((pipeRect) => {
+      return intersects(rect, pipeRect) && fishIntersectsRect(fish, pipeRect);
+    })) {
       return "pipe";
     }
   }
@@ -979,11 +1130,10 @@ function drawText(text, x, y, size, color = "white", align = "center", maxWidth 
 }
 
 function drawFish(fish, alpha = 1) {
-  const angle = Math.max(-30, Math.min(90, fish.velocity * 3)) * Math.PI / 180;
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(fish.x, fish.y);
-  ctx.rotate(-angle);
+  ctx.rotate(fishRotation(fish));
   ctx.drawImage(images.fish, -fish.width / 2, -fish.height / 2, fish.width, fish.height);
   ctx.restore();
 }
@@ -1278,6 +1428,7 @@ nameForm.addEventListener("submit", (event) => {
 });
 
 Promise.all([loadAssets(), loadGameFont()]).then(() => {
+  buildFishHitMask();
   configureCanvas();
   state.fish = createFish(150, 300, 90);
   const lastPlayer = localStorage.getItem(LAST_PLAYER_KEY) || "";
