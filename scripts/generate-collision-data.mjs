@@ -1,11 +1,18 @@
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { inflateSync } from "node:zlib";
 
 const imagePath = new URL("../data/img/fish1.png", import.meta.url);
 const outputPath = new URL("../src/shared/collision-data.js", import.meta.url);
 const ALPHA_THRESHOLD = 32;
+// These exact literals are part of the published manual-v1 ranked rules.
+// Math.sin/cos can differ by one ULP between Node/V8 architectures, so neither
+// verification nor sprite regeneration may recompute them with the host libm.
+// Keep the committed table as the canonical input and pin every byte, including
+// its velocity keys. New rotation rules require an explicit new table and pin;
+// restore a missing/damaged canonical file from version control instead.
+const CANONICAL_ROTATIONS_SHA256 = "c082b92ce3fe3857e94a0e68bfd51814e5edc6859559532def61b512b4d080d6";
 
 function paeth(left, up, upperLeft) {
   const predicted = left + up - upperLeft;
@@ -70,30 +77,16 @@ function decodeRgbaPng(png) {
   return { width, height, pixels };
 }
 
-function literal(value) {
-  return Object.is(value, -0) ? "-0" : String(value);
-}
-
-function buildRotationTable() {
-  const velocities = new Set([0, -10, 100]);
-  // Both origins are used by the existing game: a new fish starts at zero,
-  // and a flap sets -10. Preserve repeated floating-point additions of 0.3.
-  for (const origin of [0, -10]) {
-    let velocity = origin;
-    while (velocity < 100) {
-      velocities.add(velocity);
-      velocity += 0.3;
-      if (velocity > 100) velocity = 100;
-    }
+function canonicalRotations(source) {
+  const match = /\nexport const FISH_ROTATIONS = Object\.freeze\(\{\n([\s\S]*)\n\}\);\n$/.exec(source);
+  if (!match || createHash("sha256").update(match[1]).digest("hex") !== CANONICAL_ROTATIONS_SHA256) {
+    throw new Error("Canonical rotation table failed integrity check; restore src/shared/collision-data.js from version control. Changing rotations requires new ranked rules.");
   }
-  return [...velocities].sort((a, b) => a - b).map((velocity) => {
-    const angle = -Math.max(-30, Math.min(90, velocity * 3)) * Math.PI / 180;
-    return `  ${JSON.stringify(String(velocity))}: Object.freeze([${[angle, Math.cos(angle), Math.sin(angle)].map(literal).join(", ")}]),`;
-  }).join("\n");
+  return match[1];
 }
 
-async function generate() {
-  const png = await readFile(imagePath);
+export function generateCollisionData(png, currentSource) {
+  const rotations = canonicalRotations(currentSource);
   const { width, height, pixels } = decodeRgbaPng(png);
   const points = [];
   for (let y = 0; y < height; y += 1) {
@@ -102,7 +95,6 @@ async function generate() {
     }
   }
   if (!points.length) throw new Error("The fish sprite has no collision pixels");
-  const rotations = buildRotationTable();
   const imageHash = createHash("sha256").update(png).digest("hex");
   const dataHash = createHash("sha256")
     .update(JSON.stringify({ width, height, threshold: ALPHA_THRESHOLD, points }))
@@ -127,18 +119,23 @@ ${rotations}
 `;
 }
 
-const args = process.argv.slice(2);
-if (args.some((arg) => arg !== "--check") || args.length > 1) {
-  throw new Error("Usage: node scripts/generate-collision-data.mjs [--check]");
-}
-const generated = await generate();
-if (args.includes("--check")) {
-  const current = await readFile(outputPath, "utf8");
-  if (current !== generated) {
+export function checkCollisionData(png, currentSource) {
+  if (currentSource !== generateCollisionData(png, currentSource)) {
     throw new Error("Collision data is stale; run node scripts/generate-collision-data.mjs");
   }
-  console.log("Collision data matches the sprite and rotation generator.");
-} else {
-  await writeFile(outputPath, generated);
-  console.log(`Generated ${fileURLToPath(outputPath)}`);
+}
+
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+  const args = process.argv.slice(2);
+  if (args.some((arg) => arg !== "--check") || args.length > 1) {
+    throw new Error("Usage: node scripts/generate-collision-data.mjs [--check]");
+  }
+  const [png, current] = await Promise.all([readFile(imagePath), readFile(outputPath, "utf8")]);
+  if (args.includes("--check")) {
+    checkCollisionData(png, current);
+    console.log("Collision data matches the sprite and pinned canonical rotations.");
+  } else {
+    await writeFile(outputPath, generateCollisionData(png, current));
+    console.log(`Generated ${fileURLToPath(outputPath)}`);
+  }
 }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { checkCollisionData, generateCollisionData } from "../scripts/generate-collision-data.mjs";
 import {
   RULES_VERSION,
   MAX_BLOCK_TICKS,
@@ -84,12 +85,42 @@ test("the first flap and movement apply before the original float physics", () =
   assert.equal(state.rngState, 1);
 });
 
-test("committed collision data still matches the PNG and deterministic rotation generator", () => {
+test("committed collision data still matches the PNG and pinned canonical rotations", () => {
   const output = execFileSync(process.execPath, ["scripts/generate-collision-data.mjs", "--check"], {
     cwd: new URL("../", import.meta.url),
     encoding: "utf8",
   });
   assert.match(output, /matches the sprite/);
+});
+
+test("collision generation preserves canonical bytes without host trigonometry", (t) => {
+  const png = readFileSync(new URL("../data/img/fish1.png", import.meta.url));
+  const source = readFileSync(new URL("../src/shared/collision-data.js", import.meta.url), "utf8");
+  t.mock.method(Math, "sin", () => { throw new Error("Host Math.sin must not change ranked rules"); });
+  t.mock.method(Math, "cos", () => { throw new Error("Host Math.cos must not change ranked rules"); });
+  assert.equal(generateCollisionData(png, source), source);
+});
+
+test("portable collision verification rejects altered rotations, pixels, hashes and sprite bytes", () => {
+  const png = readFileSync(new URL("../data/img/fish1.png", import.meta.url));
+  const source = readFileSync(new URL("../src/shared/collision-data.js", import.meta.url), "utf8");
+  // This is the actual one-ULP difference produced by Linux/x64 Node 22. It
+  // must be rejected as a rule change, not silently accepted with a tolerance.
+  const changedRotation = source.replace("-0.4539904997395468", "-0.45399049973954675");
+  assert.notEqual(changedRotation, source);
+  assert.throws(() => checkCollisionData(png, changedRotation), /Canonical rotation table failed integrity check/);
+  for (const altered of [
+    source.replace("Object.freeze([14, 1])", "Object.freeze([13, 1])"),
+    source.replace("export const FISH_IMAGE_WIDTH = 30;", "export const FISH_IMAGE_WIDTH = 31;"),
+    source.replace(/FISH_IMAGE_SHA256 = "[a-f0-9]+"/, 'FISH_IMAGE_SHA256 = "changed"'),
+    source.replace(/COLLISION_DATA_VERSION = "[a-f0-9]+"/, 'COLLISION_DATA_VERSION = "changed"'),
+  ]) {
+    assert.notEqual(altered, source);
+    assert.throws(() => checkCollisionData(png, altered), /Collision data is stale/);
+  }
+  // The decoder ignores bytes after IEND, but the full PNG digest must still
+  // detect a changed file even when its decoded alpha mask is identical.
+  assert.throws(() => checkCollisionData(Buffer.concat([png, Buffer.from([0])]), source), /Collision data is stale/);
 });
 
 for (const fixture of fixtures.cases) {
