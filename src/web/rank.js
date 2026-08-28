@@ -1,11 +1,6 @@
 const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
 const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
-const DEFAULT_GOOGLE_SCORE_ENDPOINT = "https://script.google.com/macros/s/AKfycbx61g7C95a55gBJ63r1h58F2oeupmO54ommLPoIoc2vgQaMuq7B8r64q_hrYxXNxh4a7w/exec";
-const REMOTE_SCORE_TIMEOUT_MS = 20000;
-const LEGACY_GOOGLE_SCORE_ENDPOINTS = new Set([
-  "https://script.google.com/macros/s/AKfycbyO3LwdrpR1Z4eSspiR-eiliyCS40fvxgAvO5dIh9_oaj9jvMGfmxaIEaZoX7mfVws0Fw/exec",
-]);
 
 const rankList = document.getElementById("rank-list");
 
@@ -94,28 +89,6 @@ function renderStatus(message) {
   rankList.append(item);
 }
 
-function scoreEndpoint() {
-  return String(window.FLAPPY_FISH_CONFIG?.scoreEndpoint || "").trim();
-}
-
-function isGoogleScoreEndpoint(endpoint) {
-  return endpoint.includes("script.google.com/macros/s/");
-}
-
-function googleScoreEndpoint() {
-  const config = window.FLAPPY_FISH_CONFIG || {};
-  const explicitEndpoint = String(config.googleScoreEndpoint || "").trim();
-  const configuredEndpoint = scoreEndpoint();
-
-  if (explicitEndpoint && !LEGACY_GOOGLE_SCORE_ENDPOINTS.has(explicitEndpoint)) {
-    return explicitEndpoint;
-  }
-  if (isGoogleScoreEndpoint(configuredEndpoint) && !LEGACY_GOOGLE_SCORE_ENDPOINTS.has(configuredEndpoint)) {
-    return configuredEndpoint;
-  }
-  return DEFAULT_GOOGLE_SCORE_ENDPOINT;
-}
-
 async function loadServerScores() {
   try {
     const r = await fetch("/api/scores");
@@ -126,44 +99,7 @@ async function loadServerScores() {
   return [];
 }
 
-function loadJsonpScores(endpoint) {
-  if (!endpoint) return Promise.resolve([]);
-
-  return new Promise((resolve) => {
-    const callbackName = `flappyFishRank${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    const script = document.createElement("script");
-    const separator = endpoint.includes("?") ? "&" : "?";
-    let finished = false;
-
-    const cleanup = () => {
-      window.clearTimeout(timeout);
-      script.remove();
-      delete window[callbackName];
-    };
-
-    const finish = (scores) => {
-      if (finished) return;
-      finished = true;
-      cleanup();
-      resolve(Array.isArray(scores) ? scores : []);
-    };
-
-    const timeout = window.setTimeout(() => finish([]), REMOTE_SCORE_TIMEOUT_MS);
-
-    window[callbackName] = (data) => finish(data?.scores);
-    script.onerror = () => finish([]);
-    script.src = `${endpoint}${separator}callback=${encodeURIComponent(callbackName)}&t=${Date.now()}`;
-    document.head.append(script);
-  });
-}
-
 async function loadScores() {
-  const sheetScores = await loadJsonpScores(googleScoreEndpoint());
-  if (sheetScores.length > 0) {
-    renderRanking(sheetScores);
-    return;
-  }
-
   const serverScores = await loadServerScores();
   if (serverScores.length > 0) {
     renderRanking(serverScores);
