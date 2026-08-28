@@ -72,6 +72,34 @@ function localScores() {
     .map(([name, bestScore]) => ({ name, bestScore }));
 }
 
+function shouldUseLocalScores() {
+  return !GOOGLE_SCORE_ENDPOINT;
+}
+
+function scoresConfigStatus() {
+  return {
+    googleScoreEndpointConfigured: Boolean(GOOGLE_SCORE_ENDPOINT),
+    scoreWriteSecretConfigured: Boolean(SCORE_WRITE_SECRET),
+  };
+}
+
+async function readResponseBody(response) {
+  const text = await response.text();
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { raw: text.slice(0, 300) };
+  }
+}
+
+function googleEndpointError(data) {
+  if (data?.error) return data.error;
+  if (data?.raw) return `Unexpected Google score endpoint response: ${data.raw}`;
+  return "Google score endpoint did not return ok:true";
+}
+
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), GOOGLE_SCORE_TIMEOUT_MS);
@@ -96,7 +124,10 @@ async function loadGoogleScores() {
     if (!response.ok) {
       throw new Error(`Google score endpoint returned ${response.status}`);
     }
-    const data = await response.json();
+    const data = await readResponseBody(response);
+    if (data?.ok === false) {
+      throw new Error(googleEndpointError(data));
+    }
     return Array.isArray(data?.scores) ? data.scores : [];
   } catch (error) {
     console.warn(`Could not load Google scores: ${error.message}`);
@@ -105,7 +136,12 @@ async function loadGoogleScores() {
 }
 
 async function forwardScoreToGoogleSheet(score) {
-  if (!GOOGLE_SCORE_ENDPOINT || !SCORE_WRITE_SECRET) return false;
+  if (!GOOGLE_SCORE_ENDPOINT) {
+    return { ok: false, status: 503, error: "GOOGLE_SCORE_ENDPOINT is not configured" };
+  }
+  if (!SCORE_WRITE_SECRET) {
+    return { ok: false, status: 503, error: "SCORE_WRITE_SECRET is not configured" };
+  }
 
   try {
     const response = await fetchWithTimeout(GOOGLE_SCORE_ENDPOINT, {
@@ -121,10 +157,15 @@ async function forwardScoreToGoogleSheet(score) {
       throw new Error(`Google score endpoint returned ${response.status}`);
     }
 
-    return true;
+    const data = await readResponseBody(response);
+    if (data?.ok !== true) {
+      throw new Error(googleEndpointError(data));
+    }
+
+    return { ok: true, status: response.status, data };
   } catch (error) {
     console.warn(`Could not forward score to Google Sheets: ${error.message}`);
-    return false;
+    return { ok: false, status: 502, error: error.message };
   }
 }
 
@@ -145,7 +186,10 @@ app.use((req, res, next) => {
 
 // Health check
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({
+    status: "ok",
+    scores: scoresConfigStatus(),
+  });
 });
 
 app.get("/favicon.ico", (req, res) => {
@@ -155,7 +199,7 @@ app.get("/favicon.ico", (req, res) => {
 // Leaderboard API
 app.get("/api/scores", async (req, res) => {
   const googleScores = await loadGoogleScores();
-  const storedScores = localScores();
+  const storedScores = shouldUseLocalScores() ? localScores() : [];
   const scores = normalizeScores([
     ...googleScores,
     ...storedScores,
@@ -173,16 +217,27 @@ app.get("/api/scores", async (req, res) => {
 app.post("/api/scores", async (req, res) => {
   try {
     const score = cleanScorePayload(parseRequestBody(req));
-    if (score) {
-      const existing = scoresMap.get(score.name) || 0;
-      if (score.bestScore >= existing) {
-        scoresMap.set(score.name, score.bestScore);
-      }
-      await forwardScoreToGoogleSheet(score);
+    if (!score) {
+      return res.status(400).json({ ok: false, error: "Invalid payload" });
     }
-    res.json({ ok: true });
+
+    const forwardResult = await forwardScoreToGoogleSheet(score);
+    if (!forwardResult.ok) {
+      return res.status(forwardResult.status).json({
+        ok: false,
+        forwarded: false,
+        error: forwardResult.error,
+      });
+    }
+
+    const existing = scoresMap.get(score.name) || 0;
+    if (score.bestScore >= existing) {
+      scoresMap.set(score.name, score.bestScore);
+    }
+
+    res.json({ ok: true, forwarded: true });
   } catch (err) {
-    res.status(400).json({ error: "Invalid payload" });
+    res.status(400).json({ ok: false, error: "Invalid payload" });
   }
 });
 
