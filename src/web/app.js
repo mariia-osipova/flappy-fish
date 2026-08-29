@@ -175,6 +175,7 @@ let manualSnapshot = null;
 let pendingFlap = false;
 let startingGame = false;
 let lastRankedEvent = { status: "idle" };
+let rankedDisabled = false;
 let refreshedGameId = null;
 const rankedNotice = document.getElementById("ranked-notice");
 const rankedStartButton = document.getElementById("ranked-start");
@@ -183,6 +184,7 @@ const pauseButton = document.getElementById("game-pause");
 const practiceButton = document.getElementById("practice-start");
 const ranked = new RankedClient({ onChange(event) {
   lastRankedEvent = event;
+  if (event.error?.code === "ranked_disabled") rankedDisabled = true;
   if (manualKind === "ranked" && event.snapshot) {
     mirrorManual(event.snapshot);
     if (!event.running) audio.music.pause();
@@ -194,6 +196,10 @@ const ranked = new RankedClient({ onChange(event) {
   updateRankedNotice();
 } });
 
+function practiceOnly() {
+  return PRACTICE_ONLY || rankedDisabled;
+}
+
 function updateRankedNotice() {
   const event = lastRankedEvent;
   let message;
@@ -201,6 +207,8 @@ function updateRankedNotice() {
     message = "Practice-only deployment. Manual play and Evolution are available; no scores are sent or added to the leaderboard.";
   } else if (manualKind === "practice") {
     message = "Practice — this game will not enter the leaderboard.";
+  } else if (rankedDisabled) {
+    message = "Рейтинг ещё не настроен. Single Player запускается как тренировка и не попадает в рейтинг.";
   } else if (state.mode === "evolution" || state.mode === "learned") {
     message = "Evolution simulation — no ranked scores are submitted.";
   } else if (event.status === "completed") {
@@ -229,10 +237,10 @@ function updateRankedNotice() {
     message = "Play ranked, or choose practice. Names are shared: the leaderboard does not verify who owns a nickname.";
   }
   rankedNotice.textContent = message;
-  rankedNotice.dataset.status = PRACTICE_ONLY || manualKind === "practice" ? "practice" : event.status;
+  rankedNotice.dataset.status = practiceOnly() || manualKind === "practice" ? "practice" : event.status;
   rankedStartButton.disabled = startingGame || event.status === "connecting";
-  rankedStartButton.hidden = PRACTICE_ONLY || Boolean(ranked.unfinished && ranked.receipt) || (manualKind === "ranked" && !state.gameOver);
-  rankedResumeButton.hidden = PRACTICE_ONLY || !ranked.unfinished || !ranked.receipt || (manualKind === "ranked" && ranked.running);
+  rankedStartButton.hidden = practiceOnly() || Boolean(ranked.unfinished && ranked.receipt) || (manualKind === "ranked" && !state.gameOver);
+  rankedResumeButton.hidden = practiceOnly() || !ranked.unfinished || !ranked.receipt || (manualKind === "ranked" && ranked.running);
   rankedResumeButton.disabled = startingGame || event.status === "connecting" || event.status === "conflict" || event.status === "storage_error";
   rankedResumeButton.textContent = event.status === "full" ? "Retry ranked slot" : "Resume / retry ranked";
   pauseButton.hidden = state.mode !== "single" && state.mode !== "evolution";
@@ -243,7 +251,7 @@ function updateRankedNotice() {
 }
 
 async function resumeRanked() {
-  if (PRACTICE_ONLY) return startPractice();
+  if (practiceOnly()) return startPractice();
   if (startingGame || isNameGateOpen()) return;
   startingGame = true;
   try {
@@ -294,7 +302,13 @@ async function loadAssets() {
       images[key] = images[optionalImageFallbacks[key]];
     }
   }));
-  images.frames = await Promise.all(assetPaths.frames.map(loadImage));
+  const firstFrame = await loadImage(assetPaths.frames[0]);
+  images.frames = [firstFrame];
+  void Promise.all(assetPaths.frames.slice(1).map(loadImage)).then((frames) => {
+    images.frames = [firstFrame, ...frames];
+  }).catch((error) => {
+    console.warn(`${error.message}; continuing with the first background frame`);
+  });
 }
 
 async function loadGameFont() {
@@ -728,7 +742,7 @@ function mirrorManual(snapshot) {
 }
 
 async function startSingle() {
-  if (PRACTICE_ONLY) return startPractice();
+  if (practiceOnly()) return startPractice();
   if (startingGame || isNameGateOpen()) return;
   startingGame = true;
   try {
@@ -1121,7 +1135,7 @@ function drawScore() {
 function drawMenu() {
   drawBackground();
   drawText("FLAPPY FISH!", WIDTH / 2, HEIGHT * 0.25, 100, "rgb(253, 231, 91)");
-  drawText(PRACTICE_ONLY ? "1. Single Player (Practice)" : "1. Single Player (Ranked Game)", WIDTH / 2, HEIGHT * 0.49, 50, "white", "center", 900);
+  drawText(practiceOnly() ? "1. Single Player (Practice)" : "1. Single Player (Ranked Game)", WIDTH / 2, HEIGHT * 0.49, 50, "white", "center", 900);
   drawText("2. Simulation (Evolutionary Algorithm)", WIDTH / 2, HEIGHT * 0.61, 50, "white", "center", 900);
   drawText("GROUP 4: Osipova, Zanoni and Scofano", WIDTH / 2, HEIGHT - 52, 30, "rgb(233, 255, 244)", "center", 880);
 }

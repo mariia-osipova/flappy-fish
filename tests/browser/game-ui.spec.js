@@ -3,18 +3,19 @@ import {
   localTrafficOnly, observeCanvas, enterGame, enterPractice, readCanvas, expectLocalAndHealthy,
 } from "./helpers.js";
 
-test("ranked-disabled fallback requires an explicit choice; keyboard and pause keep working", async ({ page }, testInfo) => {
+test("ranked-disabled deployment exposes Single Player as practice; keyboard and pause keep working", async ({ page }, testInfo) => {
   const traffic = await localTrafficOnly(page);
   await observeCanvas(page);
   await enterGame(page);
   const notice = page.locator("#ranked-notice");
-  await expect(notice).toHaveAttribute("data-status", "unavailable");
-  await page.locator("#ranked-start").click();
-  await expect(notice).toHaveAttribute("data-status", "unavailable");
+  await expect(notice).toHaveAttribute("data-status", "practice");
+  await expect(notice).toContainText("Single Player");
+  await expect(page.locator("#ranked-start")).toBeHidden();
   await expect(page.locator("#game-pause")).toBeHidden();
   expect((await readCanvas(page)).fish).toBeNull();
 
-  await page.locator("#practice-start").click();
+  await expect.poll(async () => (await readCanvas(page)).texts.some((text) => text.includes("Single Player (Practice)"))).toBe(true);
+  await page.locator("#game-canvas").click({ position: { x: 450, y: 270 } });
   await expect(notice).toHaveAttribute("data-status", "practice");
   await expect(notice).toContainText("will not enter the leaderboard");
   await expect.poll(async () => (await readCanvas(page)).fish?.y).toBe(300);
