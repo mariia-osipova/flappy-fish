@@ -89,7 +89,9 @@ async function fixture(t, options = {}) {
 test('unconfigured deployment stays in practice and old score writes are gone', async t => {
   const f = await fixture(t, { config: loadConfig({}) });
   assert.equal((await f.request('/api/health')).data.rankedEnabled, false);
-  assert.equal((await f.request('/')).status, 200);
+  const page = await f.request('/');
+  assert.equal(page.status, 200);
+  assert.equal(page.response.headers.get('set-cookie'), null);
   assert.equal((await f.request('/shared/game-core.js')).status, 200);
   assert.equal((await f.request('/server.js')).status, 404);
   assert.equal((await f.request('/.env')).status, 404);
@@ -108,7 +110,7 @@ test('keys must be long, separated, and server-only', () => {
 
 test('anonymous secure cookies authorize only their own game; no CORS authority', async t => {
   const f = await fixture(t);
-  const issued = await f.request('/api/session', { body: {} });
+  const issued = await f.request('/index.html');
   const cookieHeader = issued.response.headers.get('set-cookie');
   for (const attribute of ['__Host-flappy_session=', 'HttpOnly', 'Secure', 'SameSite=Lax', 'Path=/']) assert.ok(cookieHeader.includes(attribute));
   assert.equal(issued.response.headers.get('access-control-allow-origin'), null);

@@ -1,5 +1,5 @@
 import { createInitialState, step as stepManual, fishRotation as manualFishRotation, INPUT_LEFT, INPUT_RIGHT, INPUT_FLAP } from "../shared/game-core.js";
-import { RankedClient } from "./ranked-client.js";
+import { RankedClient } from "./ranked-client.js?v=session-on-shell-1";
 
 const PRACTICE_ONLY = document.querySelector('meta[name="flappy-fish-mode"]')?.content === "practice";
 
@@ -175,7 +175,7 @@ let manualSnapshot = null;
 let pendingFlap = false;
 let startingGame = false;
 let lastRankedEvent = { status: "idle" };
-let rankedDisabled = false;
+let rankedDisabled = document.querySelector('meta[name="flappy-fish-ranked"]')?.content === "disabled";
 let refreshedGameId = null;
 const rankedNotice = document.getElementById("ranked-notice");
 const rankedStartButton = document.getElementById("ranked-start");
@@ -195,6 +195,9 @@ const ranked = new RankedClient({ onChange(event) {
   }
   updateRankedNotice();
 } });
+// Open IndexedDB and recover any saved outbox while assets are loading, so a
+// quick click on Ranked does not wait for browser initialization first.
+if (!PRACTICE_ONLY && !rankedDisabled) void ranked.initialize().catch(() => {});
 
 function practiceOnly() {
   return PRACTICE_ONLY || rankedDisabled;
@@ -1446,7 +1449,6 @@ Promise.all([loadAssets(), loadGameFont()]).then(() => {
   loading.classList.add("is-hidden");
   playerNameInput.focus();
   if (lastPlayer) void refreshPlayerBestFromRemote(normalizePlayerName(lastPlayer));
-  if (!PRACTICE_ONLY) void ranked.initialize().catch(() => {});
   updateRankedNotice();
   requestAnimationFrame(tick);
 }).catch((error) => {

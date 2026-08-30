@@ -1,4 +1,5 @@
 import express from 'express';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes, randomUUID } from 'node:crypto';
@@ -15,12 +16,16 @@ import {
 } from './security.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
+const indexPath = path.join(root, 'src/web/index.html');
+const indexHtml = readFileSync(indexPath, 'utf8');
+const disabledIndexHtml = indexHtml.replace('<head>', '<head>\n    <meta name="flappy-fish-ranked" content="disabled">');
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res)).catch(next);
 
 export function createApp({ config = loadConfig(), store, verifier, now = Date.now, logger = console } = {}) {
   const app = express();
   app.disable('x-powered-by');
   const ready = config.configured && Boolean(config.sessionKey && config.stateKey);
+  const rankedAvailable = ready && config.rankedEnabled;
   const gateway = store || (ready ? new AppsScriptGateway({ url: config.gatewayUrl, key: config.gatewayKey, now, timeoutMs: config.gatewayTimeoutMs }) : null);
   let replayVerifier = verifier;
   const limiter = new RateLimiter({ now });
@@ -199,13 +204,25 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
   app.post('/api/scores', (req, res) => res.status(410).json({ error: { code: 'raw_scores_disabled', message: 'Прямая запись очков отключена. Используйте проверяемую партию.' } }));
   app.use('/api', (req, res) => res.status(404).json({ error: { code: 'not_found', message: 'API не найден.' } }));
 
+  // Establish the anonymous identity on the document response. The ranked
+  // client can then create a game with one request instead of waiting for a
+  // separate session round-trip after the player presses Start. Unconfigured
+  // servers mark the same shell as practice-only without making the browser
+  // discover that state through another hosted request.
+  const sendAppShell = (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    if (rankedAvailable) issueSession(req, res, config.sessionKey, now());
+    res.type('html').send(rankedAvailable ? indexHtml : disabledIndexHtml);
+  };
+  app.get(['/', '/index.html'], sendAppShell);
+
   app.get('/favicon.ico', (req, res) => res.type('png').sendFile(path.join(root, 'src/web/favicon.png')));
   app.use('/assets', express.static(path.join(root, 'data'), { dotfiles: 'deny' }));
   app.use('/shared', express.static(path.join(root, 'src/shared'), { dotfiles: 'deny', fallthrough: false }));
   app.use(express.static(path.join(root, 'src/web'), { dotfiles: 'deny' }));
   app.get('*', (req, res) => {
     if (path.extname(req.path) || req.path.split('/').some(segment => segment.startsWith('.'))) return res.sendStatus(404);
-    res.sendFile(path.join(root, 'src/web/index.html'));
+    sendAppShell(req, res);
   });
 
   app.use((error, req, res, next) => {

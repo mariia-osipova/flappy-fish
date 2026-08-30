@@ -20,6 +20,7 @@ function harness(options = {}) {
   const server = options.server || {
     receipt: null, now: 1_000_000, offline: false, commits: 0, begins: 0, resumes: 0,
     loseCheckpoint: false, loseBegin: false, loseResume: false, full: false,
+    sessionMissing: false,
     calls: [], ids: new Map(), tokens: new Map(), inFlight: 0, maxInFlight: 0,
   };
   const issue = (receipt) => {
@@ -33,8 +34,9 @@ function harness(options = {}) {
     const body = init.body ? JSON.parse(init.body) : null;
     server.calls.push({ path, body });
     if (server.offline) throw new Error("offline");
-    if (path === "/api/session") return ok({ ok: true });
+    if (path === "/api/session") { server.sessionMissing = false; return ok({ ok: true }); }
     if (path === "/api/games") {
+      if (server.sessionMissing) return fail("session_required", 401);
       if (!server.receipt) {
         if (server.full) return fail("ranked_full", 503);
         server.begins += 1;
@@ -106,6 +108,22 @@ async function started(options) {
   await result.client.start("Fish");
   return result;
 }
+
+test("the document session avoids a separate request on fresh ranked start", async () => {
+  const { client, server } = harness();
+  await client.start("Fish");
+  assert.deepEqual(server.calls.map((call) => call.path), ["/api/games"]);
+  await client.close();
+});
+
+test("a missing document cookie is renewed once before retrying the same begin", async () => {
+  const result = harness();
+  result.server.sessionMissing = true;
+  await result.client.start("Fish");
+  assert.deepEqual(result.server.calls.map((call) => call.path), ["/api/games", "/api/session", "/api/games"]);
+  assert.equal(result.server.calls[0].body.requestId, result.server.calls[2].body.requestId);
+  await result.client.close();
+});
 
 function advance(client, count, input = 0) {
   for (let index = 0; index < count; index += 1) client.advance(input);
@@ -462,7 +480,7 @@ test("slow browser storage coalesces frame snapshots while retaining a durabilit
   await client.close();
 });
 
-test("completed local outboxes do not block a new anonymous session after cookie expiry", async () => {
+test("completed local outboxes do not make a redundant session request", async () => {
   const first = await started();
   first.client.advance(INPUT_FLAP);
   while (first.client.running) first.client.advance(0);
@@ -471,11 +489,10 @@ test("completed local outboxes do not block a new anonymous session after cookie
   const paths = [];
   const restored = new RankedClient({ store: first.store, automaticRetry: false, fetcher: async (path) => {
     paths.push(path);
-    if (path === "/api/session") return ok({ ok: true });
     return fail("session_expired", 401);
   } });
   await restored.initialize();
-  assert.deepEqual(paths, ["/api/session"]);
+  assert.deepEqual(paths, []);
   assert.equal(restored.record, null);
   assert.equal(first.store.value, null);
   await restored.close();

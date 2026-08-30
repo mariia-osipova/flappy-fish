@@ -265,7 +265,9 @@ export class RankedClient {
         // still owns the durable game. A different cookie cannot recover it.
         await this.recover();
       }
-      await this.request("/api/session", {});
+      // The Node server issues the HttpOnly session cookie with index.html.
+      // Avoid another hosted request here; start() renews and retries once if
+      // an old page, an expired cookie, or browser policy left it unavailable.
       this.lastSessionRefresh = this.now();
       this.initialized = true;
       this.scheduleSessionRenewal();
@@ -285,6 +287,17 @@ export class RankedClient {
       if (this.closed) this.store.close?.();
       this.emit("unavailable", error);
       throw error;
+    }
+  }
+
+  async begin(body) {
+    try {
+      return await this.request("/api/games", body);
+    } catch (error) {
+      if (this.receipt || !["session_required", "session_expired"].includes(error.code)) throw error;
+      await this.request("/api/session", {});
+      this.lastSessionRefresh = this.now();
+      return this.request("/api/games", body);
     }
   }
 
@@ -321,7 +334,7 @@ export class RankedClient {
         this.record = { version: 1, name, beginRequestId: this.requestId(), receipt: null, queue: [], pending: [], resume: null };
         await this.persist();
       }
-      const receipt = this.checkReceipt(await this.request("/api/games", {
+      const receipt = this.checkReceipt(await this.begin({
         name: this.record.name, requestId: this.record.beginRequestId,
       }));
       this.record.receipt = receipt;
