@@ -20,6 +20,7 @@ function harness(options = {}) {
   const server = options.server || {
     receipt: null, now: 1_000_000, offline: false, commits: 0, begins: 0, resumes: 0,
     loseCheckpoint: false, loseBegin: false, loseResume: false, full: false,
+    conflictResume: false,
     sessionMissing: false,
     calls: [], ids: new Map(), tokens: new Map(), inFlight: 0, maxInFlight: 0,
   };
@@ -64,6 +65,7 @@ function harness(options = {}) {
       receipt.lastAction = "resume";
       issue(receipt);
       server.ids.set(body.requestId, copy(receipt));
+      if (server.conflictResume) { server.conflictResume = false; return fail("conflict"); }
       if (server.loseResume) { server.loseResume = false; throw new Error("lost resume response"); }
       return ok(currentReceipt());
     }
@@ -188,8 +190,10 @@ test("reload restores a committed block after a lost acknowledgement", async () 
   first.server.loseCheckpoint = true;
   await first.client.pause();
   await first.client.close();
+  first.server.calls = [];
   const restored = harness({ store: first.store, server: first.server, serial: 100 });
   await restored.client.initialize();
+  assert.equal(first.server.calls[0].path, "/api/games/game-1", "an uncertain outbox must still read back the durable state");
   await restored.client.pump();
   assert.equal(restored.client.snapshot.tick, 23);
   assert.equal(restored.client.running, false);
@@ -305,6 +309,59 @@ test("full slots keep a paused game and its input tail; retry can later continue
   await client.resume();
   assert.equal(client.running, true);
   assert.deepEqual(client.snapshot, snapshot);
+  await client.close();
+});
+
+test("a clean paused reload initializes locally and resumes with one hosted mutation", async () => {
+  const first = await started();
+  advance(first.client, 17);
+  await first.client.pause();
+  await first.client.close();
+  first.server.calls = [];
+
+  const restored = harness({ store: first.store, server: first.server, serial: 100 });
+  await restored.client.initialize();
+  assert.deepEqual(first.server.calls, [], "a durable clean pause needs no read-back while assets load");
+  assert.equal(restored.client.status, "paused");
+  assert.equal(restored.client.snapshot.tick, 17);
+
+  await restored.client.resume();
+  assert.deepEqual(first.server.calls.map((call) => call.path), ["/api/games/game-1/resume"]);
+  assert.equal(restored.client.running, true);
+  assert.equal(restored.client.receipt.checkpoint.leaseEpoch, 2);
+  await restored.client.close();
+});
+
+test("a lost direct resume response is recovered without consuming another epoch", async () => {
+  const { client, server } = await started();
+  await client.pause();
+  server.calls = [];
+  server.loseResume = true;
+
+  await assert.rejects(client.resume(), { code: "network" });
+  const requestId = client.record.resume.requestId;
+  assert.deepEqual(server.calls.map((call) => call.path), ["/api/games/game-1/resume"]);
+  assert.equal(server.calls[0].body.requestId, requestId);
+
+  await client.resume();
+  assert.deepEqual(server.calls.map((call) => call.path), ["/api/games/game-1/resume", "/api/games/game-1"]);
+  assert.equal(server.resumes, 1);
+  assert.equal(client.record.resume, null);
+  assert.equal(client.running, true);
+  await client.close();
+});
+
+test("a direct resume conflict reads back the same idempotent request before continuing", async () => {
+  const { client, server } = await started();
+  await client.pause();
+  server.calls = [];
+  server.conflictResume = true;
+
+  await client.resume();
+  assert.deepEqual(server.calls.map((call) => call.path), ["/api/games/game-1/resume", "/api/games/game-1"]);
+  assert.equal(server.resumes, 1);
+  assert.equal(client.record.resume, null);
+  assert.equal(client.running, true);
   await client.close();
 });
 

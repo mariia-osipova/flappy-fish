@@ -100,6 +100,54 @@ test("read operations do not create missing sheets or mutate initialized sheets"
   assert.equal(h.calls.locks, 0);
 });
 
+test("verified row hints reduce read/checkpoint cells and a miss falls back to full validation", () => {
+  const h = harness();
+  const games = [];
+  for (let index = 0; index < 8; index += 1) {
+    const game = started(h, { ownerId: "owner-" + index, gameId: "game-" + index });
+    games.push(index === 7 ? game :
+      changed(h, "checkpoint", checkpointPayload(game, { ticks: 0, pause: true }), "pause-" + index));
+  }
+  const target = games[3];
+  const active = games[7];
+
+  h.resetCalls();
+  assert.equal(h.invoke("read", { ownerId: target.ownerId, gameId: target.gameId }).data.gameId, target.gameId);
+  const hintedCells = h.calls.readCells;
+  assert.equal(hintedCells, 2, "the fast path reads only the header and the target JSON cell");
+
+  h.advanceTime(10000);
+  h.resetCalls();
+  assert.equal(changed(h, "checkpoint", checkpointPayload(active), "fast-checkpoint").seq, 1);
+  assert.equal(h.calls.readCells, 2, "checkpoint also reads only its verified target row");
+  assert.equal(h.calls.flushes, 1);
+
+  h.clearCache();
+  h.resetCalls();
+  assert.equal(h.invoke("read", { ownerId: target.ownerId, gameId: target.gameId }).data.gameId, target.gameId);
+  assert.equal(h.calls.readCells, games.length + 1, "a cache miss validates every authoritative game row");
+  assert.ok(h.calls.readCells > hintedCells);
+  assert.equal(h.calls.writes, 0);
+  assert.equal(h.calls.flushes, 0);
+});
+
+test("a stale or forged row hint is verified and repaired by the authoritative scan", () => {
+  const h = harness();
+  const first = started(h, { ownerId: "owner-first", gameId: "game-first" });
+  const second = started(h, { ownerId: "owner-second", gameId: "game-second" });
+  h.setCache(h.gameRowCacheKey(first.gameId), "3");
+  h.resetCalls();
+
+  const read = h.invoke("read", { ownerId: first.ownerId, gameId: first.gameId });
+  assert.equal(read.data.gameId, first.gameId);
+  assert.equal(h.calls.readCells, 4, "header, stale hinted cell, then both authoritative rows are read");
+
+  h.resetCalls();
+  assert.equal(h.invoke("read", { ownerId: first.ownerId, gameId: first.gameId }).data.gameId, first.gameId);
+  assert.equal(h.calls.readCells, 2, "the repaired hint points to the verified row");
+  assert.equal(second.gameId, "game-second");
+});
+
 test("begin retry after committed write returns the original game, not a new random proposal", () => {
   const h = harness();
   const payload = beginPayload();
@@ -197,6 +245,27 @@ test("failure before write can be retried, and every mutation flushes before unl
   h.setBusy(true);
   expectError(h.invoke("resume", resumedPayload(game)), "storage_unavailable", 503);
   h.setBusy(false);
+});
+
+test("only mutation attempts flush; duplicate and rejected checkpoints just release the lock", () => {
+  const h = harness();
+  const game = started(h);
+  h.advanceTime(10000);
+  const payload = checkpointPayload(game);
+  const next = changed(h, "checkpoint", payload, "checkpoint-once");
+  assert.deepEqual(h.calls.events.slice(-2).map((event) => event.type), ["flush", "release"]);
+
+  h.resetCalls();
+  assert.deepEqual(changed(h, "checkpoint", payload, "checkpoint-once"), next);
+  assert.equal(h.calls.writes, 0);
+  assert.equal(h.calls.flushes, 0);
+  assert.deepEqual(h.calls.events.map((event) => event.type), ["lock", "release"]);
+
+  h.resetCalls();
+  expectError(h.invoke("checkpoint", checkpointPayload(next, { ticks: 1201 })), "invalid_input");
+  assert.equal(h.calls.writes, 0);
+  assert.equal(h.calls.flushes, 0);
+  assert.deepEqual(h.calls.events.map((event) => event.type), ["lock", "release"]);
 });
 
 test("zero-tick pause accepts reordered snapshot keys and releases the place", () => {

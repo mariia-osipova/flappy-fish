@@ -24,8 +24,13 @@ export function createAppsScriptHarness({
     SPREADSHEET_ID: "test-spreadsheet",
     ...properties,
   };
-  const calls = { opens: 0, reads: 0, writes: 0, flushes: 0, locks: 0, releases: 0, events: [] };
+  const calls = {
+    opens: 0, reads: 0, readCells: 0, lastRowReads: 0,
+    writes: 0, flushes: 0, locks: 0, releases: 0,
+    cacheReads: 0, cacheWrites: 0, events: [],
+  };
   const sheets = new Map();
+  const scriptCache = new Map();
   const logs = [];
 
   class FakeRange {
@@ -37,6 +42,7 @@ export function createAppsScriptHarness({
     }
     getValues() {
       calls.reads += 1;
+      calls.readCells += this.rows * this.columns;
       return Array.from({ length: this.rows }, (_, row) =>
         Array.from({ length: this.columns }, (_, column) =>
           clone(this.sheet.rows[this.row - 1 + row]?.[this.column - 1 + column] ?? "")));
@@ -68,6 +74,7 @@ export function createAppsScriptHarness({
     getName() { return this.name; }
     getRange(row, column, rows, columns) { return new FakeRange(this, row, column, rows, columns); }
     getLastRow() {
+      calls.lastRowReads += 1;
       for (let index = this.rows.length - 1; index >= 0; index -= 1) {
         if (this.rows[index]?.some((value) => value !== "" && value !== undefined && value !== null)) {
           return index + 1;
@@ -104,6 +111,39 @@ export function createAppsScriptHarness({
     constructor(...args) { super(...(args.length ? args : [clock])); }
     static now() { return clock; }
   }
+  function readCachedValue(key) {
+    const entry = scriptCache.get(String(key));
+    if (!entry) return null;
+    if (entry.expiresAt <= clock) {
+      scriptCache.delete(String(key));
+      return null;
+    }
+    return entry.value;
+  }
+  function getCachedValue(key) {
+    calls.cacheReads += 1;
+    return readCachedValue(key);
+  }
+  function getAllCachedValues(keys) {
+    calls.cacheReads += 1;
+    return Object.fromEntries(keys.map((key) => [String(key), readCachedValue(key)])
+      .filter(([, value]) => value !== null));
+  }
+  function writeCachedValue(key, value, expirationInSeconds) {
+    scriptCache.set(String(key), {
+      value: String(value),
+      expiresAt: clock + Number(expirationInSeconds) * 1000,
+    });
+  }
+  function putCachedValue(key, value, expirationInSeconds = 600) {
+    calls.cacheWrites += 1;
+    writeCachedValue(key, value, expirationInSeconds);
+  }
+  function putAllCachedValues(values, expirationInSeconds = 600) {
+    calls.cacheWrites += 1;
+    Object.entries(values).forEach(([key, value]) =>
+      writeCachedValue(key, value, expirationInSeconds));
+  }
   const context = vm.createContext({
     Date: ClockDate,
     PropertiesService: {
@@ -130,6 +170,14 @@ export function createAppsScriptHarness({
         calls.events.push({ type: "flush" });
         if (failFlush) { failFlush = false; throw new Error("Injected flush failure."); }
       },
+    },
+    CacheService: {
+      getScriptCache: () => ({
+        get: getCachedValue,
+        getAll: getAllCachedValues,
+        put: putCachedValue,
+        putAll: putAllCachedValues,
+      }),
     },
     LockService: {
       getScriptLock: () => ({
@@ -166,6 +214,12 @@ export function createAppsScriptHarness({
       // Explicit fixture preparation, not an emulated application write.
       sheets.set(name, new FakeSheet(name, rows));
     },
+    setCache(key, value, expirationInSeconds = 600) {
+      putCachedValue(key, value, expirationInSeconds);
+    },
+    deleteCache(key) { scriptCache.delete(String(key)); },
+    clearCache() { scriptCache.clear(); },
+    gameRowCacheKey(gameId) { return context.gameRowCacheKey(gameId); },
     getRecord(gameId) {
       const records = harness.getRows("Games").slice(1)
         .filter((row) => row[0]).map((row) => JSON.parse(row[0]));

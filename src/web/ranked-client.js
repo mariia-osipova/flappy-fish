@@ -127,6 +127,15 @@ export class RankedClient {
   get receipt() { return this.record?.receipt || null; }
   get unfinished() { return Boolean(this.record && (!terminal(this.receipt) || this.record.queue.length)); }
 
+  // A confirmed paused receipt with no local work can be presented without a
+  // read-back. The resume mutation validates both ownership and the signed
+  // checkpoint, so it can safely be the first hosted request.
+  hasCleanPausedState() {
+    return this.receipt?.status === "paused" &&
+      this.record.queue.length === 0 && this.record.pending.length === 0 &&
+      !this.record.uncertain && !this.record.resume && !this.record.forceResume;
+  }
+
   leaseExpired() {
     return this.receipt?.leaseExpired ?? (this.receipt?.leaseUntil <= this.now());
   }
@@ -263,7 +272,9 @@ export class RankedClient {
         this.checkReceipt(this.receipt);
         // Do not replace a lost/expired identity before checking whether it
         // still owns the durable game. A different cookie cannot recover it.
-        await this.recover();
+        // A clean pause has no ambiguous mutation to reconcile; the signed
+        // checkpoint is validated by resume before gameplay can continue.
+        if (!this.hasCleanPausedState()) await this.recover();
       }
       // The Node server issues the HttpOnly session cookie with index.html.
       // Avoid another hosted request here; start() renews and retries once if
@@ -462,15 +473,29 @@ export class RankedClient {
       if (!this.initialized) await this.initialize();
       await this.renewSession();
       if (!this.receipt) return await this.start(this.record?.name || "");
-      await this.pump();
-      await this.recover();
+      const directResume = this.hasCleanPausedState();
+      if (!directResume) {
+        await this.pump();
+        await this.recover();
+      }
       if (terminal(this.receipt)) {
         this.rebuildSnapshot();
         this.emit("completed");
         return this.snapshot;
       }
       if (this.record.queue.length) throw this.error || new RankedError("network", "Waiting to confirm the stored inputs.");
-      if (this.receipt.status !== "active" || this.leaseExpired()) await this.reacquire();
+      if (this.receipt.status !== "active" || this.leaseExpired()) {
+        try {
+          await this.reacquire();
+        } catch (error) {
+          if (!directResume || error.code !== "conflict") throw error;
+          // A conflict response can race with a committed response from the
+          // same idempotent request. Read back once and continue only when the
+          // server confirms that exact request; otherwise preserve the conflict.
+          await this.recover();
+          if (this.record.resume) throw error;
+        }
+      }
       this.rebuildSnapshot();
       this.running = true;
       this.emit("active");

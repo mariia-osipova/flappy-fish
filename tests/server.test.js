@@ -127,6 +127,53 @@ test('anonymous secure cookies authorize only their own game; no CORS authority'
   assert.equal((await f.request('/api/scores?callback=evil')).status, 400);
 });
 
+test('ranked APIs expose only low-cardinality Server-Timing stages', async t => {
+  const f = await fixture(t);
+  const cookie = await f.session();
+
+  function metrics(result, expected) {
+    const header = result.response.headers.get('server-timing');
+    assert.ok(header, 'expected a Server-Timing response header');
+    const parsed = header.split(/\s*,\s*/).map(value => {
+      const match = /^(gateway|verify);dur=(\d+\.\d)$/.exec(value);
+      assert.ok(match, `invalid Server-Timing metric: ${value}`);
+      assert.ok(Number.isFinite(Number(match[2])) && Number(match[2]) >= 0);
+      return match[1];
+    });
+    assert.deepEqual(parsed, expected);
+    return header;
+  }
+
+  const begun = await f.begin(cookie, 'Timing Fish');
+  assert.equal(begun.status, 200, begun.text);
+  metrics(begun, ['gateway']);
+
+  const read = await f.request(`/api/games/${begun.data.gameId}`, { cookie });
+  assert.equal(read.status, 200, read.text);
+  metrics(read, ['gateway']);
+
+  const paused = await f.checkpoint(cookie, begun.data, f.block(begun.data, [], { pause: true }));
+  assert.equal(paused.status, 200, paused.text);
+  const checkpointTiming = metrics(paused, ['verify', 'gateway']);
+  for (const privateValue of ['Timing Fish', begun.data.gameId, begun.data.checkpointToken, cookie]) {
+    assert.equal(checkpointTiming.includes(privateValue), false);
+  }
+
+  const resumed = await f.request(`/api/games/${begun.data.gameId}/resume`, {
+    cookie,
+    body: { requestId: randomUUID(), checkpointToken: paused.data.checkpointToken },
+  });
+  assert.equal(resumed.status, 200, resumed.text);
+  metrics(resumed, ['gateway']);
+
+  const scores = await f.request('/api/scores?name=Timing%20Fish');
+  assert.equal(scores.status, 200, scores.text);
+  metrics(scores, ['gateway']);
+  const cachedScores = await f.request('/api/scores?name=Timing%20Fish');
+  assert.equal(cachedScores.status, 200, cachedScores.text);
+  assert.equal(cachedScores.response.headers.get('server-timing'), null);
+});
+
 test('begin is idempotent and one owner cannot reserve a second active slot', async t => {
   const f = await fixture(t);
   const cookie = await f.session();

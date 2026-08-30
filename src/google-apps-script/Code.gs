@@ -17,7 +17,11 @@ const STORE = Object.freeze({
   maxSnapshotBytes: 4096,
   maxRecordChars: 45000,
   lockWaitMs: 2000,
+  gameRowCacheSeconds: 21600,
 });
+
+const GAME_LAYOUT_CACHE_KEY = "games-layout-v1";
+let currentStoreMutation = null;
 
 function doGet() {
   return jsonResponse(storeFailure("forbidden", "Use the authenticated gateway.", 405));
@@ -108,12 +112,28 @@ function withStoreLock(callback) {
   if (!lock.tryLock(STORE.lockWaitMs)) {
     fail("storage_unavailable", "The score store is busy; retry the same request.", 503);
   }
+  const mutation = { pending: false };
+  currentStoreMutation = mutation;
   try {
     return callback();
   } finally {
+    currentStoreMutation = null;
     // A lost response after this commit is recovered by the stored request id.
-    try { SpreadsheetApp.flush(); } finally { lock.releaseLock(); }
+    try {
+      if (mutation.pending) SpreadsheetApp.flush();
+    } finally {
+      lock.releaseLock();
+    }
   }
+}
+
+function markStoreMutation() {
+  if (!currentStoreMutation) {
+    fail("storage_unavailable", "A score store mutation was attempted without its lock.", 503);
+  }
+  // Mark before the mutating API call because a transport failure can leave its
+  // commit outcome unknown. Idempotent retries recover from the stored receipt.
+  currentStoreMutation.pending = true;
 }
 
 function openStore() {
@@ -130,8 +150,8 @@ function requireSheet(book, name, header) {
   return sheet;
 }
 
-function loadJsonRows(sheet) {
-  const count = sheet.getLastRow() - 1;
+function loadJsonRows(sheet, lastRow) {
+  const count = (lastRow === undefined ? sheet.getLastRow() : lastRow) - 1;
   if (count <= 0) return [];
   return sheet.getRange(2, 1, count, 1).getValues().reduce(function (rows, values, index) {
     if (values[0] === "") return rows;
@@ -147,22 +167,95 @@ function loadJsonRows(sheet) {
 
 function loadGames(book) {
   const sheet = requireSheet(book, STORE.gamesSheet, STORE.gamesHeader);
-  const rows = loadJsonRows(sheet);
+  return loadGamesFromSheet(sheet, sheet.getLastRow());
+}
+
+function loadGamesFromSheet(sheet, lastRow) {
+  const rows = loadJsonRows(sheet, lastRow);
   const ids = new Set();
   rows.forEach(function (entry) {
     const game = entry.record;
-    if (typeof game.gameId !== "string" || ids.has(game.gameId) ||
-        typeof game.ownerId !== "string" || typeof game.rankKey !== "string" ||
-        !["active", "paused", "completed"].includes(game.status) ||
-        !Number.isSafeInteger(game.seq) || game.seq < 0 ||
-        !Number.isSafeInteger(game.leaseEpoch) || game.leaseEpoch < 1 ||
-        !Number.isFinite(game.leaseUntil) || !Number.isFinite(game.elapsedActiveMs) ||
-        game.elapsedActiveMs < 0 || !plainObject(game.snapshot)) {
-      fail("storage_unavailable", "A game record is damaged.", 503);
-    }
+    validateGameRecord(game);
+    if (ids.has(game.gameId)) fail("storage_unavailable", "A game record is damaged.", 503);
     ids.add(game.gameId);
   });
-  return { sheet: sheet, rows: rows };
+  return { sheet: sheet, rows: rows, lastRow: lastRow };
+}
+
+function validateGameRecord(game) {
+  if (typeof game.gameId !== "string" || typeof game.ownerId !== "string" ||
+      typeof game.rankKey !== "string" || !["active", "paused", "completed"].includes(game.status) ||
+      !Number.isSafeInteger(game.seq) || game.seq < 0 ||
+      !Number.isSafeInteger(game.leaseEpoch) || game.leaseEpoch < 1 ||
+      !Number.isFinite(game.leaseUntil) || !Number.isFinite(game.elapsedActiveMs) ||
+      game.elapsedActiveMs < 0 || !plainObject(game.snapshot)) {
+    fail("storage_unavailable", "A game record is damaged.", 503);
+  }
+}
+
+function gameRowCacheKey(gameId) {
+  // Game ids are bounded to 160 characters. Sanitizing keeps the key within
+  // CacheService's limit; collisions are harmless because the row is verified.
+  return "game-row-v1:" + gameId.replace(/[^A-Za-z0-9_.-]/g, "_");
+}
+
+function getStoreCache() {
+  try { return CacheService.getScriptCache(); } catch (_) { return null; }
+}
+
+function rememberGameRow(gameId, row, lastRow) {
+  const cache = getStoreCache();
+  if (!cache) return;
+  try {
+    const values = {};
+    values[GAME_LAYOUT_CACHE_KEY] = String(lastRow);
+    values[gameRowCacheKey(gameId)] = String(row);
+    cache.putAll(values, STORE.gameRowCacheSeconds);
+  } catch (_) {
+    // CacheService is only an optimization; Sheets remains authoritative.
+  }
+}
+
+function cachedGameRow(gameId, lastRow) {
+  const cache = getStoreCache();
+  if (!cache) return null;
+  try {
+    const rowKey = gameRowCacheKey(gameId);
+    const values = cache.getAll([GAME_LAYOUT_CACHE_KEY, rowKey]);
+    if (values[GAME_LAYOUT_CACHE_KEY] !== String(lastRow)) return null;
+    const row = Number(values[rowKey]);
+    return Number.isSafeInteger(row) && row >= 2 && row <= lastRow ? row : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function readGameCell(sheet, row) {
+  const raw = sheet.getRange(row, 1).getValues()[0][0];
+  if (raw === "") return null;
+  let record;
+  try { record = JSON.parse(raw); } catch (_) { return null; }
+  if (!plainObject(record)) return null;
+  try { validateGameRecord(record); } catch (_) { return null; }
+  return { row: row, record: record };
+}
+
+function loadOwnedGame(book, payload) {
+  const sheet = requireSheet(book, STORE.gamesSheet, STORE.gamesHeader);
+  const lastRow = sheet.getLastRow();
+  const row = cachedGameRow(payload.gameId, lastRow);
+  if (row !== null) {
+    const cached = readGameCell(sheet, row);
+    if (cached && cached.record.gameId === payload.gameId) {
+      return { sheet: sheet, entry: requireOwnedGame(cached, payload), lastRow: lastRow };
+    }
+  }
+  // A miss, stale hint, changed row count or damaged hinted cell falls back to
+  // the full validation path. Capacity-sensitive operations always use it.
+  const games = loadGamesFromSheet(sheet, lastRow);
+  const entry = findOwnedGame(games.rows, payload);
+  rememberGameRow(entry.record.gameId, entry.row, lastRow);
+  return { sheet: sheet, entry: entry, lastRow: lastRow };
 }
 
 function writeGame(sheet, row, record) {
@@ -172,6 +265,7 @@ function writeGame(sheet, row, record) {
   }
   // JSON begins with '{': names beginning with '=' cannot become formulas.
   // This one cell contains both terminal status and final score.
+  markStoreMutation();
   sheet.getRange(row, 1).setValues([[serialized]]);
 }
 
@@ -226,22 +320,24 @@ function beginGame(request) {
     lastRequestHash: payload.requestHash, lastAction: "begin",
     elapsedActiveMs: 0, activeSince: now,
   };
-  writeGame(games.sheet, games.sheet.getLastRow() + 1, game);
+  const row = games.lastRow + 1;
+  writeGame(games.sheet, row, game);
+  rememberGameRow(game.gameId, row, row);
   request.diagnostic = { action: "begin", activeSlots: capacity.activeSlots, limit: capacity.limit };
   return game;
 }
 
 function readGame(request) {
   validateIdentity(request.payload);
-  return findOwnedGame(loadGames(openStore()).rows, request.payload).record;
+  return loadOwnedGame(openStore(), request.payload).entry.record;
 }
 
 function checkpointGame(request) {
   const payload = request.payload;
   validateIdentity(payload);
   requireHash(payload.requestHash, "requestHash");
-  const games = loadGames(openStore());
-  const entry = findOwnedGame(games.rows, payload);
+  const games = loadOwnedGame(openStore(), payload);
+  const entry = games.entry;
   const game = entry.record;
   if (isDuplicate(game, request)) return game;
   requirePreviousCheckpoint(game, payload);
@@ -307,6 +403,7 @@ function resumeGame(request) {
   game.updatedAt = now;
   rememberRequest(game, request);
   writeGame(games.sheet, entry.row, game);
+  rememberGameRow(game.gameId, entry.row, games.lastRow);
   request.diagnostic = { action: "resume", activeSlots: capacity.activeSlots, limit: capacity.limit };
   return game;
 }
@@ -364,6 +461,10 @@ function ensureCapacity(rows, ownerId, exceptGameId, now) {
 function findOwnedGame(rows, payload) {
   const entry = rows.find(function (value) { return value.record.gameId === payload.gameId; });
   if (!entry) fail("not_found", "The ranked game was not found.", 404);
+  return requireOwnedGame(entry, payload);
+}
+
+function requireOwnedGame(entry, payload) {
   if (entry.record.ownerId !== payload.ownerId) {
     fail("forbidden", "This ranked game belongs to another session.", 403);
   }
@@ -443,11 +544,18 @@ function initializeStorage() {
       [STORE.legacySheet, STORE.legacyHeader],
     ].forEach(function (item) {
       let sheet = book.getSheetByName(item[0]);
-      if (!sheet) sheet = book.insertSheet(item[0]);
-      if (sheet.getLastRow() === 0) sheet.getRange(1, 1).setValues([[item[1]]]);
+      if (!sheet) {
+        markStoreMutation();
+        sheet = book.insertSheet(item[0]);
+      }
+      if (sheet.getLastRow() === 0) {
+        markStoreMutation();
+        sheet.getRange(1, 1).setValues([[item[1]]]);
+      }
       else if (sheet.getRange(1, 1).getValues()[0][0] !== item[1]) {
         fail("storage_unavailable", "A protected sheet has an unexpected schema.", 503);
       }
+      markStoreMutation();
       sheet.setFrozenRows(1);
     });
     return { initialized: true };
@@ -522,6 +630,7 @@ function migrateLegacyScores() {
         index <= records.length ? JSON.stringify(records[index - 1]) : ""];
     });
     // Replace in one range operation; never clear the original Scores sheet.
+    markStoreMutation();
     target.getRange(1, 1, replacement.length, 1).setValues(replacement);
     const report = {
       sourceSheet: STORE.sourceSheet, sourceRows: Math.max(0, values.length - 1),

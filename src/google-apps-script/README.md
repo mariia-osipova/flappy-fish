@@ -190,11 +190,20 @@ enabling production ranking. Hundreds of training players do not imply hundreds
 of simultaneous rated games. Per-instance Node caching is an optimization,
 never authoritative storage.
 
+Checkpoint and owned-game reads use Apps Script `CacheService` only as a
+`gameId -> row` hint. A hit still reads the authoritative JSON cell and verifies
+its schema, id and owner; a miss or mismatch falls back to the complete Games
+scan. Capacity, begin, resume and leaderboard operations always scan the
+authoritative rows. Cache eviction therefore affects latency, not correctness.
+Successful mutations still call `SpreadsheetApp.flush()` before releasing the
+script lock; requests that performed no write do not pay for a redundant flush.
+
 HMAC prevents unauthorized mutations, but a known public Apps Script URL can
 still receive requests that consume execution resources. There are
 [Apps Script quotas](https://developers.google.com/apps-script/guides/services/quotas);
-the owner must monitor them. The global lock and history scans are intentional
-limits of this small Sheets-only deployment.
+the owner must monitor them. The global write lock, synchronous flush and full
+capacity/leaderboard scans remain intentional limits of this small Sheets-only
+deployment.
 
 Sanitized runtime logs report successful begin/resume occupancy and classify
 storage failures as busy, quota, configuration, corrupt record or backend.

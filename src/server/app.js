@@ -21,6 +21,20 @@ const indexHtml = readFileSync(indexPath, 'utf8');
 const disabledIndexHtml = indexHtml.replace('<head>', '<head>\n    <meta name="flappy-fish-ranked" content="disabled">');
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res)).catch(next);
 
+// Server-Timing is intentionally limited to fixed metric names and numeric
+// durations. This makes production latency visible in same-origin DevTools
+// without reflecting game ids, nicknames, tokens, URLs, or upstream errors.
+const SERVER_TIMING_METRICS = new Set(['gateway', 'verify']);
+function appendServerTiming(res, metric, durationMs) {
+  if (res.headersSent || !SERVER_TIMING_METRICS.has(metric) || !Number.isFinite(durationMs)) return;
+  res.append('Server-Timing', `${metric};dur=${Math.max(0, durationMs).toFixed(1)}`);
+}
+async function timedStage(res, metric, operation) {
+  const started = performance.now();
+  try { return await operation(); }
+  finally { appendServerTiming(res, metric, performance.now() - started); }
+}
+
 export function createApp({ config = loadConfig(), store, verifier, now = Date.now, logger = console } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -129,7 +143,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
       ownerId, name, rankKey, gameId: randomUUID(), seed, rulesVersion: RULES_VERSION,
       snapshot, stateHash: digest(snapshot), requestHash: digest({ action: 'begin', ownerId, name, rankKey }),
     };
-    const record = await gateway.call('begin', payload, requestId);
+    const record = await timedStage(res, 'gateway', () => gateway.call('begin', payload, requestId));
     res.json(durableReceipt(record, ownerId));
   }));
 
@@ -137,7 +151,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     const ownerId = owner(req);
     limiter.take('read:' + ownerId, 30, 60000);
     const id = gameId(req);
-    const record = await gateway.call('read', { ownerId, gameId: id });
+    const record = await timedStage(res, 'gateway', () => gateway.call('read', { ownerId, gameId: id }));
     res.json(durableReceipt(record, ownerId, id));
   }));
 
@@ -156,14 +170,14 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     limiter.take('checkpoint:' + ownerId, 60, 60000);
     limiter.take('checkpoint:global', 600, 60000);
     replayVerifier ||= new ReplayVerifier({ workers: config.verifierWorkers, queueLimit: config.verifierQueue, budgetMs: config.verifierBudgetMs });
-    const snapshot = input.length ? await replayVerifier.verify(claims.snapshot, input) : structuredClone(claims.snapshot);
+    const snapshot = await timedStage(res, 'verify', () => input.length ? replayVerifier.verify(claims.snapshot, input) : structuredClone(claims.snapshot));
     assert(Buffer.byteLength(canonicalJson(snapshot)) <= MAX_SNAPSHOT_BYTES, 503, 'snapshot_too_large', 'Состояние партии превышает допустимый размер.');
     const payload = {
       ownerId, gameId: id, prevSeq: claims.seq, prevStateHash: claims.stateHash, leaseEpoch: claims.leaseEpoch,
       snapshot, stateHash: digest(snapshot), inputTicks: input.length, pause,
       requestHash: digest({ action: 'checkpoint', gameId: id, ownerId, seq: req.body.seq, prevStateHash: claims.stateHash, leaseEpoch: claims.leaseEpoch, inputsBase64: req.body.inputsBase64, pause }),
     };
-    const record = await gateway.call('checkpoint', payload, requestId);
+    const record = await timedStage(res, 'gateway', () => gateway.call('checkpoint', payload, requestId));
     res.json(durableReceipt(record, ownerId, id));
   }));
 
@@ -177,7 +191,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     limiter.take('resume:' + ownerId, 20, 60000);
     const payload = { ownerId, gameId: id, prevSeq: claims.seq, prevStateHash: claims.stateHash, leaseEpoch: claims.leaseEpoch };
     payload.requestHash = digest({ action: 'resume', ...payload });
-    const record = await gateway.call('resume', payload, requestId);
+    const record = await timedStage(res, 'gateway', () => gateway.call('resume', payload, requestId));
     res.json(durableReceipt(record, ownerId, id));
   }));
 
@@ -194,7 +208,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
           leaderboard = { until: now() + 30000, scores: Array.from(index.values()).slice(0, 100), updatedAt: data.updatedAt, index };
         }).finally(() => { pendingScores = null; });
       }
-      await pendingScores;
+      await timedStage(res, 'gateway', () => pendingScores);
     }
     // The full nickname index stays server-side; public responses contain top100
     // plus at most one searched player, independent of visitor count.
