@@ -8,6 +8,7 @@ import { runner as migrate } from 'node-pg-migrate';
 import { replay } from '../src/shared/game-core.js';
 import { ApiError } from '../src/server/errors.js';
 import { PostgresStore } from '../src/server/storage/postgres-store.js';
+import { importInTransaction, SafeMigrationError } from '../scripts/import-sheets-export.js';
 import { beginCall, checkpointCall, resumeCall, truncatePostgres } from './helpers/postgres-fixture.js';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -293,6 +294,17 @@ if (!databaseUrl) {
     assert.equal(Object.hasOwn(scores.player, 'gameId'), false);
   });
 
+  test('leaderboard rank-key ties preserve Apps Script UTF-16 ordering', async () => {
+    const supplementary = '\u{10000}';
+    const privateUseBmp = '\ue000';
+    await pool.query(`
+      INSERT INTO legacy_scores (rank_key, name, best_score, updated_at_ms, source_row)
+      VALUES ($1, $1, 7, NULL, 2), ($2, $2, 7, NULL, 3)
+    `, [supplementary, privateUseBmp]);
+    const scores = await store.call('scores', { includeIndex: true });
+    assert.deepEqual(scores.scores.map(entry => entry.name), [supplementary, privateUseBmp]);
+  });
+
   test('leaderboard rejects an internal index above 100000 entries', async () => {
     await pool.query(`
       INSERT INTO legacy_scores (rank_key, name, best_score, updated_at_ms, source_row)
@@ -310,5 +322,34 @@ if (!databaseUrl) {
     await dedicated.close();
     await dedicated.close();
     await assert.rejects(dedicatedPool.query('SELECT 1'), /ended|end/i);
+  });
+
+  test('Sheets importer is idempotent on PostgreSQL and conflicts roll back atomically', async () => {
+    const game = await call(beginCall({ name: 'Imported Fish' }), 'begin');
+    await truncatePostgres(pool);
+    const legacy = {
+      name: 'Legacy Fish', rankKey: 'legacy fish', bestScore: 12,
+      source: 'legacy', verified: false, updatedAt: new Date(now).toISOString(), sourceRow: 2,
+    };
+    const data = {
+      games: [game], legacy: [legacy], totals: { games: 1, legacy: 1 }, invalidRows: [],
+    };
+    const client = await pool.connect();
+    try {
+      assert.deepEqual(await importInTransaction(client, data, { apply: true }), {
+        gamesInserted: 1, gamesDuplicates: 0, legacyInserted: 1,
+      });
+      assert.deepEqual(await importInTransaction(client, data, { apply: true }), {
+        gamesInserted: 0, gamesDuplicates: 1, legacyInserted: 0,
+      });
+      const changed = structuredClone(data);
+      changed.legacy[0].bestScore = 13;
+      await assert.rejects(importInTransaction(client, changed, { apply: true }), error =>
+        error instanceof SafeMigrationError && error.code === 'database_conflict');
+    } finally {
+      client.release();
+    }
+    const persisted = await pool.query("SELECT best_score FROM legacy_scores WHERE rank_key = 'legacy fish'");
+    assert.equal(Number(persisted.rows[0].best_score), 12);
   });
 }

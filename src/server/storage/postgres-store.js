@@ -323,28 +323,32 @@ export class PostgresStore {
         SELECT name, rank_key, best_score, verified, updated_at_ms, source
         FROM winners
         WHERE candidate_rank = 1
-        ORDER BY best_score DESC, rank_key COLLATE "C" ASC
         LIMIT $1
       `, [MAX_LEADERBOARD_ENTRIES + 1]);
       if (result.rows.length > MAX_LEADERBOARD_ENTRIES) throw unavailable();
 
       let player = null;
-      const index = result.rows.map((row, position) => {
+      const ranked = result.rows.map(row => {
         const bestScore = bigintToSafeInteger(row.best_score, 'bestScore');
         const updatedMs = row.updated_at_ms === null ? null : bigintToSafeInteger(row.updated_at_ms, 'scoreUpdatedAt');
         let updatedAt = null;
         if (updatedMs !== null) {
           updatedAt = new Date(updatedMs).toISOString();
         }
-        const entry = {
+        return {
+          rankKey: row.rank_key,
           name: row.name,
           bestScore,
           source: row.source,
           verified: row.verified,
           updatedAt,
-          rank: position + 1,
         };
-        if (requestedRankKey !== null && row.rank_key === requestedRankKey) player = entry;
+      }).sort((left, right) => right.bestScore - left.bestScore ||
+        (left.rankKey < right.rankKey ? -1 : left.rankKey > right.rankKey ? 1 : 0));
+      const index = ranked.map((candidate, position) => {
+        const { rankKey, ...entry } = candidate;
+        entry.rank = position + 1;
+        if (requestedRankKey !== null && rankKey === requestedRankKey) player = entry;
         return entry;
       });
       return {
