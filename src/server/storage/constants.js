@@ -1,0 +1,9 @@
+export const ADMISSION_LOCK_KEY = '7364300041313974598';
+export const LEASE_MS = 120_000;
+export const CREATION_WINDOW_MS = 60_000;
+export const MAX_CREATIONS_PER_OWNER = 6;
+export const MAX_CHECKPOINT_TICKS = 1_200;
+export const TICK_RATE = 120;
+export const CLOCK_TOLERANCE_MS = 1_000;
+export const MAX_LEADERBOARD_ENTRIES = 100_000;
+
