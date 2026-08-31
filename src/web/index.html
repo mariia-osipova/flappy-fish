@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="30x30" href="favicon.png?v=mr-fish-3">
     <link rel="shortcut icon" type="image/png" href="favicon.png?v=mr-fish-3">
     <link rel="preload" href="assets/font/StrangeFont-Regular.otf" as="font" type="font/otf" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=ranked-v2-controls">
+    <link rel="stylesheet" href="styles.css?v=ranked-v4-progress">
     <script>
       // Global error shield to prevent third-party extensions (e.g. MetaMask, Web3 wallet injection) from breaking the game
       window.addEventListener("error", function (e) {
@@ -37,8 +37,8 @@
       </section>
       <section class="ranked-controls" aria-label="Ranked game controls">
         <p id="ranked-notice" role="status" aria-live="polite">Ranked games are checked by the server. Practice does not enter the leaderboard.</p>
-        <div class="ranked-progress" id="ranked-progress" role="progressbar" aria-label="Waiting for the ranked server" hidden>
-          <span class="ranked-progress-bar"></span>
+        <div class="ranked-progress" id="ranked-progress" role="progressbar" aria-label="Waiting for the ranked server" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-hidden="true">
+          <span class="ranked-progress-bar" id="ranked-progress-bar"></span>
         </div>
         <div class="ranked-actions">
           <button type="button" id="ranked-start">New ranked game</button>
@@ -61,6 +61,6 @@
     </section>
 
     <script src="name-filter.js?v=20260827-filter-latam"></script>
-    <script type="module" src="app.js?v=ranked-v3-controls"></script>
+    <script type="module" src="app.js?v=ranked-v4-progress"></script>
   </body>
 </html>

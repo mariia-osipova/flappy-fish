@@ -43,6 +43,7 @@ test("real ranked UI persists a partial pause, reloads with its secure identity,
   await enterGame(page, name);
   await expect(page.locator("#ranked-notice")).toHaveAttribute("data-status", "idle");
   await expect(page.locator("#ranked-progress")).toBeHidden();
+  const actionsY = await page.locator(".ranked-actions").evaluate((element) => element.getBoundingClientRect().y);
 
   const cookieMetadata = (await page.context().cookies()).filter((cookie) => cookie.name === "__Host-flappy_session")
     .map(({ name, httpOnly, secure, sameSite, path }) => ({ name, httpOnly, secure, sameSite, path }));
@@ -50,16 +51,19 @@ test("real ranked UI persists a partial pause, reloads with its secure identity,
   expect(await page.evaluate(() => document.cookie.includes("__Host-flappy_session"))).toBe(false);
 
   await page.route("**/api/games", async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 900));
     await route.continue();
   }, { times: 1 });
   const beginning = page.waitForResponse((response) => new URL(response.url()).pathname === "/api/games" && response.request().method() === "POST");
   await page.locator("#ranked-start").click();
   await expect(page.locator("#ranked-progress")).toBeVisible();
+  await expect.poll(async () => Number(await page.locator("#ranked-progress").getAttribute("aria-valuenow"))).toBeGreaterThan(0);
+  expect(await page.locator(".ranked-actions").evaluate((element) => element.getBoundingClientRect().y)).toBeCloseTo(actionsY, 1);
   const beginResponse = await beginning;
   expect(beginResponse.status()).toBe(200);
   const initial = await beginResponse.json();
   expect(initial.status).toBe("active");
+  await expect(page.locator("#ranked-progress")).toHaveAttribute("aria-valuenow", "100");
   await expect(page.locator("#ranked-notice")).toHaveAttribute("data-status", "active");
   await expect(page.locator("#ranked-progress")).toBeHidden();
   await expect.poll(async () => (await readCanvas(page)).fish?.y).toBe(300);

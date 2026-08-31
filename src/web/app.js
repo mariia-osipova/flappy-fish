@@ -183,6 +183,7 @@ let rankedDisabled = document.querySelector('meta[name="flappy-fish-ranked"]')?.
 let refreshedGameId = null;
 const rankedNotice = document.getElementById("ranked-notice");
 const rankedProgress = document.getElementById("ranked-progress");
+const rankedProgressBar = document.getElementById("ranked-progress-bar");
 const rankedStartButton = document.getElementById("ranked-start");
 const rankedResumeButton = document.getElementById("ranked-resume");
 const pauseButton = document.getElementById("game-pause");
@@ -200,12 +201,59 @@ const ranked = new RankedClient({ onChange(event) {
   }
   updateRankedNotice();
 } });
-// Open IndexedDB and recover any saved outbox while assets are loading, so a
-// quick click on Ranked does not wait for browser initialization first.
-if (!PRACTICE_ONLY && !rankedDisabled) void ranked.initialize().catch(() => {});
-
 function practiceOnly() {
   return PRACTICE_ONLY || rankedDisabled;
+}
+
+const RANKED_PROGRESS_AVERAGE_MS = 5000;
+const RANKED_PROGRESS_TIME_CONSTANT = RANKED_PROGRESS_AVERAGE_MS / Math.log(10);
+let rankedProgressTimer = null;
+let rankedProgressStartedAt = 0;
+let rankedProgressHideTimer = null;
+let rankedProgressActive = false;
+
+function setRankedProgress(value) {
+  const progress = Math.max(0, Math.min(100, value));
+  rankedProgressBar.style.setProperty("--ranked-progress", String(progress / 100));
+  rankedProgress.setAttribute("aria-valuenow", String(Math.round(progress)));
+}
+
+function advanceRankedProgress() {
+  if (!rankedProgressActive) return;
+  const elapsed = Math.max(0, performance.now() - rankedProgressStartedAt);
+  // Reach about 90% at the usual five-second response time, then approach
+  // 100% ever more slowly without claiming completion before the server does.
+  setRankedProgress(Math.min(99, 100 * (1 - Math.exp(-elapsed / RANKED_PROGRESS_TIME_CONSTANT))));
+  rankedProgressTimer = window.setTimeout(advanceRankedProgress, 100);
+}
+
+function updateRankedProgress(waitingForServer, message) {
+  rankedProgress.setAttribute("aria-label", message);
+  if (waitingForServer) {
+    if (rankedProgressHideTimer !== null) {
+      clearTimeout(rankedProgressHideTimer);
+      rankedProgressHideTimer = null;
+    }
+    if (rankedProgressActive) return;
+    rankedProgressActive = true;
+    rankedProgressStartedAt = performance.now();
+    rankedProgress.dataset.visible = "true";
+    rankedProgress.setAttribute("aria-hidden", "false");
+    setRankedProgress(0);
+    rankedProgressTimer = window.setTimeout(advanceRankedProgress, 100);
+    return;
+  }
+
+  if (!rankedProgressActive) return;
+  rankedProgressActive = false;
+  if (rankedProgressTimer !== null) clearTimeout(rankedProgressTimer);
+  rankedProgressTimer = null;
+  setRankedProgress(100);
+  rankedProgressHideTimer = window.setTimeout(() => {
+    rankedProgress.dataset.visible = "false";
+    rankedProgress.setAttribute("aria-hidden", "true");
+    rankedProgressHideTimer = null;
+  }, 260);
 }
 
 function updateRankedNotice() {
@@ -247,8 +295,7 @@ function updateRankedNotice() {
   rankedNotice.textContent = message;
   rankedNotice.dataset.status = practiceOnly() || manualKind === "practice" ? "practice" : event.status;
   const waitingForServer = ["connecting", "saving", "pausing", "reconnecting", "buffer_full"].includes(event.status);
-  rankedProgress.hidden = !waitingForServer;
-  rankedProgress.setAttribute("aria-label", message);
+  updateRankedProgress(waitingForServer, message);
   rankedStartButton.disabled = startingGame || event.status === "connecting";
   rankedStartButton.hidden = practiceOnly() || Boolean(ranked.unfinished && ranked.receipt) || (manualKind === "ranked" && !state.gameOver);
   rankedResumeButton.hidden = practiceOnly() || !ranked.unfinished || !ranked.receipt || (manualKind === "ranked" && ranked.running);
@@ -260,6 +307,12 @@ function updateRankedNotice() {
   practiceButton.disabled = startingGame;
   practiceButton.textContent = manualKind === "ranked" && !state.gameOver ? "Continue as practice" : "Practice (unranked)";
 }
+
+// Open IndexedDB and recover any saved outbox while assets are loading, so a
+// quick click on Ranked does not wait for browser initialization first. Start
+// only after the progress controller above has been initialized because the
+// client immediately emits its connecting state.
+if (!PRACTICE_ONLY && !rankedDisabled) void ranked.initialize().catch(() => {});
 
 async function resumeRanked() {
   if (practiceOnly()) return startPractice();
