@@ -11,6 +11,8 @@
     "db:migrate": "node-pg-migrate up --database-url-var DATABASE_URL --migrations-dir migrations",
     "db:migrate:down": "node-pg-migrate down --database-url-var DATABASE_URL --migrations-dir migrations",
     "test": "node --test tests/*.test.js",
+    "test:postgres": "node --test tests/postgres-store.test.js",
+    "test:all": "npm test && npm run test:postgres && npm run build",
     "test:browser": "playwright test",
     "test:load": "node scripts/load-staging.js"
   },

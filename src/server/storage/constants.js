@@ -6,4 +6,3 @@ export const MAX_CHECKPOINT_TICKS = 1_200;
 export const TICK_RATE = 120;
 export const CLOCK_TOLERANCE_MS = 1_000;
 export const MAX_LEADERBOARD_ENTRIES = 100_000;
-
