@@ -7,7 +7,7 @@ import { performance } from 'node:perf_hooks';
 import { assertValidSnapshot, createInitialState, RULES_VERSION } from '../shared/game-core.js';
 import { ApiError, assert, unavailable } from './errors.js';
 import { loadConfig } from './config.js';
-import { AppsScriptGateway } from './gateway.js';
+import { createStore } from './storage/create-store.js';
 import { ReplayVerifier } from './verifier.js';
 import { RateLimiter } from './rate-limit.js';
 import {
@@ -40,13 +40,13 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
   app.disable('x-powered-by');
   const ready = config.configured && Boolean(config.sessionKey && config.stateKey);
   const rankedAvailable = ready && config.rankedEnabled;
-  const gateway = store || (ready ? new AppsScriptGateway({ url: config.gatewayUrl, key: config.gatewayKey, now, timeoutMs: config.gatewayTimeoutMs }) : null);
+  const storage = store || (ready ? createStore(config, { now }) : null);
   let replayVerifier = verifier;
   const limiter = new RateLimiter({ now });
   let leaderboard = null;
   let pendingScores = null;
 
-  const needsStorage = () => { if (!ready || !gateway) throw new ApiError(503, 'ranked_disabled', 'Рейтинг ещё не настроен. Доступна тренировка без рейтинга.'); };
+  const needsStorage = () => { if (!ready || !storage) throw new ApiError(503, 'ranked_disabled', 'Рейтинг ещё не настроен. Доступна тренировка без рейтинга.'); };
   const needsRanked = () => {
     needsStorage();
     if (!config.rankedEnabled) throw new ApiError(503, 'ranked_disabled', 'Рейтинг временно выключен. Доступна тренировка без рейтинга.');
@@ -143,7 +143,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
       ownerId, name, rankKey, gameId: randomUUID(), seed, rulesVersion: RULES_VERSION,
       snapshot, stateHash: digest(snapshot), requestHash: digest({ action: 'begin', ownerId, name, rankKey }),
     };
-    const record = await timedStage(res, 'gateway', () => gateway.call('begin', payload, requestId));
+    const record = await timedStage(res, 'gateway', () => storage.call('begin', payload, requestId));
     res.json(durableReceipt(record, ownerId));
   }));
 
@@ -151,7 +151,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     const ownerId = owner(req);
     limiter.take('read:' + ownerId, 30, 60000);
     const id = gameId(req);
-    const record = await timedStage(res, 'gateway', () => gateway.call('read', { ownerId, gameId: id }));
+    const record = await timedStage(res, 'gateway', () => storage.call('read', { ownerId, gameId: id }));
     res.json(durableReceipt(record, ownerId, id));
   }));
 
@@ -177,7 +177,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
       snapshot, stateHash: digest(snapshot), inputTicks: input.length, pause,
       requestHash: digest({ action: 'checkpoint', gameId: id, ownerId, seq: req.body.seq, prevStateHash: claims.stateHash, leaseEpoch: claims.leaseEpoch, inputsBase64: req.body.inputsBase64, pause }),
     };
-    const record = await timedStage(res, 'gateway', () => gateway.call('checkpoint', payload, requestId));
+    const record = await timedStage(res, 'gateway', () => storage.call('checkpoint', payload, requestId));
     res.json(durableReceipt(record, ownerId, id));
   }));
 
@@ -191,7 +191,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     limiter.take('resume:' + ownerId, 20, 60000);
     const payload = { ownerId, gameId: id, prevSeq: claims.seq, prevStateHash: claims.stateHash, leaseEpoch: claims.leaseEpoch };
     payload.requestHash = digest({ action: 'resume', ...payload });
-    const record = await timedStage(res, 'gateway', () => gateway.call('resume', payload, requestId));
+    const record = await timedStage(res, 'gateway', () => storage.call('resume', payload, requestId));
     res.json(durableReceipt(record, ownerId, id));
   }));
 
@@ -203,7 +203,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     if (!leaderboard || leaderboard.until <= now()) {
       if (!pendingScores) {
         limiter.take('scores:misses', 30, 60000);
-        pendingScores = gateway.call('scores', { includeIndex: true }).then(data => {
+        pendingScores = storage.call('scores', { includeIndex: true }).then(data => {
           const index = scoreIndex(data);
           leaderboard = { until: now() + 30000, scores: Array.from(index.values()).slice(0, 100), updatedAt: data.updatedAt, index };
         }).finally(() => { pendingScores = null; });
@@ -248,6 +248,9 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     if (status === 429 || status === 503) res.set('Retry-After', '5');
     res.status(status).json({ error: { code, message, ...(error instanceof ApiError && error.details ? { details: error.details } : {}) } });
   });
-  app.locals.close = async () => { if (replayVerifier?.close) await replayVerifier.close(); };
+  app.locals.close = async () => {
+    if (replayVerifier?.close) await replayVerifier.close();
+    if (storage?.close) await storage.close();
+  };
   return app;
 }

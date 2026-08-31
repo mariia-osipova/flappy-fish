@@ -75,4 +75,8 @@ export class AppsScriptGateway {
       throw unavailable();
     }
   }
+
+  async ping() { return true; }
+
+  async close() {}
 }

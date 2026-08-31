@@ -108,6 +108,40 @@ test('keys must be long, separated, and server-only', () => {
   assert.throws(() => verifyToken(token, config.stateKey, 'session'), /Подпись/);
 });
 
+test('storage backend selection is explicit, unambiguous, and fail-closed', () => {
+  const secrets = {
+    SESSION_HMAC_KEY: 'postgres-session-key-32-bytes-or-more-never-production',
+    STATE_HMAC_KEY: 'postgres-state-key-32-bytes-or-more-never-production',
+  };
+  const postgres = loadConfig({ ...secrets, DATABASE_URL: 'postgresql://user:pass@db.internal/flappy' });
+  assert.equal(postgres.storageBackend, 'postgres');
+  assert.equal(postgres.configured, true);
+  assert.equal(postgres.rankedEnabled, false);
+  assert.equal(postgres.maxRankedGames, 5);
+
+  const ambiguous = loadConfig({
+    ...secrets,
+    DATABASE_URL: postgres.databaseUrl,
+    APPS_SCRIPT_URL: config.gatewayUrl,
+    GATEWAY_HMAC_KEY: TEST_GATEWAY_SECRET,
+  });
+  assert.equal(ambiguous.storageBackend, null);
+  assert.equal(ambiguous.configured, false);
+
+  const explicit = loadConfig({
+    ...secrets,
+    STORAGE_BACKEND: 'postgres',
+    DATABASE_URL: postgres.databaseUrl,
+    APPS_SCRIPT_URL: config.gatewayUrl,
+    GATEWAY_HMAC_KEY: secrets.SESSION_HMAC_KEY,
+  });
+  assert.equal(explicit.storageBackend, 'postgres');
+  assert.equal(explicit.configured, true);
+  assert.equal(loadConfig({ ...secrets, STORAGE_BACKEND: 'unknown', DATABASE_URL: postgres.databaseUrl }).configured, false);
+  assert.equal(loadConfig({ ...secrets, DATABASE_URL: 'https://not-postgres.invalid/db' }).configured, false);
+  assert.equal(loadConfig({ ...secrets, STATE_HMAC_KEY: secrets.SESSION_HMAC_KEY, DATABASE_URL: postgres.databaseUrl }).configured, false);
+});
+
 test('anonymous secure cookies authorize only their own game; no CORS authority', async t => {
   const f = await fixture(t);
   const issued = await f.request('/index.html');
