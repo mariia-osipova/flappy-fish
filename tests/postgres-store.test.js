@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { after, before, beforeEach, test } from 'node:test';
 import pg from 'pg';
-import { runner as migrate } from 'node-pg-migrate';
+import { runner as pgMigrate } from 'node-pg-migrate';
 import { replay } from '../src/shared/game-core.js';
 import { ApiError } from '../src/server/errors.js';
 import { PostgresStore } from '../src/server/storage/postgres-store.js';
@@ -13,6 +14,19 @@ import { beginCall, checkpointCall, resumeCall, truncatePostgres } from './helpe
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const root = fileURLToPath(new URL('../', import.meta.url));
+const require = createRequire(import.meta.url);
+const runtimeGrantsMigration = require('../migrations/002_runtime_grants.cjs');
+
+async function migrate(options, appRole = decodeURIComponent(new URL(databaseUrl).username)) {
+  const previousRole = process.env.DATABASE_APP_ROLE;
+  process.env.DATABASE_APP_ROLE = appRole;
+  try {
+    return await pgMigrate(options);
+  } finally {
+    if (previousRole === undefined) delete process.env.DATABASE_APP_ROLE;
+    else process.env.DATABASE_APP_ROLE = previousRole;
+  }
+}
 
 if (!databaseUrl) {
   test('PostgreSQL contract tests require TEST_DATABASE_URL', { skip: 'set TEST_DATABASE_URL to a disposable PostgreSQL database' }, () => {});
@@ -80,6 +94,55 @@ if (!databaseUrl) {
     });
     assert.deepEqual(repeated, []);
     await pool.query(`DROP SCHEMA "${schema}" CASCADE`);
+  });
+
+  test('runtime grants strip broad privileges from a distinct ordinary role', async () => {
+    const role = `ff_runtime_${randomUUID().replaceAll('-', '')}`;
+    await pool.query(`CREATE ROLE "${role}" NOLOGIN`);
+    try {
+      await pool.query(`GRANT ALL PRIVILEGES ON TABLE games, legacy_scores TO "${role}"`);
+      const previousRole = process.env.DATABASE_APP_ROLE;
+      let statement;
+      try {
+        process.env.DATABASE_APP_ROLE = role;
+        runtimeGrantsMigration.up({ sql(value) { statement = value; } });
+      } finally {
+        if (previousRole === undefined) delete process.env.DATABASE_APP_ROLE;
+        else process.env.DATABASE_APP_ROLE = previousRole;
+      }
+      await pool.query(statement);
+
+      const result = await pool.query(`
+        SELECT
+          has_schema_privilege($1, 'public', 'USAGE') AS schema_usage,
+          has_schema_privilege($1, 'public', 'CREATE') AS schema_create,
+          has_table_privilege($1, 'games', 'SELECT') AS games_select,
+          has_table_privilege($1, 'games', 'INSERT') AS games_insert,
+          has_table_privilege($1, 'games', 'UPDATE') AS games_update,
+          has_table_privilege($1, 'games', 'DELETE') AS games_delete,
+          has_table_privilege($1, 'games', 'TRUNCATE') AS games_truncate,
+          has_table_privilege($1, 'legacy_scores', 'SELECT') AS legacy_select,
+          has_table_privilege($1, 'legacy_scores', 'INSERT') AS legacy_insert,
+          has_table_privilege($1, 'legacy_scores', 'UPDATE') AS legacy_update,
+          has_table_privilege($1, 'legacy_scores', 'DELETE') AS legacy_delete
+      `, [role]);
+      assert.deepEqual(result.rows[0], {
+        schema_usage: true,
+        schema_create: false,
+        games_select: true,
+        games_insert: true,
+        games_update: true,
+        games_delete: false,
+        games_truncate: false,
+        legacy_select: true,
+        legacy_insert: false,
+        legacy_update: false,
+        legacy_delete: false,
+      });
+    } finally {
+      await pool.query(`DROP OWNED BY "${role}"`);
+      await pool.query(`DROP ROLE "${role}"`);
+    }
   });
 
   test('begin is durable and idempotent before validating a new random proposal', async () => {

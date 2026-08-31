@@ -120,6 +120,14 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
   });
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok', environment: config.environment, rankedEnabled: Boolean(ready && config.rankedEnabled), rulesVersion: RULES_VERSION }));
+  app.get('/api/health/live', (req, res) => res.json({ status: 'ok' }));
+  app.get('/api/health/ready', asyncRoute(async (req, res) => {
+    if (!config.rankedEnabled) return res.json({ status: 'ok' });
+    if (!ready || !storage?.ping) throw new ApiError(503, 'not_ready', 'Сервис ещё не готов.');
+    try { await storage.ping(); }
+    catch { throw new ApiError(503, 'not_ready', 'Сервис ещё не готов.'); }
+    res.json({ status: 'ok' });
+  }));
 
   app.post('/api/session', asyncRoute(async (req, res) => {
     needsStorage();

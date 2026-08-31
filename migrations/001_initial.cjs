@@ -2,17 +2,7 @@
 
 exports.shorthands = undefined;
 
-function runtimeRole() {
-  const value = process.env.DATABASE_APP_ROLE;
-  if (value === undefined || value === '') return null;
-  if (!/^[A-Za-z_][A-Za-z0-9_-]{0,62}$/.test(value)) {
-    throw new Error('DATABASE_APP_ROLE must be a PostgreSQL role identifier.');
-  }
-  return `"${value}"`;
-}
-
 exports.up = (pgm) => {
-  const appRole = runtimeRole();
   pgm.sql(`
     CREATE TABLE games (
       game_id              uuid PRIMARY KEY,
@@ -97,16 +87,6 @@ exports.up = (pgm) => {
       source_row     integer NULL
     );
   `);
-  if (appRole) {
-    // Northflank exposes distinct administrator and runtime users. Objects
-    // created by the admin migration job are not automatically writable by
-    // the least-privileged application role.
-    pgm.sql(`
-      GRANT USAGE ON SCHEMA public TO ${appRole};
-      GRANT SELECT, INSERT, UPDATE, DELETE
-        ON TABLE games, legacy_scores TO ${appRole};
-    `);
-  }
 };
 
 exports.down = (pgm) => {

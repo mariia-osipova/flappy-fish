@@ -35,7 +35,7 @@ async function fixture(t, options = {}) {
   const servers = [];
   let base;
   async function launch() {
-    const app = createApp({ config: options.config || config, store: gateway, now: harness.now, logger: quiet });
+    const app = createApp({ config: options.config || config, store: options.store || gateway, now: harness.now, logger: quiet });
     const server = app.listen(0, '127.0.0.1');
     await once(server, 'listening');
     base = `http://127.0.0.1:${server.address().port}`;
@@ -98,6 +98,36 @@ test('unconfigured deployment stays in practice and old score writes are gone', 
   assert.equal((await f.request('/api/session', { body: {} })).status, 503);
   assert.equal((await f.request('/api/scores', { body: { name: 'Injected', score: 999999 } })).status, 410);
   assert.equal(f.calls(), 0);
+});
+
+test('liveness never touches storage and readiness only probes enabled ranking', async t => {
+  let pings = 0;
+  const healthyStore = {
+    async ping() { pings += 1; return true; },
+    async close() {},
+  };
+  const healthy = await fixture(t, { store: healthyStore });
+  assert.deepEqual((await healthy.request('/api/health/live')).data, { status: 'ok' });
+  assert.equal(pings, 0);
+  assert.deepEqual((await healthy.request('/api/health/ready')).data, { status: 'ok' });
+  assert.equal(pings, 1);
+
+  const practiceStore = {
+    async ping() { throw new Error('must not be called'); },
+    async close() {},
+  };
+  const practice = await fixture(t, { config: loadConfig({}), store: practiceStore });
+  assert.equal((await practice.request('/api/health/ready')).status, 200);
+
+  const unavailableStore = {
+    async ping() { throw new Error('private database detail'); },
+    async close() {},
+  };
+  const unavailableResult = await fixture(t, { store: unavailableStore });
+  const response = await unavailableResult.request('/api/health/ready');
+  assert.equal(response.status, 503);
+  assert.equal(response.data.error.code, 'not_ready');
+  assert.equal(response.text.includes('private database detail'), false);
 });
 
 test('keys must be long, separated, and server-only', () => {
