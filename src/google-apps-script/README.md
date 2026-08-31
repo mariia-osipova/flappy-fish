@@ -205,7 +205,7 @@ the owner must monitor them. The global write lock, synchronous flush and full
 capacity/leaderboard scans remain intentional limits of this small Sheets-only
 deployment.
 
-Sanitized runtime logs report successful begin/resume occupancy and classify
-storage failures as busy, quota, configuration, corrupt record or backend.
-They do not include player names, owner/game IDs, replay content, signatures,
-secrets or raw exception text.
+Sanitized runtime logs classify storage failures as busy, quota, configuration,
+corrupt record or backend. Successful player-facing admissions are not logged,
+so optional telemetry does not delay a game. Logs do not include player names,
+owner/game IDs, replay content, signatures, secrets or raw exception text.

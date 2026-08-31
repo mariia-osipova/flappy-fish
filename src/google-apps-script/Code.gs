@@ -20,7 +20,6 @@ const STORE = Object.freeze({
   gameRowCacheSeconds: 21600,
 });
 
-const GAME_LAYOUT_CACHE_KEY = "games-layout-v1";
 let currentStoreMutation = null;
 
 function doGet() {
@@ -39,10 +38,13 @@ function doPost(event) {
     };
     const handler = Object.prototype.hasOwnProperty.call(handlers, request.action) ? handlers[request.action] : null;
     if (!handler) fail("invalid_input", "Unknown gateway action.", 400);
+    const mutation = request.action !== "read" && request.action !== "scores";
+    // Opening the spreadsheet does not read or mutate state, so doing it before
+    // ScriptLock shortens the serialized portion of every ranked mutation.
+    // Read handlers still validate their input before opening the store.
+    if (mutation) request.book = openStore(request);
     const run = function () { return handler(request); };
-    const data = request.action === "read" || request.action === "scores"
-      ? run()
-      : withStoreLock(run);
+    const data = mutation ? withStoreLock(run) : run();
     if (request.diagnostic) logDiagnostic("ranked_admission", request.diagnostic);
     return jsonResponse({ ok: true, data: data });
   } catch (error) {
@@ -76,7 +78,11 @@ function authenticateRequest(event) {
       !Number.isSafeInteger(timestamp) || Math.abs(Date.now() - timestamp) > STORE.signatureWindowMs) {
     fail("forbidden", "Request authentication failed.", 403);
   }
-  const secret = PropertiesService.getScriptProperties().getProperty("GATEWAY_HMAC_KEY");
+  // Fetch the small configuration set once. A fresh game needs the HMAC secret,
+  // spreadsheet id and capacity setting; separate property calls made its hot
+  // path needlessly serial and more variable.
+  const properties = PropertiesService.getScriptProperties().getProperties();
+  const secret = properties.GATEWAY_HMAC_KEY;
   if (!secret || secret.length < 32) {
     fail("storage_unavailable", "Gateway authentication is not configured.", 503);
   }
@@ -96,7 +102,7 @@ function authenticateRequest(event) {
     fail("invalid_input", "Invalid gateway content.", 400);
   }
   if (!plainObject(payload)) fail("invalid_input", "Gateway content must be an object.", 400);
-  return { action: envelope.action, requestId: envelope.requestId, payload: payload };
+  return { action: envelope.action, requestId: envelope.requestId, payload: payload, properties: properties };
 }
 
 function constantTimeEqual(left, right) {
@@ -136,8 +142,10 @@ function markStoreMutation() {
   currentStoreMutation.pending = true;
 }
 
-function openStore() {
-  const id = PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID");
+function openStore(request) {
+  const id = request && request.properties
+    ? request.properties.SPREADSHEET_ID
+    : PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID");
   if (!id) fail("storage_unavailable", "The score store is not configured.", 503);
   return SpreadsheetApp.openById(id);
 }
@@ -166,12 +174,37 @@ function loadJsonRows(sheet, lastRow) {
 }
 
 function loadGames(book) {
-  const sheet = requireSheet(book, STORE.gamesSheet, STORE.gamesHeader);
-  return loadGamesFromSheet(sheet, sheet.getLastRow());
+  const sheet = book.getSheetByName(STORE.gamesSheet);
+  if (!sheet) fail("storage_unavailable", "Initialize the protected score store first.", 503);
+  // The header, last row and JSON records are all in one protected column.
+  // One data-range read replaces three Spreadsheet service calls on begin.
+  const values = sheet.getDataRange().getValues();
+  if (!values.length || values[0][0] !== STORE.gamesHeader) {
+    fail("storage_unavailable", "Initialize the protected score store first.", 503);
+  }
+  return loadGamesFromValues(sheet, values);
 }
 
 function loadGamesFromSheet(sheet, lastRow) {
   const rows = loadJsonRows(sheet, lastRow);
+  return validateGames(sheet, rows, lastRow);
+}
+
+function loadGamesFromValues(sheet, values) {
+  const rows = values.slice(1).reduce(function (parsed, row, index) {
+    if (row[0] === "") return parsed;
+    let record;
+    try { record = JSON.parse(row[0]); } catch (_) {
+      fail("storage_unavailable", "A score store record is damaged.", 503);
+    }
+    if (!plainObject(record)) fail("storage_unavailable", "A score store record is damaged.", 503);
+    parsed.push({ row: index + 2, record: record });
+    return parsed;
+  }, []);
+  return validateGames(sheet, rows, values.length);
+}
+
+function validateGames(sheet, rows, lastRow) {
   const ids = new Set();
   rows.forEach(function (entry) {
     const game = entry.record;
@@ -203,14 +236,11 @@ function getStoreCache() {
   try { return CacheService.getScriptCache(); } catch (_) { return null; }
 }
 
-function rememberGameRow(gameId, row, lastRow) {
+function rememberGameRow(gameId, row) {
   const cache = getStoreCache();
   if (!cache) return;
   try {
-    const values = {};
-    values[GAME_LAYOUT_CACHE_KEY] = String(lastRow);
-    values[gameRowCacheKey(gameId)] = String(row);
-    cache.putAll(values, STORE.gameRowCacheSeconds);
+    cache.put(gameRowCacheKey(gameId), String(row), STORE.gameRowCacheSeconds);
   } catch (_) {
     // CacheService is only an optimization; Sheets remains authoritative.
   }
@@ -220,10 +250,9 @@ function cachedGameRow(gameId, lastRow) {
   const cache = getStoreCache();
   if (!cache) return null;
   try {
-    const rowKey = gameRowCacheKey(gameId);
-    const values = cache.getAll([GAME_LAYOUT_CACHE_KEY, rowKey]);
-    if (values[GAME_LAYOUT_CACHE_KEY] !== String(lastRow)) return null;
-    const row = Number(values[rowKey]);
+    // Games are append-only. If an administrator has changed a row, the
+    // authoritative cell validation below rejects the stale hint and scans.
+    const row = Number(cache.get(gameRowCacheKey(gameId)));
     return Number.isSafeInteger(row) && row >= 2 && row <= lastRow ? row : null;
   } catch (_) {
     return null;
@@ -254,7 +283,7 @@ function loadOwnedGame(book, payload) {
   // the full validation path. Capacity-sensitive operations always use it.
   const games = loadGamesFromSheet(sheet, lastRow);
   const entry = findOwnedGame(games.rows, payload);
-  rememberGameRow(entry.record.gameId, entry.row, lastRow);
+  rememberGameRow(entry.record.gameId, entry.row);
   return { sheet: sheet, entry: entry, lastRow: lastRow };
 }
 
@@ -273,7 +302,7 @@ function beginGame(request) {
   const payload = request.payload;
   requireText(payload.ownerId, "ownerId", 160);
   requireHash(payload.requestHash, "requestHash");
-  const book = openStore();
+  const book = request.book;
   const games = loadGames(book);
   const previous = games.rows.find(function (entry) {
     return entry.record.ownerId === payload.ownerId &&
@@ -302,7 +331,7 @@ function beginGame(request) {
     fail("conflict", "The game id already exists.", 409);
   }
   const now = Date.now();
-  const capacity = ensureCapacity(games.rows, payload.ownerId, null, now);
+  const capacity = ensureCapacity(games.rows, payload.ownerId, null, now, request.properties);
   const recent = games.rows.filter(function (entry) {
     return entry.record.ownerId === payload.ownerId &&
       entry.record.createdAt > now - STORE.creationWindowMs;
@@ -322,21 +351,22 @@ function beginGame(request) {
   };
   const row = games.lastRow + 1;
   writeGame(games.sheet, row, game);
-  rememberGameRow(game.gameId, row, row);
+  // CacheService is advisory. Avoid an extra remote call while admitting a
+  // game; the first owned-game read/checkpoint can populate the hint safely.
   request.diagnostic = { action: "begin", activeSlots: capacity.activeSlots, limit: capacity.limit };
   return game;
 }
 
 function readGame(request) {
   validateIdentity(request.payload);
-  return loadOwnedGame(openStore(), request.payload).entry.record;
+  return loadOwnedGame(request.book || openStore(request), request.payload).entry.record;
 }
 
 function checkpointGame(request) {
   const payload = request.payload;
   validateIdentity(payload);
   requireHash(payload.requestHash, "requestHash");
-  const games = loadOwnedGame(openStore(), payload);
+  const games = loadOwnedGame(request.book, payload);
   const entry = games.entry;
   const game = entry.record;
   if (isDuplicate(game, request)) return game;
@@ -384,7 +414,7 @@ function resumeGame(request) {
   const payload = request.payload;
   validateIdentity(payload);
   requireHash(payload.requestHash, "requestHash");
-  const games = loadGames(openStore());
+  const games = loadGames(request.book);
   const entry = findOwnedGame(games.rows, payload);
   const game = entry.record;
   if (isDuplicate(game, request)) return game;
@@ -394,7 +424,7 @@ function resumeGame(request) {
   if (game.status === "active" && game.leaseUntil > now) {
     fail("conflict", "The ranked game is already active.", 409);
   }
-  const capacity = ensureCapacity(games.rows, game.ownerId, game.gameId, now);
+  const capacity = ensureCapacity(games.rows, game.ownerId, game.gameId, now, request.properties);
   game.elapsedActiveMs += activeCredit(game, now);
   game.activeSince = now;
   game.leaseUntil = now + STORE.leaseMs;
@@ -403,7 +433,7 @@ function resumeGame(request) {
   game.updatedAt = now;
   rememberRequest(game, request);
   writeGame(games.sheet, entry.row, game);
-  rememberGameRow(game.gameId, entry.row, games.lastRow);
+  rememberGameRow(game.gameId, entry.row);
   request.diagnostic = { action: "resume", activeSlots: capacity.activeSlots, limit: capacity.limit };
   return game;
 }
@@ -436,8 +466,10 @@ function activeCredit(game, now) {
     : 0;
 }
 
-function ensureCapacity(rows, ownerId, exceptGameId, now) {
-  const configured = PropertiesService.getScriptProperties().getProperty("MAX_RANKED_GAMES");
+function ensureCapacity(rows, ownerId, exceptGameId, now, properties) {
+  const configured = properties
+    ? properties.MAX_RANKED_GAMES
+    : PropertiesService.getScriptProperties().getProperty("MAX_RANKED_GAMES");
   const maximum = configured === null || configured === undefined
     ? STORE.maxActiveGames : Number(String(configured).trim());
   if (!Number.isSafeInteger(maximum) || maximum < 1 || maximum > 30 ||
@@ -475,7 +507,7 @@ function readScores(request) {
   if (request.payload.includeIndex !== undefined && typeof request.payload.includeIndex !== "boolean") {
     fail("invalid_input", "Invalid leaderboard index option.", 400);
   }
-  const book = openStore();
+  const book = request.book || openStore(request);
   const games = loadGames(book).rows;
   const legacy = loadJsonRows(requireSheet(book, STORE.legacySheet, STORE.legacyHeader));
   const best = new Map();
@@ -710,6 +742,9 @@ function classifyStorageFailure(error) {
 
 function logDiagnostic(event, fields) {
   try {
+    // Successful admission is already durable in Sheets. Suppress its optional
+    // execution log so it cannot add latency to the player-facing hot path.
+    if (event === "ranked_admission") return;
     if (typeof Logger !== "undefined") {
       Logger.log(JSON.stringify({
         component: "flappy-fish-store", event: event,

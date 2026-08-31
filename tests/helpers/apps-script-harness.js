@@ -27,7 +27,7 @@ export function createAppsScriptHarness({
   const calls = {
     opens: 0, reads: 0, readCells: 0, lastRowReads: 0,
     writes: 0, flushes: 0, locks: 0, releases: 0,
-    cacheReads: 0, cacheWrites: 0, events: [],
+    cacheReads: 0, cacheWrites: 0, propertyReads: 0, propertyBatchReads: 0, events: [],
   };
   const sheets = new Map();
   const scriptCache = new Map();
@@ -148,7 +148,14 @@ export function createAppsScriptHarness({
     Date: ClockDate,
     PropertiesService: {
       getScriptProperties: () => ({
-        getProperty: (name) => propertyValues[name] ?? null,
+        getProperty: (name) => {
+          calls.propertyReads += 1;
+          return propertyValues[name] ?? null;
+        },
+        getProperties: () => {
+          calls.propertyBatchReads += 1;
+          return clone(propertyValues);
+        },
         setProperty: (name, value) => { propertyValues[name] = String(value); },
       }),
     },

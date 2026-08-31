@@ -74,6 +74,18 @@ test("signature binds action, request id, timestamp and exact content", () => {
   assert.equal(h.post(valid).ok, true, "whitespace is allowed when it was part of the signed content");
 });
 
+test("begin batches config and reads the protected Games column once", () => {
+  const h = harness();
+  h.resetCalls();
+
+  started(h);
+
+  assert.equal(h.calls.propertyBatchReads, 1);
+  assert.equal(h.calls.propertyReads, 0);
+  assert.equal(h.calls.reads, 1, "header, row count and game records share one data-range read");
+  assert.equal(h.calls.cacheWrites, 0, "admission does not wait for an advisory row hint");
+});
+
 test("expired/future signatures, missing secrets and unknown actions fail closed", () => {
   const h = harness();
   expectError(h.invoke("scores", {}, { timestamp: h.now() - 60001 }), "forbidden");
@@ -100,7 +112,7 @@ test("read operations do not create missing sheets or mutate initialized sheets"
   assert.equal(h.calls.locks, 0);
 });
 
-test("verified row hints reduce read/checkpoint cells and a miss falls back to full validation", () => {
+test("verified row hints reduce subsequent read/checkpoint cells and a miss falls back to full validation", () => {
   const h = harness();
   const games = [];
   for (let index = 0; index < 8; index += 1) {
@@ -118,9 +130,15 @@ test("verified row hints reduce read/checkpoint cells and a miss falls back to f
 
   h.advanceTime(10000);
   h.resetCalls();
-  assert.equal(changed(h, "checkpoint", checkpointPayload(active), "fast-checkpoint").seq, 1);
-  assert.equal(h.calls.readCells, 2, "checkpoint also reads only its verified target row");
+  const firstCheckpoint = changed(h, "checkpoint", checkpointPayload(active), "first-checkpoint");
+  assert.equal(h.calls.readCells, games.length + 1,
+    "the first checkpoint after admission validates the authoritative game rows");
   assert.equal(h.calls.flushes, 1);
+
+  h.advanceTime(10);
+  h.resetCalls();
+  assert.equal(changed(h, "checkpoint", checkpointPayload(firstCheckpoint, { ticks: 1 }), "fast-checkpoint").seq, 2);
+  assert.equal(h.calls.readCells, 2, "later checkpoints read only the verified target row");
 
   h.clearCache();
   h.resetCalls();
@@ -479,13 +497,10 @@ test("damaged authoritative rows fail closed instead of freeing occupied places"
   assert.equal(h.calls.writes, 0);
 });
 
-test("runtime diagnostics are emitted after commit without identity or replay data", () => {
+test("runtime diagnostics classify storage failures without identity or replay data", () => {
   const h = harness();
   started(h);
-  const admission = JSON.parse(h.logs.at(-1));
-  assert.deepEqual(admission, {
-    component: "flappy-fish-store", event: "ranked_admission", action: "begin", activeSlots: 1, limit: 5,
-  });
+  assert.equal(h.logs.length, 0, "successful admissions do not block on optional logging");
   h.setBusy(true);
   expectError(h.invoke("begin", beginPayload({ ownerId: "other", gameId: "other" })), "storage_unavailable");
   assert.equal(JSON.parse(h.logs.at(-1)).reason, "busy");
