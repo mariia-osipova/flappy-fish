@@ -1,8 +1,15 @@
 # Защищённый рейтинг: устройство и выпуск
 
-Код сохраняет существующий Node.js-хостинг AI Studio. Google Sheets остаётся
-единственным постоянным хранилищем. Новый сервер по умолчанию запускается с
-**выключенным рейтингом**; тренировка и Evolution работают без Google.
+> Эта инструкция описывает прежний Apps Script backend и остаётся справочником
+> для переходного режима. Для PostgreSQL/Northflank, включая staging, импорт,
+> production cutover и rollback без двух writer, используйте
+> [отдельный runbook](postgres-northflank.md). Не применяйте раздел «Выпуск
+> владельцем» ниже как план PostgreSQL cutover.
+
+В описанном ниже переходном deployment Google Sheets остаётся постоянным
+хранилищем. Целевая PostgreSQL-конфигурация приведена в новом runbook. Любой
+сервер по умолчанию запускается с **выключенным рейтингом**; тренировка и
+Evolution работают без хранилища.
 
 Изменение репозитория не закрывает старые Apps Script deployments и не меняет
 опубликованный сайт. До выполнения шагов владельца ниже прежний публичный
@@ -13,7 +20,7 @@
 Нужен Node.js22 или новее. Для воспроизводимой установки используется `bun.lock`:
 
 ```sh
-npm exec --yes --package=bun -- bun install --frozen-lockfile
+npm exec --yes --package=bun@1.4.0 -- bun install --frozen-lockfile
 npm run build
 npm test
 npm start

@@ -358,6 +358,31 @@ PostgreSQL уже является единственным source of truth. Н�
 6. Возврат к Apps Script возможен лишь как отдельная обратная миграция с новым
    freeze/import/verify планом, не как переключение переменной.
 
+## Cutover sign-off
+
+Перед изменением `RANKED_ENABLED` на `true` владелец выпуска должен сохранить
+не секретные доказательства каждого пункта. Значения URI, ключей, ников и строк
+экспорта в журнал не помещаются.
+
+- SHA image, migration job и развёрнутого web service совпадают.
+- Записаны время freeze и подтверждение, что все старые Apps Script writer
+  закрыты; после freeze число исходных строк не менялось.
+- Записаны идентификаторы pre-import и post-import backups PostgreSQL.
+- Dry-run, apply и verify завершились с кодом 0; counts, maximum score, top 100 и
+  checksum game IDs сопоставлены с замороженным экспортом.
+- Обычная runtime-роль прошла DML smoke test с `ROLLBACK`; admin URI отсутствует
+  у web service.
+- Production domain и оба HMAC-ключа сохранены, обе probes успешны, а один
+  practice-only instance обслуживает `/` и `/api/scores`.
+- Назначены ответственный за переключение и наблюдающий за первым окном работы;
+  заранее определено, кто имеет право снова выключить writer.
+
+Любое расхождение counts/checksum/top 100, неизвестный активный writer, failed
+probe или несовпадение SHA — условие остановки: оставить рейтинг выключенным и
+исправить подготовку. После первой новой записи граница rollback считается
+пройденной; возврат трафика к Apps Script без обратной миграции больше не
+разрешён.
+
 ## Наблюдение и риски
 
 - Один web instance сохраняет глобальность in-memory rate limits, queue и cache,

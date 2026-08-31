@@ -2,14 +2,17 @@
 
 ## Web app and protected leaderboard
 
-The web game runs on the existing Node.js server. Ranked scores are replayed by
-the server and saved through an authenticated Google Apps Script gateway.
+The web game runs on the Node.js server. Ranked scores are replayed by the
+server and stored in PostgreSQL; the authenticated Google Apps Script gateway
+remains available only as a transitional backend during cutover.
 Practice and Evolution do not submit scores. **Ranking is disabled by default**
 until the owner configures staging, migrates history and retires old public writers.
 
-See [security, testing and rollout instructions](docs/security-and-rollout.md)
-and [Apps Script setup](src/google-apps-script/README.md). Local tests use a fake
-spreadsheet; they do not modify Google or deploy the production website.
+See the [PostgreSQL/Northflank runbook](docs/postgres-northflank.md), the
+[security reference](docs/security-and-rollout.md), and the transitional
+[Apps Script setup](src/google-apps-script/README.md). Tests never modify Google
+or deploy the production website; PostgreSQL contract tests use only the
+explicit disposable `TEST_DATABASE_URL`.
 
 ### GitHub Pages: practice only
 
@@ -18,7 +21,7 @@ The static build works below a repository path such as `/flappy-fish/`, includes
 the game assets and shared physics, and never calls the ranked API. Manual play
 and Evolution remain available, with a visible **practice-only** notice; the
 Rank page explains that no results are recorded. Server code, configuration and
-secrets are not included. This is separate from the Node.js + Sheets deployment
+secrets are not included. This is separate from the Node.js durable deployment
 described above and does not enable or replace its protected leaderboard.
 
 
@@ -131,7 +134,7 @@ Copy the project from the `main` branch.
 Use Node.js22+ and the committed Bun lockfile:
 
 ```bash
-npm exec --yes --package=bun -- bun install --frozen-lockfile
+npm exec --yes --package=bun@1.4.0 -- bun install --frozen-lockfile
 npm run build
 npm test
 ```
