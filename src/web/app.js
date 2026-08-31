@@ -20,6 +20,7 @@ const SCREAMER_DURATION = 1200;
 const SCREAMER_CHANCE = 0.25;
 const TOUCH_MENU_HOLD_MS = 650;
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
+const SOUND_MUTED_KEY = "flappy-fish-sound-muted";
 
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
@@ -29,6 +30,7 @@ const nameGate = document.getElementById("name-gate");
 const nameForm = document.getElementById("name-form");
 const playerNameInput = document.getElementById("player-name");
 const nameBest = document.getElementById("name-best");
+const soundToggleButton = document.getElementById("sound-toggle");
 
 const assetPaths = {
   fish: "assets/img/fish1.png",
@@ -58,18 +60,20 @@ const fishHitMask = {
 const audio = {
   flap: new Audio("assets/audios/efecto bubble.ogg"),
   music: new Audio("assets/audios/linkin park fondo.ogg"),
-  scream: new Audio("assets/audios/scream.mp3"),
 };
 
 audio.music.loop = true;
 audio.music.volume = 0.45;
 audio.flap.volume = 0.45;
-audio.scream.volume = 0.72;
 
 const keys = new Set();
 const images = {};
 let audioUnlocked = false;
+let soundMuted = false;
 let heldCanvasAction = null;
+
+try { soundMuted = localStorage.getItem(SOUND_MUTED_KEY) === "1"; } catch { /* Sound preference is optional. */ }
+applySoundPreference();
 
 function gameFont(size) {
   return `${size}px "Strange Fish", fantasy`;
@@ -178,6 +182,7 @@ let lastRankedEvent = { status: "idle" };
 let rankedDisabled = document.querySelector('meta[name="flappy-fish-ranked"]')?.content === "disabled";
 let refreshedGameId = null;
 const rankedNotice = document.getElementById("ranked-notice");
+const rankedProgress = document.getElementById("ranked-progress");
 const rankedStartButton = document.getElementById("ranked-start");
 const rankedResumeButton = document.getElementById("ranked-resume");
 const pauseButton = document.getElementById("game-pause");
@@ -241,6 +246,9 @@ function updateRankedNotice() {
   }
   rankedNotice.textContent = message;
   rankedNotice.dataset.status = practiceOnly() || manualKind === "practice" ? "practice" : event.status;
+  const waitingForServer = ["connecting", "saving", "pausing", "reconnecting", "buffer_full"].includes(event.status);
+  rankedProgress.hidden = !waitingForServer;
+  rankedProgress.setAttribute("aria-label", message);
   rankedStartButton.disabled = startingGame || event.status === "connecting";
   rankedStartButton.hidden = practiceOnly() || Boolean(ranked.unfinished && ranked.receipt) || (manualKind === "ranked" && !state.gameOver);
   rankedResumeButton.hidden = practiceOnly() || !ranked.unfinished || !ranked.receipt || (manualKind === "ranked" && ranked.running);
@@ -324,7 +332,24 @@ function unlockAudio() {
   audioUnlocked = true;
 }
 
+function applySoundPreference() {
+  audio.flap.muted = soundMuted;
+  audio.music.muted = soundMuted;
+  soundToggleButton.setAttribute("aria-pressed", String(soundMuted));
+  soundToggleButton.textContent = soundMuted ? "Sound: off" : "Sound: on";
+  soundToggleButton.title = soundMuted ? "Enable sound" : "Mute sound";
+}
+
+function toggleSound() {
+  unlockAudio();
+  soundMuted = !soundMuted;
+  try { localStorage.setItem(SOUND_MUTED_KEY, soundMuted ? "1" : "0"); } catch { /* Sound preference is optional. */ }
+  applySoundPreference();
+  if (!soundMuted && state.mode === "single" && !state.paused && !state.gameOver) startMusic();
+}
+
 function playSound(sound) {
+  if (soundMuted) return;
   try {
     sound.currentTime = 0;
     sound.play().catch(() => {});
@@ -348,7 +373,7 @@ function configureCanvas() {
 }
 
 function startMusic() {
-  if (!audioUnlocked) return;
+  if (!audioUnlocked || soundMuted) return;
   audio.music.play().catch(() => {});
 }
 
@@ -985,7 +1010,6 @@ function updateSingle(delta, now) {
     if (manualKind === "practice") updateRankedNotice();
     if (Math.random() < SCREAMER_CHANCE) {
       state.jumpScareUntil = now + SCREAMER_DURATION;
-      playSound(audio.scream);
     }
   }
 }
@@ -1407,6 +1431,7 @@ rankedStartButton.addEventListener("click", () => { unlockAudio(); void startSin
 rankedResumeButton.addEventListener("click", () => { unlockAudio(); void resumeRanked(); });
 practiceButton.addEventListener("click", () => { unlockAudio(); startPractice(); });
 pauseButton.addEventListener("click", () => { unlockAudio(); togglePause(); });
+soundToggleButton.addEventListener("click", toggleSound);
 
 window.addEventListener("resize", configureCanvas);
 

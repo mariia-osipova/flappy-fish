@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="30x30" href="favicon.png?v=mr-fish-3">
     <link rel="shortcut icon" type="image/png" href="favicon.png?v=mr-fish-3">
     <link rel="preload" href="assets/font/StrangeFont-Regular.otf" as="font" type="font/otf" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=ranked-v1">
+    <link rel="stylesheet" href="styles.css?v=ranked-v2-controls">
     <script>
       // Global error shield to prevent third-party extensions (e.g. MetaMask, Web3 wallet injection) from breaking the game
       window.addEventListener("error", function (e) {
@@ -26,6 +26,7 @@
     </script>
   </head>
   <body>
+    <button type="button" class="sound-button" id="sound-toggle" aria-pressed="false">Sound: on</button>
     <a class="rank-button" href="rank.html">Rank</a>
 
     <main class="app-shell" aria-label="Flappy Fish web app">
@@ -36,6 +37,9 @@
       </section>
       <section class="ranked-controls" aria-label="Ranked game controls">
         <p id="ranked-notice" role="status" aria-live="polite">Ranked games are checked by the server. Practice does not enter the leaderboard.</p>
+        <div class="ranked-progress" id="ranked-progress" role="progressbar" aria-label="Waiting for the ranked server" hidden>
+          <span class="ranked-progress-bar"></span>
+        </div>
         <div class="ranked-actions">
           <button type="button" id="ranked-start">New ranked game</button>
           <button type="button" id="ranked-resume" hidden>Resume / retry ranked</button>
@@ -57,6 +61,6 @@
     </section>
 
     <script src="name-filter.js?v=20260827-filter-latam"></script>
-    <script type="module" src="app.js?v=ranked-v2-session"></script>
+    <script type="module" src="app.js?v=ranked-v3-controls"></script>
   </body>
 </html>

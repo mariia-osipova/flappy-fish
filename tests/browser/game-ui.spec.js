@@ -7,6 +7,12 @@ test("ranked-disabled deployment exposes Single Player as practice; keyboard and
   const traffic = await localTrafficOnly(page);
   await observeCanvas(page);
   await enterGame(page);
+  const soundToggle = page.locator("#sound-toggle");
+  await expect(soundToggle).toHaveText("Sound: on");
+  await soundToggle.click();
+  await expect(soundToggle).toHaveText("Sound: off");
+  await expect(soundToggle).toHaveAttribute("aria-pressed", "true");
+  expect(await page.evaluate(() => localStorage.getItem("flappy-fish-sound-muted"))).toBe("1");
   const notice = page.locator("#ranked-notice");
   await expect(notice).toHaveAttribute("data-status", "practice");
   await expect(notice).toContainText("Single Player");

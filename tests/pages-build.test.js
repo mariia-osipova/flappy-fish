@@ -40,6 +40,7 @@ test("Pages output contains only public assets and resolves modules below a repo
   assert.ok((await stat(path.join(output, "assets/img/fish1.png"))).isFile());
   assert.ok((await stat(path.join(output, "assets/font/StrangeFont-Regular.otf"))).isFile());
   assert.ok((await stat(path.join(output, "assets/audios/efecto bubble.ogg"))).isFile());
+  assert.deepEqual((await readdir(path.join(output, "assets/audios"))).sort(), ["efecto bubble.ogg", "linkin park fondo.ogg"]);
 });
 
 test("building Pages leaves the default Node frontend and its shared imports unchanged", async () => {

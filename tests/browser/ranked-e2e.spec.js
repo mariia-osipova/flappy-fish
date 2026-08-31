@@ -42,19 +42,26 @@ test("real ranked UI persists a partial pause, reloads with its secure identity,
   const name = `E2E ${testInfo.project.name} ${testInfo.repeatEachIndex}`;
   await enterGame(page, name);
   await expect(page.locator("#ranked-notice")).toHaveAttribute("data-status", "idle");
+  await expect(page.locator("#ranked-progress")).toBeHidden();
 
   const cookieMetadata = (await page.context().cookies()).filter((cookie) => cookie.name === "__Host-flappy_session")
     .map(({ name, httpOnly, secure, sameSite, path }) => ({ name, httpOnly, secure, sameSite, path }));
   expect(cookieMetadata).toEqual([{ name: "__Host-flappy_session", httpOnly: true, secure: true, sameSite: "Lax", path: "/" }]);
   expect(await page.evaluate(() => document.cookie.includes("__Host-flappy_session"))).toBe(false);
 
+  await page.route("**/api/games", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    await route.continue();
+  }, { times: 1 });
   const beginning = page.waitForResponse((response) => new URL(response.url()).pathname === "/api/games" && response.request().method() === "POST");
   await page.locator("#ranked-start").click();
+  await expect(page.locator("#ranked-progress")).toBeVisible();
   const beginResponse = await beginning;
   expect(beginResponse.status()).toBe(200);
   const initial = await beginResponse.json();
   expect(initial.status).toBe("active");
   await expect(page.locator("#ranked-notice")).toHaveAttribute("data-status", "active");
+  await expect(page.locator("#ranked-progress")).toBeHidden();
   await expect.poll(async () => (await readCanvas(page)).fish?.y).toBe(300);
 
   await page.keyboard.down("ArrowLeft");
