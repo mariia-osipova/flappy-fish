@@ -10,6 +10,7 @@ import { loadConfig } from './config.js';
 import { createStore } from './storage/create-store.js';
 import { ReplayVerifier } from './verifier.js';
 import { RateLimiter } from './rate-limit.js';
+import { CREATION_WINDOW_MS, MAX_CREATIONS_PER_OWNER } from './storage/constants.js';
 import {
   canonicalJson, decodeInputs, digest, exactBody, issueSession, makeReceipt,
   MAX_SNAPSHOT_BYTES, normalizeName, readCheckpoint, readSession, validateRequestId,
@@ -143,7 +144,7 @@ export function createApp({ config = loadConfig(), store, verifier, now = Date.n
     exactBody(req.body, ['name', 'requestId']);
     const requestId = validateRequestId(req.body.requestId);
     const { name, rankKey } = normalizeName(req.body.name);
-    limiter.take('begin:' + ownerId, 6, 60000);
+    limiter.take('begin:' + ownerId, MAX_CREATIONS_PER_OWNER, CREATION_WINDOW_MS);
     limiter.take('begin:global', 60, 60000);
     const seed = randomBytes(4).readUInt32LE();
     const snapshot = createInitialState(seed);

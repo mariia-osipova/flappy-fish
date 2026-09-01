@@ -827,7 +827,7 @@ async function startSingle() {
   if (startingGame || isNameGateOpen()) return;
   startingGame = true;
   try {
-    if (manualKind === "ranked" && manualSnapshot?.dead && ranked.unfinished) {
+    if (manualKind === "ranked" && manualSnapshot?.dead && ranked.receipt && ranked.unfinished) {
       await ranked.pump();
       if (ranked.unfinished) return;
     }

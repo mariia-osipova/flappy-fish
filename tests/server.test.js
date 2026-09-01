@@ -7,6 +7,7 @@ import { AppsScriptGateway } from '../src/server/gateway.js';
 import { loadConfig } from '../src/server/config.js';
 import { digest, signToken, verifyToken } from '../src/server/security.js';
 import { ReplayVerifier } from '../src/server/verifier.js';
+import { MAX_CREATIONS_PER_OWNER } from '../src/server/storage/constants.js';
 import { createInitialState, RULES_VERSION } from '../src/shared/game-core.js';
 import { createAppsScriptHarness, TEST_GATEWAY_SECRET } from './helpers/apps-script-harness.js';
 
@@ -417,11 +418,12 @@ test('legacy maxima merge by normalized name, verified ties win, cache is 30 sec
 });
 
 test('rate limits return 429; disabling ranked leaves stored scores and practice readable', async t => {
+  assert.equal(MAX_CREATIONS_PER_OWNER, 50);
   const f = await fixture(t);
   const cookie = await f.session();
   await f.begin(cookie);
   let last;
-  for (let i = 0; i < 6; i++) last = await f.begin(cookie);
+  for (let i = 0; i < MAX_CREATIONS_PER_OWNER; i++) last = await f.begin(cookie);
   assert.equal(last.status, 429);
   assert.equal(last.response.headers.get('retry-after'), '5');
   const disabled = await fixture(t, { harness: f.harness, config: { ...config, rankedEnabled: false } });

@@ -133,3 +133,47 @@ test("real ranked UI persists a partial pause, reloads with its secure identity,
   expect(traffic.apiRequests.some((request) => request.path === "/api/scores" && request.method === "POST")).toBe(false);
   expectLocalAndHealthy(traffic);
 });
+
+test("a rejected new game can be retried from game over", async ({ page }, testInfo) => {
+  const traffic = await localTrafficOnly(page, "https://127.0.0.1:3101");
+  await observeCanvas(page);
+  await enterGame(page, `Retry ${testInfo.project.name} ${testInfo.repeatEachIndex}`);
+
+  const firstBegin = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === "/api/games" && response.request().method() === "POST");
+  await page.locator("#ranked-start").click();
+  expect((await firstBegin).status()).toBe(200);
+  await expect(page.locator("#ranked-notice")).toHaveAttribute("data-status", "active");
+  await page.keyboard.press("Space");
+  await expect(page.locator("#ranked-notice")).toContainText("Verified result saved: 0");
+
+  let rejectedRequestId;
+  await page.route("**/api/games", async (route) => {
+    rejectedRequestId = route.request().postDataJSON().requestId;
+    await route.fulfill({
+      status: 429,
+      contentType: "application/json",
+      headers: { "Retry-After": "60" },
+      body: JSON.stringify({ error: { code: "rate_limited", message: "Слишком много запросов. Попробуйте позже." } }),
+    });
+  }, { times: 1 });
+
+  const rejectedBegin = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === "/api/games" && response.request().method() === "POST");
+  await page.locator("#ranked-start").click();
+  expect((await rejectedBegin).status()).toBe(429);
+  await expect(page.locator("#ranked-notice")).toContainText("Слишком много запросов");
+
+  const retriedBegin = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === "/api/games" && response.request().method() === "POST" && response.status() === 200);
+  await page.locator("#ranked-start").click();
+  const retriedResponse = await retriedBegin;
+  expect(retriedResponse.request().postDataJSON().requestId).toBe(rejectedRequestId);
+  await expect(page.locator("#ranked-notice")).toHaveAttribute("data-status", "active");
+
+  const paused = page.waitForResponse((response) =>
+    new URL(response.url()).pathname.endsWith("/checkpoints") && response.request().method() === "POST");
+  await page.locator("#game-pause").click();
+  expect((await paused).status()).toBe(200);
+  expectLocalAndHealthy(traffic);
+});

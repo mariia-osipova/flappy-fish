@@ -9,7 +9,7 @@ const STORE = Object.freeze({
   maxActiveGames: 5,
   leaseMs: 120000,
   creationWindowMs: 60000,
-  maxCreationsPerOwner: 6,
+  maxCreationsPerOwner: 50,
   signatureWindowMs: 60000,
   maxCheckpointTicks: 1200,
   tickRate: 120,

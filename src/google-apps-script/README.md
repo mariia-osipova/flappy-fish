@@ -117,7 +117,7 @@ attempt. JSON storage also keeps names beginning with `=` as text.
 - The server-clock pacing check retains previously accumulated active time,
   caps an expired interval at its old lease end, and excludes paused time and
   time after lease expiry. There is no overall active-game duration limit.
-- New games are additionally limited to six per owner per minute, derived from
+- New games are additionally limited to 50 per owner per minute, derived from
   stored game rows. Node's request/replay limits are a separate protection.
 - All mutations take `ScriptLock`, update the authoritative JSON cell and call
   `SpreadsheetApp.flush()` before releasing the lock. Reads do not initialize

@@ -8,6 +8,7 @@ import pg from 'pg';
 import { runner as pgMigrate } from 'node-pg-migrate';
 import { replay } from '../src/shared/game-core.js';
 import { ApiError } from '../src/server/errors.js';
+import { MAX_CREATIONS_PER_OWNER } from '../src/server/storage/constants.js';
 import { PostgresStore } from '../src/server/storage/postgres-store.js';
 import { importInTransaction, SafeMigrationError } from '../scripts/import-sheets-export.js';
 import { beginCall, checkpointCall, resumeCall, truncatePostgres } from './helpers/postgres-fixture.js';
@@ -175,11 +176,11 @@ if (!databaseUrl) {
 
     await truncatePostgres(pool);
     const ownerId = randomUUID();
-    for (let index = 0; index < 6; index += 1) {
+    for (let index = 0; index < MAX_CREATIONS_PER_OWNER; index += 1) {
       const current = await call(beginCall({ ownerId, name: `Attempt ${index}` }), 'begin');
       await call(checkpointCall(current, { inputs: [], pause: true }), 'checkpoint');
     }
-    await expectError(call(beginCall({ ownerId, name: 'Attempt 7' }), 'begin'), 429, 'rate_limited');
+    await expectError(call(beginCall({ ownerId, name: `Attempt ${MAX_CREATIONS_PER_OWNER + 1}` }), 'begin'), 429, 'rate_limited');
   });
 
   test('read returns an owned record without mutating it and hides other owners', async () => {

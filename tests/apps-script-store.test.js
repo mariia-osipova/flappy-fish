@@ -209,7 +209,7 @@ test("capacity property is bounded, validated and shared by all callers", () => 
 
 test("creation rate is derived from durable games, including completed attempts", () => {
   const h = harness();
-  for (let index = 0; index < 6; index += 1) {
+  for (let index = 0; index < 50; index += 1) {
     const game = started(h, { gameId: "attempt-" + index });
     changed(h, "checkpoint", checkpointPayload(game, { ticks: 1, dead: true }), "finish-" + index);
   }
