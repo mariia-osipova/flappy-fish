@@ -4,11 +4,28 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "echo 'Build complete'",
-    "start": "node server.js"
+    "build": "node scripts/check-build.js",
+    "build:pages": "node scripts/build-pages.js",
+    "start": "node server.js",
+    "dev": "node --env-file-if-exists=.env server.js",
+    "db:migrate": "node scripts/run-migrations.js up",
+    "db:migrate:down": "node scripts/run-migrations.js down",
+    "db:import:sheets": "node scripts/import-sheets-export.js",
+    "db:verify-import": "node scripts/verify-postgres-import.js",
+    "test": "node --test tests/*.test.js",
+    "test:postgres": "node --test tests/postgres-store.test.js",
+    "test:all": "npm test && npm run test:postgres && npm run build",
+    "test:browser": "playwright test",
+    "test:load": "node scripts/load-staging.js"
   },
+  "engines": { "node": ">=22" },
   "dependencies": {
+    "csv-parse": "^7.0.2",
     "express": "^4.21.2",
-    "firebase": "^12.18.0"
+    "node-pg-migrate": "^9.0.0",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
   }
 }

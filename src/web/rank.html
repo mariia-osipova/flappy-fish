@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="30x30" href="favicon.png?v=mr-fish-3">
     <link rel="shortcut icon" type="image/png" href="favicon.png?v=mr-fish-3">
     <link rel="preload" href="assets/font/StrangeFont-Regular.otf" as="font" type="font/otf" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260827-filter-latam">
+    <link rel="stylesheet" href="styles.css?v=ranked-v1">
     <script>
       // Global error shield to prevent third-party extensions (e.g. MetaMask, Web3 wallet injection) from breaking the page
       window.addEventListener("error", function (e) {
@@ -31,12 +31,18 @@
     <main class="rank-page" aria-labelledby="rank-title">
       <section class="leaderboard-page">
         <h1 id="rank-title">Leaderboard</h1>
+        <p class="rank-explanation">Best completed game for each nickname. Historical records are marked as unverified; anyone can use the same nickname.</p>
+        <form id="rank-search" class="rank-search">
+          <label for="rank-name">Find a nickname</label>
+          <input id="rank-name" type="search" maxlength="24" autocomplete="nickname">
+          <button type="submit">Find</button>
+        </form>
+        <p id="rank-player" role="status"></p>
         <ol id="rank-list" class="rank-list"></ol>
       </section>
     </main>
 
     <script src="name-filter.js?v=20260827-filter-latam"></script>
-    <script src="config.js?v=20260828-server-scores"></script>
-    <script src="rank.js?v=20260828-server-scores"></script>
+    <script type="module" src="rank.js?v=ranked-v1"></script>
   </body>
 </html>

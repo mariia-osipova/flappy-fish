@@ -1,3 +1,8 @@
+import { createInitialState, step as stepManual, fishRotation as manualFishRotation, INPUT_LEFT, INPUT_RIGHT, INPUT_FLAP } from "../shared/game-core.js";
+import { RankedClient } from "./ranked-client.js?v=session-on-shell-1";
+
+const PRACTICE_ONLY = document.querySelector('meta[name="flappy-fish-mode"]')?.content === "practice";
+
 const WIDTH = 1000;
 const HEIGHT = 600;
 const FPS_STEP = 1000 / 120;
@@ -14,9 +19,8 @@ const REQUIRED_FISH = 50;
 const SCREAMER_DURATION = 1200;
 const SCREAMER_CHANCE = 0.25;
 const TOUCH_MENU_HOLD_MS = 650;
-const SCORES_KEY = "flappy-fish-scores-by-name";
 const LAST_PLAYER_KEY = "flappy-fish-last-player";
-const SCORE_RESET_KEY = "flappy-fish-rank-reset-2026-08-26";
+const SOUND_MUTED_KEY = "flappy-fish-sound-muted";
 
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
@@ -26,6 +30,7 @@ const nameGate = document.getElementById("name-gate");
 const nameForm = document.getElementById("name-form");
 const playerNameInput = document.getElementById("player-name");
 const nameBest = document.getElementById("name-best");
+const soundToggleButton = document.getElementById("sound-toggle");
 
 const assetPaths = {
   fish: "assets/img/fish1.png",
@@ -55,18 +60,20 @@ const fishHitMask = {
 const audio = {
   flap: new Audio("assets/audios/efecto bubble.ogg"),
   music: new Audio("assets/audios/linkin park fondo.ogg"),
-  scream: new Audio("assets/audios/scream.mp3"),
 };
 
 audio.music.loop = true;
 audio.music.volume = 0.45;
 audio.flap.volume = 0.45;
-audio.scream.volume = 0.72;
 
 const keys = new Set();
 const images = {};
 let audioUnlocked = false;
+let soundMuted = false;
 let heldCanvasAction = null;
+
+try { soundMuted = localStorage.getItem(SOUND_MUTED_KEY) === "1"; } catch { /* Sound preference is optional. */ }
+applySoundPreference();
 
 function gameFont(size) {
   return `${size}px "Strange Fish", fantasy`;
@@ -80,145 +87,45 @@ function isBlockedPlayerName(name) {
   return Boolean(window.FLAPPY_FISH_NAME_FILTER?.containsProfanity?.(name));
 }
 
-function resetLocalRankOnce() {
-  if (localStorage.getItem(SCORE_RESET_KEY) === "done") return;
-  localStorage.removeItem(SCORES_KEY);
-  localStorage.removeItem(LAST_PLAYER_KEY);
-  localStorage.setItem(SCORE_RESET_KEY, "done");
-}
-
-function readScores() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(SCORES_KEY) || "{}");
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
-    return Object.fromEntries(
-      Object.entries(parsed)
-        .filter(([, score]) => Number.isFinite(Number(score)))
-        .map(([name, score]) => [name, Math.max(0, Math.floor(Number(score)))])
-    );
-  } catch {
-    return {};
-  }
-}
-
-function writeScores(scores) {
-  localStorage.setItem(SCORES_KEY, JSON.stringify(scores));
-}
+// Only server responses contribute to the official best. Local storage remembers
+// a nickname, never a score or a credential.
+const officialBests = new Map();
+let bestLookupTimer;
 
 function getBestScore(name) {
-  if (!name) return 0;
-  return readScores()[name] || 0;
-}
-
-function mergeRemoteBest(name, bestScore) {
-  const remoteBest = Math.max(0, Math.floor(Number(bestScore ?? 0)));
-  if (remoteBest <= getBestScore(name)) return;
-
-  const scores = readScores();
-  scores[name] = remoteBest;
-  writeScores(scores);
-
-  if (state.playerName === name) {
-    state.highScore = remoteBest;
-    updateNameBest(remoteBest);
-    updateBestScoreDisplay(remoteBest);
-  }
-}
-
-function bestRemoteScoreForName(scores, playerName) {
-  const key = playerName.toLowerCase();
-  return scores.reduce((bestScore, score) => {
-    const name = String(score.name || "").trim().toLowerCase();
-    if (name !== key) return bestScore;
-    const value = Math.max(0, Math.floor(Number(score.bestScore ?? score.score ?? 0)));
-    return Math.max(bestScore, value);
-  }, 0);
+  return officialBests.get(name.toLowerCase())?.bestScore ?? null;
 }
 
 async function refreshPlayerBestFromRemote(name) {
-  if (!name) return;
-
+  if (PRACTICE_ONLY || !name) return;
   try {
-    const scores = await fetch("/api/scores")
-      .then((response) => response.json())
-      .then((data) => data?.scores || []);
-    mergeRemoteBest(name, bestRemoteScoreForName(scores, name));
+    const response = await fetch(`/api/scores?name=${encodeURIComponent(name)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Leaderboard unavailable");
+    const data = await response.json();
+    officialBests.set(name.toLowerCase(), data.player || { bestScore: 0 });
+    if (state.playerName.toLowerCase() === name.toLowerCase()) {
+      state.highScore = getBestScore(name);
+      updateBestScoreDisplay();
+    }
+    if (normalizePlayerName(playerNameInput.value).toLowerCase() === name.toLowerCase()) updateNameBest();
   } catch {
-    /* Remote scores are optional. */
+    // A failed lookup must not turn a browser-local record into an official one.
   }
-}
-
-function syncScoreToServer(name, bestScore, lastScore) {
-  if (!name) return;
-  const updatedAt = new Date().toISOString();
-  const attemptId = `${updatedAt}-${Math.random().toString(36).slice(2, 10)}`;
-
-  const payload = {
-    name,
-    bestScore,
-    score: lastScore,
-    updatedAt,
-    attemptId,
-  };
-
-  try {
-    fetch("/api/scores", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      keepalive: true,
-    }).catch(() => {});
-  } catch {}
-}
-
-function savePlayerScore(score) {
-  if (!state.playerName) return;
-  const scores = readScores();
-  const best = scores[state.playerName] || 0;
-  if (score > best) {
-    scores[state.playerName] = score;
-    writeScores(scores);
-    state.highScore = score;
-    updateNameBest(score);
-    updateBestScoreDisplay(score);
-  }
-}
-
-function recordGameResult(score) {
-  if (!state.playerName) return;
-  const scores = readScores();
-  const previousBest = scores[state.playerName] || 0;
-  const best = Math.max(previousBest, score);
-
-  if (best > previousBest) {
-    scores[state.playerName] = best;
-    writeScores(scores);
-    state.highScore = best;
-    updateNameBest(best);
-    updateBestScoreDisplay(best);
-  }
-
-  syncScoreToServer(state.playerName, best, score);
 }
 
 function setPlayerName(name) {
   state.playerName = name;
-  const scores = readScores();
-  if (!(name in scores)) {
-    scores[name] = 0;
-    writeScores(scores);
-  }
-  state.highScore = scores[name];
-  localStorage.setItem(LAST_PLAYER_KEY, name);
+  state.highScore = getBestScore(name);
+  try { localStorage.setItem(LAST_PLAYER_KEY, name); } catch { /* Nickname persistence is optional. */ }
   updateNameBest(state.highScore);
-  updateBestScoreDisplay(state.highScore);
-  refreshPlayerBestFromRemote(name);
+  updateBestScoreDisplay();
+  void refreshPlayerBestFromRemote(name);
 }
 
 function updateNameBest(score = getBestScore(normalizePlayerName(playerNameInput.value))) {
   nameBest.classList.remove("is-error");
   playerNameInput.removeAttribute("aria-invalid");
-  nameBest.textContent = `Best score: ${score}`;
+  nameBest.textContent = PRACTICE_ONLY ? "Practice only — no leaderboard" : score === null ? "Official best: unavailable" : `Official best: ${score}`;
 }
 
 function showNameError(message) {
@@ -228,14 +135,12 @@ function showNameError(message) {
 }
 
 function updateBestScoreDisplay(score = state.highScore) {
-  bestScoreDisplay.textContent = `Best score: ${score}`;
+  bestScoreDisplay.textContent = PRACTICE_ONLY ? "Practice only — no leaderboard" : score === null ? "Official best: unavailable" : `Official best: ${score}`;
 }
 
 function isNameGateOpen() {
   return !nameGate.hidden;
 }
-
-resetLocalRankOnce();
 
 const state = {
   mode: "menu",
@@ -244,7 +149,7 @@ const state = {
   started: false,
   gameOver: false,
   score: 0,
-  highScore: 0,
+  highScore: null,
   playerName: "",
   frameIndex: 0,
   frameTimer: 0,
@@ -268,6 +173,161 @@ const state = {
     genomeStd: [],
   },
 };
+
+let manualKind = null;
+let manualSnapshot = null;
+let pendingFlap = false;
+let startingGame = false;
+let lastRankedEvent = { status: "idle" };
+let rankedDisabled = document.querySelector('meta[name="flappy-fish-ranked"]')?.content === "disabled";
+let refreshedGameId = null;
+const rankedNotice = document.getElementById("ranked-notice");
+const rankedProgress = document.getElementById("ranked-progress");
+const rankedProgressBar = document.getElementById("ranked-progress-bar");
+const rankedStartButton = document.getElementById("ranked-start");
+const rankedResumeButton = document.getElementById("ranked-resume");
+const pauseButton = document.getElementById("game-pause");
+const practiceButton = document.getElementById("practice-start");
+const ranked = new RankedClient({ onChange(event) {
+  lastRankedEvent = event;
+  if (event.error?.code === "ranked_disabled") rankedDisabled = true;
+  if (manualKind === "ranked" && event.snapshot) {
+    mirrorManual(event.snapshot);
+    if (!event.running) audio.music.pause();
+  }
+  if (event.status === "completed" && event.receipt?.gameId !== refreshedGameId) {
+    refreshedGameId = event.receipt.gameId;
+    void refreshPlayerBestFromRemote(event.name);
+  }
+  updateRankedNotice();
+} });
+function practiceOnly() {
+  return PRACTICE_ONLY || rankedDisabled;
+}
+
+const RANKED_PROGRESS_AVERAGE_MS = 5000;
+const RANKED_PROGRESS_TIME_CONSTANT = RANKED_PROGRESS_AVERAGE_MS / Math.log(10);
+let rankedProgressTimer = null;
+let rankedProgressStartedAt = 0;
+let rankedProgressHideTimer = null;
+let rankedProgressActive = false;
+
+function setRankedProgress(value) {
+  const progress = Math.max(0, Math.min(100, value));
+  rankedProgressBar.style.setProperty("--ranked-progress", String(progress / 100));
+  rankedProgress.setAttribute("aria-valuenow", String(Math.round(progress)));
+}
+
+function advanceRankedProgress() {
+  if (!rankedProgressActive) return;
+  const elapsed = Math.max(0, performance.now() - rankedProgressStartedAt);
+  // Reach about 90% at the usual five-second response time, then approach
+  // 100% ever more slowly without claiming completion before the server does.
+  setRankedProgress(Math.min(99, 100 * (1 - Math.exp(-elapsed / RANKED_PROGRESS_TIME_CONSTANT))));
+  rankedProgressTimer = window.setTimeout(advanceRankedProgress, 100);
+}
+
+function updateRankedProgress(waitingForServer, message) {
+  rankedProgress.setAttribute("aria-label", message);
+  if (waitingForServer) {
+    if (rankedProgressHideTimer !== null) {
+      clearTimeout(rankedProgressHideTimer);
+      rankedProgressHideTimer = null;
+    }
+    if (rankedProgressActive) return;
+    rankedProgressActive = true;
+    rankedProgressStartedAt = performance.now();
+    rankedProgress.dataset.visible = "true";
+    rankedProgress.setAttribute("aria-hidden", "false");
+    setRankedProgress(0);
+    rankedProgressTimer = window.setTimeout(advanceRankedProgress, 100);
+    return;
+  }
+
+  if (!rankedProgressActive) return;
+  rankedProgressActive = false;
+  if (rankedProgressTimer !== null) clearTimeout(rankedProgressTimer);
+  rankedProgressTimer = null;
+  setRankedProgress(100);
+  rankedProgressHideTimer = window.setTimeout(() => {
+    rankedProgress.dataset.visible = "false";
+    rankedProgress.setAttribute("aria-hidden", "true");
+    rankedProgressHideTimer = null;
+  }, 260);
+}
+
+function updateRankedNotice() {
+  const event = lastRankedEvent;
+  let message;
+  if (PRACTICE_ONLY) {
+    message = "Practice-only deployment. Manual play and Evolution are available; no scores are sent or added to the leaderboard.";
+  } else if (manualKind === "practice") {
+    message = "Practice — this game will not enter the leaderboard.";
+  } else if (rankedDisabled) {
+    message = "Рейтинг ещё не настроен. Single Player запускается как тренировка и не попадает в рейтинг.";
+  } else if (state.mode === "evolution" || state.mode === "learned") {
+    message = "Evolution simulation — no ranked scores are submitted.";
+  } else if (event.status === "completed") {
+    message = `Verified result saved: ${event.receipt.checkpoint.snapshot.score}. It may take 30 seconds to appear in Rank; reopen Rank to refresh.`;
+  } else if (event.status === "active") {
+    message = `Ranked: ${event.name}. Inputs are checked every 10 seconds. Only completed games enter the leaderboard.`;
+  } else if (event.status === "saving") {
+    message = "Game over. Waiting for the server to confirm your result…";
+  } else if (event.status === "pausing") {
+    message = "Paused locally. Waiting to save the remaining inputs and release your ranked slot…";
+  } else if (event.status === "paused" && event.receipt?.status === "paused" && !event.bufferedTicks && !event.error) {
+    message = `Ranked game for ${event.name} is saved and paused. Your slot is free. Resume when a slot is available.`;
+  } else if (event.status === "buffer_full") {
+    message = "Paused: 30 seconds of unconfirmed inputs are buffered. Waiting for the connection; your result is not yet saved.";
+  } else if (event.status === "reconnecting") {
+    message = `Connection interrupted. ${Math.ceil((event.bufferedTicks || 0) / 120)} seconds of inputs await confirmation. The game pauses when the buffer reaches 30 seconds.`;
+  } else if (event.status === "full") {
+    message = "All ranked slots are busy. Wait and retry, or explicitly choose practice.";
+  } else if (event.status === "connecting") {
+    message = "Connecting to the ranked server…";
+  } else if (event.error) {
+    message = `${event.error.message} You can choose practice; it does not enter the leaderboard.`;
+  } else if (event.status === "paused" || ranked.unfinished) {
+    message = "A ranked game is waiting to resume. Unconfirmed inputs are kept in this browser.";
+  } else {
+    message = "Play ranked, or choose practice. Names are shared: the leaderboard does not verify who owns a nickname.";
+  }
+  rankedNotice.textContent = message;
+  rankedNotice.dataset.status = practiceOnly() || manualKind === "practice" ? "practice" : event.status;
+  const waitingForServer = ["connecting", "saving", "pausing", "reconnecting", "buffer_full"].includes(event.status);
+  updateRankedProgress(waitingForServer, message);
+  rankedStartButton.disabled = startingGame || event.status === "connecting";
+  rankedStartButton.hidden = practiceOnly() || Boolean(ranked.unfinished && ranked.receipt) || (manualKind === "ranked" && !state.gameOver);
+  rankedResumeButton.hidden = practiceOnly() || !ranked.unfinished || !ranked.receipt || (manualKind === "ranked" && ranked.running);
+  rankedResumeButton.disabled = startingGame || event.status === "connecting" || event.status === "conflict" || event.status === "storage_error";
+  rankedResumeButton.textContent = event.status === "full" ? "Retry ranked slot" : "Resume / retry ranked";
+  pauseButton.hidden = state.mode !== "single" && state.mode !== "evolution";
+  pauseButton.disabled = state.gameOver || startingGame;
+  pauseButton.textContent = state.paused ? "Resume" : "Pause";
+  practiceButton.disabled = startingGame;
+  practiceButton.textContent = manualKind === "ranked" && !state.gameOver ? "Continue as practice" : "Practice (unranked)";
+}
+
+// Open IndexedDB and recover any saved outbox while assets are loading, so a
+// quick click on Ranked does not wait for browser initialization first. Start
+// only after the progress controller above has been initialized because the
+// client immediately emits its connecting state.
+if (!PRACTICE_ONLY && !rankedDisabled) void ranked.initialize().catch(() => {});
+
+async function resumeRanked() {
+  if (practiceOnly()) return startPractice();
+  if (startingGame || isNameGateOpen()) return;
+  startingGame = true;
+  try {
+    const snapshot = await ranked.resume();
+    installManual(snapshot, "ranked");
+  } catch {
+    updateRankedNotice();
+  } finally {
+    startingGame = false;
+    updateRankedNotice();
+  }
+}
 
 function cacheBustedPath(path) {
   return `${path}${path.includes("?") ? "&" : "?"}v=${ASSET_RETRY_VERSION}`;
@@ -306,7 +366,13 @@ async function loadAssets() {
       images[key] = images[optionalImageFallbacks[key]];
     }
   }));
-  images.frames = await Promise.all(assetPaths.frames.map(loadImage));
+  const firstFrame = await loadImage(assetPaths.frames[0]);
+  images.frames = [firstFrame];
+  void Promise.all(assetPaths.frames.slice(1).map(loadImage)).then((frames) => {
+    images.frames = [firstFrame, ...frames];
+  }).catch((error) => {
+    console.warn(`${error.message}; continuing with the first background frame`);
+  });
 }
 
 async function loadGameFont() {
@@ -319,7 +385,24 @@ function unlockAudio() {
   audioUnlocked = true;
 }
 
+function applySoundPreference() {
+  audio.flap.muted = soundMuted;
+  audio.music.muted = soundMuted;
+  soundToggleButton.setAttribute("aria-pressed", String(soundMuted));
+  soundToggleButton.textContent = soundMuted ? "Sound: off" : "Sound: on";
+  soundToggleButton.title = soundMuted ? "Enable sound" : "Mute sound";
+}
+
+function toggleSound() {
+  unlockAudio();
+  soundMuted = !soundMuted;
+  try { localStorage.setItem(SOUND_MUTED_KEY, soundMuted ? "1" : "0"); } catch { /* Sound preference is optional. */ }
+  applySoundPreference();
+  if (!soundMuted && state.mode === "single" && !state.paused && !state.gameOver) startMusic();
+}
+
 function playSound(sound) {
+  if (soundMuted) return;
   try {
     sound.currentTime = 0;
     sound.play().catch(() => {});
@@ -343,7 +426,7 @@ function configureCanvas() {
 }
 
 function startMusic() {
-  if (!audioUnlocked) return;
+  if (!audioUnlocked || soundMuted) return;
   audio.music.play().catch(() => {});
 }
 
@@ -444,13 +527,6 @@ function createFish(x = 150, y = 300, size = 90) {
     maxFallSpeed: 100,
     alive: true,
   };
-}
-
-function resetFish(fish, x = 150, y = 300) {
-  fish.x = x;
-  fish.y = y;
-  fish.velocity = 0;
-  fish.alive = true;
 }
 
 function flapFish(fish) {
@@ -691,17 +767,6 @@ function getFishDeathCause(fish) {
   return null;
 }
 
-function handleManualScoring() {
-  const rect = fishRect(state.fish);
-  for (const pipe of state.pipes) {
-    if (pipe.x + PIPE_WIDTH / 2 < rect.left && !pipe.passed) {
-      state.score += 1;
-      pipe.passed = true;
-      savePlayerScore(state.score);
-    }
-  }
-}
-
 function resetShared() {
   state.started = false;
   state.gameOver = false;
@@ -724,25 +789,72 @@ function resetShared() {
 }
 
 function showMenu() {
+  if (manualKind === "ranked" && !state.gameOver) void ranked.pause();
+  manualKind = null;
+  pendingFlap = false;
   resetShared();
   state.mode = "menu";
   state.fish = createFish(150, 300, 90);
   stopMusic();
+  updateRankedNotice();
 }
 
-function startSingle() {
+function installManual(snapshot, kind) {
   resetShared();
   state.mode = "single";
-  state.fish = createFish(150, 300, 90);
-  startMusic();
+  manualKind = kind;
+  manualSnapshot = snapshot;
+  pendingFlap = false;
+  mirrorManual(snapshot);
+  canvas.focus();
+  if (!state.paused && !state.gameOver) startMusic();
+  updateRankedNotice();
+}
+
+function mirrorManual(snapshot) {
+  manualSnapshot = snapshot;
+  state.fish = snapshot.fish;
+  // Presentation aliases do not become part of the signed physical state.
+  state.pipes = snapshot.pipes.map((pipe) => ({ ...pipe, gapY: pipe.centerY }));
+  state.started = snapshot.started;
+  state.score = snapshot.score;
+  state.gameOver = snapshot.dead;
+  if (manualKind === "ranked") state.paused = !ranked.running && !snapshot.dead;
+}
+
+async function startSingle() {
+  if (practiceOnly()) return startPractice();
+  if (startingGame || isNameGateOpen()) return;
+  startingGame = true;
+  try {
+    if (manualKind === "ranked" && manualSnapshot?.dead && ranked.receipt && ranked.unfinished) {
+      await ranked.pump();
+      if (ranked.unfinished) return;
+    }
+    let snapshot;
+    if (ranked.receipt && ranked.unfinished) snapshot = await ranked.resume();
+    else snapshot = await ranked.start(state.playerName);
+    installManual(snapshot, "ranked");
+  } catch {
+    updateRankedNotice();
+  } finally {
+    startingGame = false;
+    updateRankedNotice();
+  }
+}
+
+function startPractice() {
+  if (isNameGateOpen()) return;
+  const continuation = manualKind === "ranked" && manualSnapshot && !manualSnapshot.dead
+    ? structuredClone(manualSnapshot) : null;
+  if (manualKind === "ranked") void ranked.pause();
+  const seed = crypto.getRandomValues(new Uint32Array(1))[0];
+  installManual(continuation || createInitialState(seed), "practice");
 }
 
 function restartSingle() {
-  resetShared();
-  state.mode = "single";
-  resetFish(state.fish || createFish(150, 300, 90));
-  if (!state.fish) state.fish = createFish(150, 300, 90);
-  startMusic();
+  if (manualKind === "practice") startPractice();
+  else void startSingle();
 }
 
 function makeAgent(weights) {
@@ -763,6 +875,8 @@ function createPopulation(weights) {
 }
 
 function startEvolution() {
+  if (manualKind === "ranked") void ranked.pause();
+  manualKind = null;
   resetShared();
   state.mode = "evolution";
   state.started = true;
@@ -770,6 +884,7 @@ function startEvolution() {
   state.populationWeights = Array.from({ length: POPULATION_SIZE }, () => randomVector());
   state.population = createPopulation(state.populationWeights);
   stopMusic();
+  updateRankedNotice();
 }
 
 function evolveFromCurrent() {
@@ -814,33 +929,30 @@ function updatePipes() {
 
 function togglePause() {
   if (state.mode !== "single" && state.mode !== "evolution") return;
+  pendingFlap = false;
+  keys.clear();
+  if (manualKind === "ranked") {
+    if (state.gameOver) return;
+    if (state.paused) void resumeRanked();
+    else {
+      state.paused = true;
+      audio.music.pause();
+      void ranked.pause();
+    }
+    return;
+  }
   state.paused = !state.paused;
-  if (state.paused) {
-    audio.music.pause();
-  } else if (state.mode === "single" && state.started && !state.gameOver) {
-    startMusic();
+  if (state.paused) audio.music.pause();
+  else {
+    canvas.focus();
+    if (state.mode === "single" && state.started && !state.gameOver) startMusic();
   }
-}
-
-function manualInput() {
-  if (keys.has("ArrowLeft")) {
-    state.fish.x -= 5;
-  }
-  if (keys.has("ArrowRight")) {
-    state.fish.x += 5;
-  }
-  state.fish.x = Math.max(40, Math.min(WIDTH - 40, state.fish.x));
+  updateRankedNotice();
 }
 
 function performFlap() {
-  if (state.mode !== "single" || state.paused) return;
-  if (state.gameOver) return;
-  if (!state.started) {
-    state.started = true;
-    startMusic();
-  }
-  flapFish(state.fish);
-  playSound(audio.flap);
+  if (state.mode !== "single" || state.paused || state.gameOver) return;
+  pendingFlap = true;
 }
 
 function usesTouchControls() {
@@ -929,25 +1041,28 @@ function handleCanvasPointerUp(event) {
 }
 
 function updateSingle(delta, now) {
-  if (state.paused || state.gameOver) return;
-
-  manualInput();
-  spawnPipes(delta);
-
-  if (!state.started) return;
-
-  updateFish(state.fish);
-  updatePipes();
-  handleManualScoring();
-
-  const deathCause = getFishDeathCause(state.fish);
-  if (deathCause) {
-    state.gameOver = true;
-    recordGameResult(state.score);
+  if (state.paused || state.gameOver || !manualSnapshot) return;
+  let input = 0;
+  if (keys.has("ArrowLeft")) input |= INPUT_LEFT;
+  if (keys.has("ArrowRight")) input |= INPUT_RIGHT;
+  if (pendingFlap) input |= INPUT_FLAP;
+  pendingFlap = false;
+  const snapshot = manualKind === "ranked"
+    ? ranked.advance(input) : stepManual(manualSnapshot, input);
+  if (!snapshot) {
+    state.paused = true;
+    return;
+  }
+  mirrorManual(snapshot);
+  if (input & INPUT_FLAP) {
+    startMusic();
+    playSound(audio.flap);
+  }
+  if (snapshot.dead) {
     stopMusic();
+    if (manualKind === "practice") updateRankedNotice();
     if (Math.random() < SCREAMER_CHANCE) {
       state.jumpScareUntil = now + SCREAMER_DURATION;
-      playSound(audio.scream);
     }
   }
 }
@@ -1074,7 +1189,7 @@ function drawFish(fish, alpha = 1) {
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(fish.x, fish.y);
-  ctx.rotate(fishRotation(fish));
+  ctx.rotate(manualKind && state.mode === "single" ? manualFishRotation(fish) : fishRotation(fish));
   ctx.drawImage(images.fish, -fish.width / 2, -fish.height / 2, fish.width, fish.height);
   ctx.restore();
 }
@@ -1100,7 +1215,7 @@ function drawScore() {
 function drawMenu() {
   drawBackground();
   drawText("FLAPPY FISH!", WIDTH / 2, HEIGHT * 0.25, 100, "rgb(253, 231, 91)");
-  drawText("1. Single Player (Manual Game)", WIDTH / 2, HEIGHT * 0.49, 50, "white", "center", 900);
+  drawText(practiceOnly() ? "1. Single Player (Practice)" : "1. Single Player (Ranked Game)", WIDTH / 2, HEIGHT * 0.49, 50, "white", "center", 900);
   drawText("2. Simulation (Evolutionary Algorithm)", WIDTH / 2, HEIGHT * 0.61, 50, "white", "center", 900);
   drawText("GROUP 4: Osipova, Zanoni and Scofano", WIDTH / 2, HEIGHT - 52, 30, "rgb(233, 255, 244)", "center", 880);
 }
@@ -1313,6 +1428,7 @@ window.addEventListener("keydown", (event) => {
   }
 
   if (event.repeat) return;
+  if (event.code === "ArrowLeft" || event.code === "ArrowRight") event.preventDefault();
   keys.add(event.code);
   unlockAudio();
 
@@ -1340,6 +1456,36 @@ window.addEventListener("keyup", (event) => {
   keys.delete(event.code);
 });
 
+window.addEventListener("blur", () => {
+  keys.clear();
+  pendingFlap = false;
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && state.mode === "single" && !state.gameOver && !state.paused) {
+    state.paused = true;
+    pendingFlap = false;
+    keys.clear();
+    audio.music.pause();
+    if (manualKind === "ranked") void ranked.pause();
+    updateRankedNotice();
+  }
+});
+
+window.addEventListener("online", () => { if (!PRACTICE_ONLY) void ranked.pump(); });
+window.addEventListener("pagehide", () => {
+  if (!PRACTICE_ONLY) void ranked.close();
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) location.reload();
+});
+
+rankedStartButton.addEventListener("click", () => { unlockAudio(); void startSingle(); });
+rankedResumeButton.addEventListener("click", () => { unlockAudio(); void resumeRanked(); });
+practiceButton.addEventListener("click", () => { unlockAudio(); startPractice(); });
+pauseButton.addEventListener("click", () => { unlockAudio(); togglePause(); });
+soundToggleButton.addEventListener("click", toggleSound);
+
 window.addEventListener("resize", configureCanvas);
 
 canvas.addEventListener("pointerdown", handleCanvasPointerDown);
@@ -1348,7 +1494,8 @@ canvas.addEventListener("pointercancel", clearHeldCanvasAction);
 
 playerNameInput.addEventListener("input", () => {
   updateNameBest();
-  updateBestScoreDisplay(getBestScore(normalizePlayerName(playerNameInput.value)));
+  clearTimeout(bestLookupTimer);
+  bestLookupTimer = setTimeout(() => void refreshPlayerBestFromRemote(normalizePlayerName(playerNameInput.value)), 350);
 });
 
 nameForm.addEventListener("submit", (event) => {
@@ -1372,12 +1519,15 @@ Promise.all([loadAssets(), loadGameFont()]).then(() => {
   buildFishHitMask();
   configureCanvas();
   state.fish = createFish(150, 300, 90);
-  const lastPlayer = localStorage.getItem(LAST_PLAYER_KEY) || "";
+  let lastPlayer = "";
+  try { lastPlayer = localStorage.getItem(LAST_PLAYER_KEY) || ""; } catch { /* Optional nickname. */ }
   playerNameInput.value = lastPlayer;
   updateNameBest();
   updateBestScoreDisplay(getBestScore(normalizePlayerName(lastPlayer)));
   loading.classList.add("is-hidden");
   playerNameInput.focus();
+  if (lastPlayer) void refreshPlayerBestFromRemote(normalizePlayerName(lastPlayer));
+  updateRankedNotice();
   requestAnimationFrame(tick);
 }).catch((error) => {
   loading.textContent = error.message;

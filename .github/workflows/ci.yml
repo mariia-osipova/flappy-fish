@@ -1,0 +1,66 @@
+name: PostgreSQL and container CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: postgres-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgres://flappy_fish:flappy_fish_test@127.0.0.1:5432/flappy_fish_test
+      TEST_DATABASE_URL: postgres://flappy_fish:flappy_fish_test@127.0.0.1:5432/flappy_fish_test
+      DATABASE_APP_ROLE: flappy_fish
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_DB: flappy_fish_test
+          POSTGRES_USER: flappy_fish
+          POSTGRES_PASSWORD: flappy_fish_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U flappy_fish -d flappy_fish_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1.4.0'
+      - name: Install dependencies from bun.lock
+        run: bun install --frozen-lockfile
+      - name: Apply database migrations
+        run: npm run db:migrate
+      - name: Run unit and compatibility tests
+        run: npm test
+      - name: Run PostgreSQL integration tests
+        run: npm run test:postgres
+      - name: Validate production build
+        run: npm run build
+      - name: Build and inspect production image
+        run: |
+          docker build --tag flappy-fish:ci .
+          docker run --rm --network host \
+            -e DATABASE_URL -e DATABASE_APP_ROLE \
+            flappy-fish:ci npm run db:migrate
+          docker run --rm --entrypoint node flappy-fish:ci -e \
+            "if (process.versions.node.split('.')[0] !== '22') process.exit(1)"
+          docker run --rm --entrypoint sh flappy-fish:ci -c \
+            'test "$(id -u)" -ne 0 && test -f scripts/run-migrations.js && test ! -e node_modules/playwright && test ! -e node_modules/@playwright'

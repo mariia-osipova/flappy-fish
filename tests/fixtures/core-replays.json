@@ -1,0 +1,1400 @@
+{
+  "rulesVersion": "manual-v1-181-a63d8508f44b",
+  "reference": {
+    "revision": "a8a9a26769e2b9361544ee05c2f62d4bc7ece058",
+    "source": "src/web/app.js",
+    "notes": "Expected snapshots generated with the original float-timer manual update/collision functions. Only pipe randomness and IDs were replaced by seeded Mulberry32 and spawn tick. Input runs are [bitmask,count]."
+  },
+  "cases": [
+    {
+      "name": "first-flap-falls",
+      "seed": 1,
+      "inputRuns": [
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          85
+        ]
+      ],
+      "checkpoints": [
+        {
+          "afterTicks": 1,
+          "state": {
+            "tick": 1,
+            "seed": 1,
+            "rngState": 1,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 290.3,
+              "width": 90,
+              "height": 90,
+              "velocity": -9.7,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 1
+          }
+        }
+      ],
+      "expected": {
+        "tick": 86,
+        "seed": 1,
+        "rngState": 1,
+        "started": true,
+        "fish": {
+          "x": 150,
+          "y": 562.3000000000003,
+          "width": 90,
+          "height": 90,
+          "velocity": 15.800000000000015,
+          "alive": false
+        },
+        "pipes": [],
+        "score": 0,
+        "dead": true,
+        "deathCause": "bounds",
+        "pipeTicks": 86
+      }
+    },
+    {
+      "name": "pre-start-arrow-clamps",
+      "seed": 2468,
+      "inputRuns": [
+        [
+          1,
+          30
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          2,
+          185
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          85
+        ]
+      ],
+      "checkpoints": [
+        {
+          "afterTicks": 30,
+          "state": {
+            "tick": 30,
+            "seed": 2468,
+            "rngState": 2468,
+            "started": false,
+            "fish": {
+              "x": 40,
+              "y": 300,
+              "width": 90,
+              "height": 90,
+              "velocity": 0,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 31,
+          "state": {
+            "tick": 31,
+            "seed": 2468,
+            "rngState": 2468,
+            "started": false,
+            "fish": {
+              "x": 40,
+              "y": 300,
+              "width": 90,
+              "height": 90,
+              "velocity": 0,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 216,
+          "state": {
+            "tick": 216,
+            "seed": 2468,
+            "rngState": 2468,
+            "started": false,
+            "fish": {
+              "x": 960,
+              "y": 300,
+              "width": 90,
+              "height": 90,
+              "velocity": 0,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 217,
+          "state": {
+            "tick": 217,
+            "seed": 2468,
+            "rngState": 2468,
+            "started": false,
+            "fish": {
+              "x": 960,
+              "y": 300,
+              "width": 90,
+              "height": 90,
+              "velocity": 0,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 220,
+          "state": {
+            "tick": 220,
+            "seed": 2468,
+            "rngState": 2468,
+            "started": false,
+            "fish": {
+              "x": 960,
+              "y": 300,
+              "width": 90,
+              "height": 90,
+              "velocity": 0,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 221,
+          "state": {
+            "tick": 221,
+            "seed": 2468,
+            "rngState": 2468,
+            "started": true,
+            "fish": {
+              "x": 960,
+              "y": 290.3,
+              "width": 90,
+              "height": 90,
+              "velocity": -9.7,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 1
+          }
+        }
+      ],
+      "expected": {
+        "tick": 306,
+        "seed": 2468,
+        "rngState": 2468,
+        "started": true,
+        "fish": {
+          "x": 960,
+          "y": 562.3000000000003,
+          "width": 90,
+          "height": 90,
+          "velocity": 15.800000000000015,
+          "alive": false
+        },
+        "pipes": [],
+        "score": 0,
+        "dead": true,
+        "deathCause": "bounds",
+        "pipeTicks": 86
+      }
+    },
+    {
+      "name": "seeded-long-run",
+      "seed": 0,
+      "inputRuns": [
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          72
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          57
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          55
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          71
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          62
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          74
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          67
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          67
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          66
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          58
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          68
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          52
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          59
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          84
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          39
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          73
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          63
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          69
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          58
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          63
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          44
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          68
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          79
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          56
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          82
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          64
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          68
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          65
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          51
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          0,
+          79
+        ]
+      ],
+      "checkpoints": [
+        {
+          "afterTicks": 1,
+          "state": {
+            "tick": 1,
+            "seed": 0,
+            "rngState": 0,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 290.3,
+              "width": 90,
+              "height": 90,
+              "velocity": -9.7,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 1
+          }
+        },
+        {
+          "afterTicks": 180,
+          "state": {
+            "tick": 180,
+            "seed": 0,
+            "rngState": 0,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 224.70000000000013,
+              "width": 90,
+              "height": 90,
+              "velocity": 2.6000000000000005,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 180
+          }
+        },
+        {
+          "afterTicks": 181,
+          "state": {
+            "tick": 181,
+            "seed": 0,
+            "rngState": 1831565813,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 227.60000000000014,
+              "width": 90,
+              "height": 90,
+              "velocity": 2.9000000000000004,
+              "alive": true
+            },
+            "pipes": [
+              {
+                "x": 996,
+                "centerY": 230,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 181
+              }
+            ],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 362,
+          "state": {
+            "tick": 362,
+            "seed": 0,
+            "rngState": 3663131626,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 142.90000000000032,
+              "width": 90,
+              "height": 90,
+              "velocity": 0.5000000000000009,
+              "alive": true
+            },
+            "pipes": [
+              {
+                "x": 272,
+                "centerY": 230,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 181
+              },
+              {
+                "x": 996,
+                "centerY": 150,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 362
+              }
+            ],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 1200,
+          "state": {
+            "tick": 1200,
+            "seed": 0,
+            "rngState": 2399460286,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 283.200000000001,
+              "width": 90,
+              "height": 90,
+              "velocity": -5.799999999999997,
+              "alive": true
+            },
+            "pipes": [
+              {
+                "x": 540,
+                "centerY": 314,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 1086
+              }
+            ],
+            "score": 5,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 114
+          }
+        },
+        {
+          "afterTicks": 2400,
+          "state": {
+            "tick": 2400,
+            "seed": 0,
+            "rngState": 2335519089,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 135.60000000000156,
+              "width": 90,
+              "height": 90,
+              "velocity": 4.999999999999999,
+              "alive": true
+            },
+            "pipes": [
+              {
+                "x": 84,
+                "centerY": 179,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 2172
+              },
+              {
+                "x": 808,
+                "centerY": 421,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 2353
+              }
+            ],
+            "score": 11,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 47
+          }
+        },
+        {
+          "afterTicks": 4800,
+          "state": {
+            "tick": 4800,
+            "seed": 0,
+            "rngState": 376070882,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 311.10000000000286,
+              "width": 90,
+              "height": 90,
+              "velocity": 2.6000000000000005,
+              "alive": true
+            },
+            "pipes": [
+              {
+                "x": 620,
+                "centerY": 423,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 4706
+              }
+            ],
+            "score": 25,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 94
+          }
+        },
+        {
+          "afterTicks": 5000,
+          "state": {
+            "tick": 5000,
+            "seed": 0,
+            "rngState": 2207636695,
+            "started": true,
+            "fish": {
+              "x": 150,
+              "y": 303.4000000000029,
+              "width": 90,
+              "height": 90,
+              "velocity": 6.499999999999998,
+              "alive": true
+            },
+            "pipes": [
+              {
+                "x": 544,
+                "centerY": 316,
+                "gap": 300,
+                "speed": 4,
+                "passed": false,
+                "id": 4887
+              }
+            ],
+            "score": 26,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 113
+          }
+        }
+      ],
+      "expected": {
+        "tick": 5025,
+        "seed": 0,
+        "rngState": 2207636695,
+        "started": true,
+        "fish": {
+          "x": 150,
+          "y": 563.4000000000029,
+          "width": 90,
+          "height": 90,
+          "velocity": 14.00000000000001,
+          "alive": false
+        },
+        "pipes": [
+          {
+            "x": 444,
+            "centerY": 316,
+            "gap": 300,
+            "speed": 4,
+            "passed": false,
+            "id": 4887
+          }
+        ],
+        "score": 26,
+        "dead": true,
+        "deathCause": "bounds",
+        "pipeTicks": 138
+      }
+    },
+    {
+      "name": "horizontal-controls",
+      "seed": 4294967295,
+      "inputRuns": [
+        [
+          1,
+          22
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          2,
+          72
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          2,
+          56
+        ],
+        [
+          1,
+          8
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          1,
+          75
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          1,
+          45
+        ],
+        [
+          2,
+          20
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          2,
+          61
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          2,
+          33
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          2,
+          13
+        ],
+        [
+          1,
+          50
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          1,
+          65
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          1,
+          13
+        ],
+        [
+          2,
+          65
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          2,
+          61
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          1,
+          50
+        ],
+        [
+          0,
+          26
+        ]
+      ],
+      "checkpoints": [
+        {
+          "afterTicks": 22,
+          "state": {
+            "tick": 22,
+            "seed": 4294967295,
+            "rngState": 4294967295,
+            "started": false,
+            "fish": {
+              "x": 40,
+              "y": 300,
+              "width": 90,
+              "height": 90,
+              "velocity": 0,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 0
+          }
+        },
+        {
+          "afterTicks": 23,
+          "state": {
+            "tick": 23,
+            "seed": 4294967295,
+            "rngState": 4294967295,
+            "started": true,
+            "fish": {
+              "x": 40,
+              "y": 290.3,
+              "width": 90,
+              "height": 90,
+              "velocity": -9.7,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 1
+          }
+        },
+        {
+          "afterTicks": 180,
+          "state": {
+            "tick": 180,
+            "seed": 4294967295,
+            "rngState": 4294967295,
+            "started": true,
+            "fish": {
+              "x": 545,
+              "y": 236.80000000000013,
+              "width": 90,
+              "height": 90,
+              "velocity": -3.9999999999999982,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 158
+          }
+        },
+        {
+          "afterTicks": 181,
+          "state": {
+            "tick": 181,
+            "seed": 4294967295,
+            "rngState": 4294967295,
+            "started": true,
+            "fish": {
+              "x": 540,
+              "y": 233.10000000000014,
+              "width": 90,
+              "height": 90,
+              "velocity": -3.6999999999999984,
+              "alive": true
+            },
+            "pipes": [],
+            "score": 0,
+            "dead": false,
+            "deathCause": null,
+            "pipeTicks": 159
+          }
+        }
+      ],
+      "expected": {
+        "tick": 748,
+        "seed": 4294967295,
+        "rngState": 3031295955,
+        "started": true,
+        "fish": {
+          "x": 440,
+          "y": 568.5000000000006,
+          "width": 90,
+          "height": 90,
+          "velocity": 13.70000000000001,
+          "alive": false
+        },
+        "pipes": [
+          {
+            "x": 264,
+            "centerY": 365,
+            "gap": 300,
+            "speed": 4,
+            "passed": true,
+            "id": 565
+          },
+          {
+            "x": 988,
+            "centerY": 434,
+            "gap": 300,
+            "speed": 4,
+            "passed": false,
+            "id": 746
+          }
+        ],
+        "score": 3,
+        "dead": true,
+        "deathCause": "bounds",
+        "pipeTicks": 2
+      }
+    }
+  ]
+}

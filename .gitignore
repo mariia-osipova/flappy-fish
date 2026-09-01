@@ -1,1 +1,10 @@
 *.pyc
+node_modules/
+dist-pages/
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+coverage/
+.DS_Store

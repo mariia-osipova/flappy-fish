@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="30x30" href="favicon.png?v=mr-fish-3">
     <link rel="shortcut icon" type="image/png" href="favicon.png?v=mr-fish-3">
     <link rel="preload" href="assets/font/StrangeFont-Regular.otf" as="font" type="font/otf" crossorigin>
-    <link rel="stylesheet" href="styles.css?v=20260827-filter-latam">
+    <link rel="stylesheet" href="styles.css?v=ranked-v4-progress">
     <script>
       // Global error shield to prevent third-party extensions (e.g. MetaMask, Web3 wallet injection) from breaking the game
       window.addEventListener("error", function (e) {
@@ -26,13 +26,26 @@
     </script>
   </head>
   <body>
+    <button type="button" class="sound-button" id="sound-toggle" aria-pressed="false">Sound: on</button>
     <a class="rank-button" href="rank.html">Rank</a>
 
     <main class="app-shell" aria-label="Flappy Fish web app">
-      <p class="best-score-strip" id="best-score-display">Best score: 0</p>
+      <p class="best-score-strip" id="best-score-display">Official best: unavailable</p>
       <section class="game-frame" aria-label="Game">
         <canvas id="game-canvas" width="1000" height="600" tabindex="-1" aria-label="Flappy Fish game canvas"></canvas>
         <div class="loading" id="loading">Loading reef...</div>
+      </section>
+      <section class="ranked-controls" aria-label="Ranked game controls">
+        <p id="ranked-notice" role="status" aria-live="polite">Ranked games are checked by the server. Practice does not enter the leaderboard.</p>
+        <div class="ranked-progress" id="ranked-progress" role="progressbar" aria-label="Waiting for the ranked server" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-hidden="true">
+          <span class="ranked-progress-bar" id="ranked-progress-bar"></span>
+        </div>
+        <div class="ranked-actions">
+          <button type="button" id="ranked-start">New ranked game</button>
+          <button type="button" id="ranked-resume" hidden>Resume / retry ranked</button>
+          <button type="button" id="game-pause" hidden>Pause</button>
+          <button type="button" id="practice-start">Practice (unranked)</button>
+        </div>
       </section>
     </main>
 
@@ -41,13 +54,13 @@
         <h2 id="name-title">Your Name</h2>
         <label for="player-name">Name</label>
         <input id="player-name" name="player-name" type="text" maxlength="24" autocomplete="nickname" required>
-        <p id="name-best">Best score: 0</p>
+        <p id="name-best">Official best: unavailable</p>
+        <p class="name-notice">No registration. Anyone can use the same name; records are grouped by nickname.</p>
         <button type="submit">Enter</button>
       </form>
     </section>
 
     <script src="name-filter.js?v=20260827-filter-latam"></script>
-    <script src="config.js?v=20260828-server-scores"></script>
-    <script src="app.js?v=20260828-server-scores"></script>
+    <script type="module" src="app.js?v=ranked-v4-progress"></script>
   </body>
 </html>

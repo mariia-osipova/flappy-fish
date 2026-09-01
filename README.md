@@ -1,5 +1,29 @@
 ## Flappy Fish — Practical Assignment
 
+## Web app and protected leaderboard
+
+The web game runs on the Node.js server. Ranked scores are replayed by the
+server and stored in PostgreSQL; the authenticated Google Apps Script gateway
+remains available only as a transitional backend during cutover.
+Practice and Evolution do not submit scores. **Ranking is disabled by default**
+until the owner configures staging, migrates history and retires old public writers.
+
+See the [PostgreSQL/Northflank runbook](docs/postgres-northflank.md), the
+[security reference](docs/security-and-rollout.md), and the transitional
+[Apps Script setup](src/google-apps-script/README.md). Tests never modify Google
+or deploy the production website; PostgreSQL contract tests use only the
+explicit disposable `TEST_DATABASE_URL`.
+
+### GitHub Pages: practice only
+
+Run `npm run build:pages` and publish the generated `dist-pages/` directory.
+The static build works below a repository path such as `/flappy-fish/`, includes
+the game assets and shared physics, and never calls the ranked API. Manual play
+and Evolution remain available, with a visible **practice-only** notice; the
+Rank page explains that no results are recorded. Server code, configuration and
+secrets are not included. This is separate from the Node.js durable deployment
+described above and does not enable or replace its protected leaderboard.
+
 
 ### Objectives
 
@@ -105,21 +129,28 @@ Follow these steps to get your project up and running:
 Copy the project from the `main` branch.
 ![Screenshot 2025-12-02 at 5.06.26 AM.png](data/readme/Screenshot%202025-12-02%20at%205.06.26%E2%80%AFAM.png)
 
-### 2. Install requirements
+### 2. Install web dependencies
 
-Run the following command to install the necessary dependencies:
+Use Node.js22+ and the committed Bun lockfile:
 
 ```bash
-python3 -m pip install -r requirements.txt
+npm exec --yes --package=bun@1.4.0 -- bun install --frozen-lockfile
+npm run build
+npm test
 ```
 
 ### 3. Run the project
 
 ```bash
-cd src
-python3 main.py 
+npm start
 ```
 
+Open [the local game](http://localhost:3000). No Google secrets are needed for
+practice. For ranked setup, follow the rollout guide above. Browser tests require
+OpenSSL and `npx playwright install chromium webkit`, then `npm run test:browser`.
+
+The original Python implementation is preserved in
+[legacy-python](legacy-python/README.md).
 
 
 ### 4. Video example
